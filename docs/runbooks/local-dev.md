@@ -49,9 +49,10 @@ pnpm build
 ```
 
 ## Deploy Web (GitHub Pages)
-1. Habilitar Pages en el repo (source: GitHub Actions).
-2. Push a `main` con cambios en `apps/web`.
-3. Workflow: `.github/workflows/deploy-web-pages.yml`.
+1. El workflow intenta habilitar Pages automáticamente en el primer despliegue.
+2. Si falla por permisos, habilitar Pages en el repo (source: GitHub Actions).
+3. Push a `main` con cambios en `apps/web`.
+4. Workflow: `.github/workflows/deploy-web-pages.yml`.
 
 ## Deploy API (Vercel)
 1. Crear proyecto Vercel apuntando a `apps/api`.
