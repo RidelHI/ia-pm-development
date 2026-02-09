@@ -1,0 +1,75 @@
+name: Deploy Web (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/deploy-web-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Angular app
+        run: pnpm --filter web build -- --configuration production --base-href "/${{ github.event.repository.name }}/"
+
+      - name: Resolve artifact path
+        id: artifact
+        run: |
+          if [ -d "apps/web/dist/web/browser" ]; then
+            echo "path=apps/web/dist/web/browser" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=apps/web/dist/web" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ steps.artifact.outputs.path }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
