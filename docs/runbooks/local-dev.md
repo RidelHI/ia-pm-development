@@ -68,3 +68,4 @@ pnpm build
 - No hardcodear secretos en código ni en workflows.
 - `apps/api/vercel.json` y `apps/api/api/index.ts` dejan lista la estructura serverless.
 - Flujo PR/protección de `main`: ver `docs/runbooks/github-pr-flow.md`.
+- Flujo operativo con Linear + agente: ver `docs/runbooks/linear-agentic-workflow.md`.

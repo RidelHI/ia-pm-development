@@ -1,0 +1,41 @@
+{
+  "project": "Warehouse Product Manager MVP",
+  "issues": [
+    {
+      "title": "WMS Seed: Definición funcional del MVP",
+      "priority": 2,
+      "state": "Done",
+      "description": "## Objetivo\nDocumentar alcance, dominio y reglas de negocio mínimas del MVP.\n\n## Criterios de aceptación\n- Documento en docs/product-warehouse-mvp.md\n- Funcionalidades y entidades definidas\n- Datos seed de ejemplo\n"
+    },
+    {
+      "title": "WMS Seed: API health + configuración Supabase",
+      "priority": 2,
+      "state": "Done",
+      "description": "## Objetivo\nExponer endpoint de salud con estado de integración Supabase y variables de entorno documentadas.\n\n## Criterios de aceptación\n- GET /health\n- apps/api/.env.example\n- README API actualizado\n"
+    },
+    {
+      "title": "WMS Seed: API productos CRUD in-memory",
+      "priority": 1,
+      "state": "Done",
+      "description": "## Objetivo\nImplementar CRUD básico de productos en memoria con validaciones mínimas y tests.\n\n## Criterios de aceptación\n- GET/POST/PATCH/DELETE en /products\n- Tests unitarios de servicio\n- pipeline en verde\n"
+    },
+    {
+      "title": "WMS: Supabase schema inicial + RLS mínima",
+      "priority": 1,
+      "state": "Backlog",
+      "description": "## Objetivo\nCrear tabla products en Supabase con RLS mínima segura para iniciar persistencia real.\n\n## Criterios de aceptación\n- SQL versionado en repo\n- políticas RLS mínimas\n- API preparada para usar tabla real\n"
+    },
+    {
+      "title": "WMS: Web listado + creación de productos",
+      "priority": 1,
+      "state": "Backlog",
+      "description": "## Objetivo\nConstruir vista web de listado con filtro y alta de productos conectada al API.\n\n## Criterios de aceptación\n- lista renderizada\n- formulario de creación\n- manejo de loading/error\n"
+    },
+    {
+      "title": "WMS: Web detalle + edición + eliminación",
+      "priority": 1,
+      "state": "Backlog",
+      "description": "## Objetivo\nCompletar flujo CRUD en frontend con detalle, edición y eliminación.\n\n## Criterios de aceptación\n- vista de detalle\n- edición funcional\n- eliminación con confirmación\n"
+    }
+  ]
+}
