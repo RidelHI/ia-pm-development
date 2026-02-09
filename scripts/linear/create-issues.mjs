@@ -13,6 +13,11 @@ function readArg(name, fallback = null) {
   return args[index + 1] ?? true;
 }
 
+if (args.includes('--help') || args.includes('-h')) {
+  console.log('Usage: node create-issues.mjs --file <json> [--team <KEY>] [--dry-run]');
+  process.exit(0);
+}
+
 const filePath = readArg('file');
 const dryRun = args.includes('--dry-run');
 const teamKey = readArg('team', process.env.LINEAR_TEAM_KEY);
@@ -66,6 +71,13 @@ const queryTeam = `
         id
         key
         name
+        states {
+          nodes {
+            id
+            name
+            type
+          }
+        }
       }
     }
   }
@@ -80,10 +92,27 @@ const mutationCreateIssue = `
         identifier
         title
         url
+        state {
+          id
+          name
+        }
       }
     }
   }
 `;
+
+function resolveStateId(team, stateName) {
+  if (!stateName) {
+    return null;
+  }
+
+  const normalized = stateName.trim().toLowerCase();
+  const state = team.states.nodes.find(
+    (candidate) => candidate.name.trim().toLowerCase() === normalized,
+  );
+
+  return state?.id ?? null;
+}
 
 if (dryRun) {
   console.log('DRY RUN - no issues will be created');
@@ -91,7 +120,7 @@ if (dryRun) {
   console.log(`Issues to create: ${payload.issues.length}`);
 
   for (const issue of payload.issues) {
-    console.log(`- [${issue.state}] ${issue.title}`);
+    console.log(`- [${issue.state ?? 'Backlog'}] ${issue.title}`);
   }
 
   process.exit(0);
@@ -114,8 +143,22 @@ for (const issue of payload.issues) {
     priority: issue.priority,
   };
 
+  if (issue.state) {
+    const stateId = resolveStateId(team, issue.state);
+
+    if (stateId) {
+      input.stateId = stateId;
+    } else {
+      console.warn(
+        `State "${issue.state}" not found in team ${team.key}. Falling back to default state.`,
+      );
+    }
+  }
+
   const result = await linearRequest(mutationCreateIssue, { input });
   const created = result.issueCreate.issue;
-  console.log(`Created ${created.identifier}: ${created.title}`);
+  console.log(
+    `Created ${created.identifier} [${created.state?.name ?? 'unknown'}]: ${created.title}`,
+  );
   console.log(`  ${created.url}`);
 }

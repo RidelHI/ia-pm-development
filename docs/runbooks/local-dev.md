@@ -70,3 +70,10 @@ pnpm build
 - Flujo PR/protección de `main`: ver `docs/runbooks/github-pr-flow.md`.
 - Flujo operativo con Linear + agente: ver `docs/runbooks/linear-agentic-workflow.md`.
 - Decisión técnica local-first (Linear + Codex): ver `docs/adr/0003-linear-codex-local-first.md`.
+
+## Quickstart Linear (opcional)
+```bash
+pnpm linear:mcp
+pnpm linear:check
+pnpm linear:dry-run
+```

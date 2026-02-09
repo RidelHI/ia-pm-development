@@ -42,8 +42,14 @@ Razón: maximiza control del workspace local (deps, pruebas, secretos y contexto
 ## Integración MCP de Linear para Codex local
 Configurar una vez:
 ```bash
-codex mcp add --transport sse linear https://mcp.linear.app/sse
-codex mcp list
+pnpm linear:mcp
+pnpm linear:check
+```
+
+Comando equivalente manual:
+```bash
+codex mcp add linear --url https://mcp.linear.app/mcp
+codex mcp get linear
 ```
 
 Nota: este camino aplica al trabajo local de Codex (CLI/IDE). Para cloud, usar la integración nativa de Linear con Codex Agent.
@@ -84,6 +90,11 @@ Variables necesarias:
 - `LINEAR_API_KEY`
 - `LINEAR_TEAM_KEY` (ejemplo: `WMS`)
 
+Verificar setup:
+```bash
+pnpm linear:check
+```
+
 Dry run:
 ```bash
 pnpm linear:dry-run
@@ -92,6 +103,13 @@ pnpm linear:dry-run
 Creación real:
 ```bash
 pnpm linear:create
+```
+
+Mover un issue de estado (kanban):
+```bash
+pnpm linear:move -- --issue WMS-4 --state \"In Progress\"
+pnpm linear:move -- --issue WMS-4 --state \"In Review\"
+pnpm linear:move -- --issue WMS-4 --state \"Done\"
 ```
 
 Archivo semilla: `docs/planning/linear-issues.seed.json`.

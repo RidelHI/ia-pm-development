@@ -13,7 +13,10 @@
     "test": "pnpm -r --if-present test",
     "build": "pnpm -r --if-present build",
     "format": "pnpm -r --if-present format",
+    "linear:mcp": "node scripts/linear/setup-mcp.mjs",
+    "linear:check": "node scripts/linear/check-setup.mjs",
     "linear:create": "node scripts/linear/create-issues.mjs --file docs/planning/linear-issues.seed.json",
-    "linear:dry-run": "node scripts/linear/create-issues.mjs --file docs/planning/linear-issues.seed.json --dry-run"
+    "linear:dry-run": "node scripts/linear/create-issues.mjs --file docs/planning/linear-issues.seed.json --dry-run",
+    "linear:move": "node scripts/linear/move-issue-state.mjs"
   }
 }
