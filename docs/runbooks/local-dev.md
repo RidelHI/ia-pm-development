@@ -66,3 +66,4 @@ pnpm build
 ## Notas
 - No hardcodear secretos en código ni en workflows.
 - `apps/api/vercel.json` y `apps/api/api/index.ts` dejan lista la estructura serverless.
+- Flujo PR/protección de `main`: ver `docs/runbooks/github-pr-flow.md`.
