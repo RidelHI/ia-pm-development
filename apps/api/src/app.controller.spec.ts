@@ -15,8 +15,14 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return api info payload', () => {
+      expect(appController.getInfo()).toEqual({
+        message: 'Warehouse API online',
+        docs: {
+          health: '/health',
+          products: '/products',
+        },
+      });
     });
   });
 });
