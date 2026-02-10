@@ -40,6 +40,7 @@ pnpm dev:api
 
 - Web: `http://localhost:4200`
 - API: `http://localhost:3000`
+- Entorno local API: usar `apps/api/.env.local` (ignorado por git).
 
 ## Calidad local
 ```bash
@@ -69,6 +70,7 @@ pnpm build
 - `apps/api/vercel.json` y `apps/api/api/index.ts` dejan lista la estructura serverless.
 - Flujo PR/proteccion de `main`: ver `docs/runbooks/github-pr-flow.md`.
 - Flujo operativo de planificacion y seguimiento: ver `docs/runbooks/github-project-workflow.md`.
+- Setup de Supabase para BE-14: ver `docs/runbooks/supabase-setup.md`.
 - Decision tecnica local-first (GitHub Projects + Codex): ver `docs/adr/0003-github-project-local-first.md`.
 
 ## Quickstart GitHub Projects

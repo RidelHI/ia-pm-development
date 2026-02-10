@@ -20,7 +20,7 @@ pnpm --filter api build
 Copiar `apps/api/.env.example` y completar:
 
 - `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
+- `SUPABASE_SECRET_KEY` (recomendado para backend server-to-server)
 - `SUPABASE_PRODUCTS_TABLE` (default recomendado: `products`)
 
 ## Endpoints actuales
@@ -33,9 +33,12 @@ Copiar `apps/api/.env.example` y completar:
 - `DELETE /products/:id`
 
 ## Persistencia de productos
-- Si `SUPABASE_URL` y `SUPABASE_ANON_KEY` están configuradas, `ProductsService` usa `SupabaseProductsRepository`.
+- Si `SUPABASE_URL` y una key de Supabase están configuradas, `ProductsService` usa `SupabaseProductsRepository`.
+- Orden de prioridad de key: `SUPABASE_SECRET_KEY` -> `SUPABASE_SERVICE_ROLE_KEY` -> `SUPABASE_ANON_KEY` (legacy).
 - Si faltan variables de Supabase, se usa fallback `InMemoryProductsRepository` para desarrollo local.
 - Tabla por defecto: `products` (override con `SUPABASE_PRODUCTS_TABLE`).
+- Migracion SQL base: `db/migrations/0001_create_products.sql`.
+- Runbook de setup/verificacion: `docs/runbooks/supabase-setup.md`.
 
 ## Deploy en Vercel
 - Entry serverless: `apps/api/api/index.ts`
