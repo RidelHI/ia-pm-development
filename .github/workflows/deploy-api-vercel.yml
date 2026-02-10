@@ -62,17 +62,24 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Create standalone deploy dir (pnpm deploy)
+        if: steps.preflight.outputs.ready == 'true'
+        shell: bash
+        run: |
+          rm -rf apps/api/.vercel-deploy
+          pnpm --filter api deploy apps/api/.vercel-deploy --prod
+
       - name: Pull Vercel environment
         if: steps.preflight.outputs.ready == 'true'
-        working-directory: apps/api
+        working-directory: apps/api/.vercel-deploy
         run: pnpm dlx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Build Vercel artifact
         if: steps.preflight.outputs.ready == 'true'
-        working-directory: apps/api
+        working-directory: apps/api/.vercel-deploy
         run: pnpm dlx vercel build --prod --token="$VERCEL_TOKEN"
 
       - name: Deploy to Vercel
         if: steps.preflight.outputs.ready == 'true'
-        working-directory: apps/api
+        working-directory: apps/api/.vercel-deploy
         run: pnpm dlx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"

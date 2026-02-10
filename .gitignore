@@ -3,6 +3,7 @@ node_modules
 coverage
 dist
 .vercel
+.vercel-deploy
 .angular
 .env
 .env.*

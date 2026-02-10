@@ -66,3 +66,16 @@ curl https://<tu-proyecto>.vercel.app/health
 
 ## Nota de hardening
 El workflow tiene preflight de secretos: si falta alguno, el job no falla por configuracion invalida y el deploy queda omitido con mensajes `notice`.
+
+## Nota de monorepo/pnpm
+En monorepos con `pnpm` (node_modules con symlinks), Vercel puede fallar en runtime si el bundle no incluye dependencias.
+El workflow genera un directorio standalone con `pnpm --filter api deploy ... --prod` antes de `vercel build/deploy` para evitar el problema.
+
+## Deployment Protection (401 Unauthorized)
+Si tu deployment responde `401 Authentication Required`, es porque Vercel tiene activada proteccion de despliegue.
+Opciones:
+1. Desactivar proteccion para `Production` en Vercel (recomendado para un API publico).
+2. Para pruebas internas, usar `vercel curl` (genera bypass automaticamente):
+```bash
+pnpm dlx vercel curl /health --deployment https://<deployment>.vercel.app --cwd apps/api
+```
