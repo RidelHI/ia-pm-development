@@ -3,7 +3,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 interface SupabaseConfig {
   url: string;
-  anonKey: string;
+  apiKey: string;
   productsTable: string;
 }
 
@@ -13,15 +13,15 @@ export class SupabaseService {
 
   getConfig(): SupabaseConfig | null {
     const url = process.env.SUPABASE_URL;
-    const anonKey = process.env.SUPABASE_ANON_KEY;
+    const apiKey = this.resolveApiKey();
 
-    if (!url || !anonKey) {
+    if (!url || !apiKey) {
       return null;
     }
 
     return {
       url,
-      anonKey,
+      apiKey,
       productsTable: process.env.SUPABASE_PRODUCTS_TABLE ?? 'products',
     };
   }
@@ -42,9 +42,18 @@ export class SupabaseService {
     }
 
     if (!this.client) {
-      this.client = createClient(config.url, config.anonKey);
+      this.client = createClient(config.url, config.apiKey);
     }
 
     return this.client;
+  }
+
+  private resolveApiKey(): string | null {
+    return (
+      process.env.SUPABASE_SECRET_KEY ??
+      process.env.SUPABASE_SERVICE_ROLE_KEY ??
+      process.env.SUPABASE_ANON_KEY ??
+      null
+    );
   }
 }
