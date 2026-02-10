@@ -64,6 +64,7 @@ pnpm build
 3. Push a `main` con cambios en `apps/api` o ejecutar workflow manual.
 4. Workflow: `.github/workflows/deploy-api-vercel.yml`.
    - Si faltan secrets, el job se marca como `skipped` (no falla CI).
+5. Runbook detallado: `docs/runbooks/vercel-api-deploy.md`.
 
 ## Notas
 - No hardcodear secretos en codigo ni en workflows.

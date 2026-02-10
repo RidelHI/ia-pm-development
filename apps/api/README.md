@@ -47,3 +47,4 @@ Copiar `apps/api/.env.example` y completar:
   - `VERCEL_TOKEN`
   - `VERCEL_ORG_ID`
   - `VERCEL_PROJECT_ID`
+- Runbook de setup/verificacion: `docs/runbooks/vercel-api-deploy.md`.
