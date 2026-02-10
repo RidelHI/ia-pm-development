@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,62 +11,24 @@ import {
   ProductStatus,
   UpdateProductInput,
 } from './product.types';
+import {
+  PRODUCTS_REPOSITORY,
+  type ProductsRepository,
+} from './repositories/products.repository';
 
 @Injectable()
 export class ProductsService {
-  private readonly products = new Map<string, Product>();
+  constructor(
+    @Inject(PRODUCTS_REPOSITORY)
+    private readonly repository: ProductsRepository,
+  ) {}
 
-  constructor() {
-    const seedData: Product[] = [
-      {
-        id: 'prod-001',
-        sku: 'SKU-APPLE-001',
-        name: 'Apple Box',
-        quantity: 40,
-        unitPriceCents: 599,
-        status: 'active',
-        location: 'A-01',
-        createdAt: new Date('2026-02-01T10:00:00.000Z').toISOString(),
-        updatedAt: new Date('2026-02-01T10:00:00.000Z').toISOString(),
-      },
-      {
-        id: 'prod-002',
-        sku: 'SKU-MILK-002',
-        name: 'Milk Pack',
-        quantity: 12,
-        unitPriceCents: 249,
-        status: 'active',
-        location: 'B-03',
-        createdAt: new Date('2026-02-02T10:00:00.000Z').toISOString(),
-        updatedAt: new Date('2026-02-02T10:00:00.000Z').toISOString(),
-      },
-    ];
-
-    for (const product of seedData) {
-      this.products.set(product.id, product);
-    }
+  async findAll(filters: ProductFilters): Promise<Product[]> {
+    return await this.repository.findAll(filters);
   }
 
-  findAll(filters: ProductFilters): Product[] {
-    const products = Array.from(this.products.values());
-    const normalizedQuery = filters.q?.trim().toLowerCase();
-
-    return products.filter((product) => {
-      const matchesStatus = filters.status
-        ? product.status === filters.status
-        : true;
-
-      const matchesQuery = normalizedQuery
-        ? product.name.toLowerCase().includes(normalizedQuery) ||
-          product.sku.toLowerCase().includes(normalizedQuery)
-        : true;
-
-      return matchesStatus && matchesQuery;
-    });
-  }
-
-  findOne(id: string): Product {
-    const product = this.products.get(id);
+  async findOne(id: string): Promise<Product> {
+    const product = await this.repository.findById(id);
 
     if (!product) {
       throw new NotFoundException(`Product ${id} not found`);
@@ -74,7 +37,7 @@ export class ProductsService {
     return product;
   }
 
-  create(input: CreateProductInput): Product {
+  async create(input: CreateProductInput): Promise<Product> {
     this.validateInput(input);
 
     const now = new Date().toISOString();
@@ -90,32 +53,31 @@ export class ProductsService {
       updatedAt: now,
     };
 
-    this.products.set(product.id, product);
-    return product;
+    return await this.repository.create(product);
   }
 
-  update(id: string, input: UpdateProductInput): Product {
-    const current = this.findOne(id);
-
+  async update(id: string, input: UpdateProductInput): Promise<Product> {
     if (Object.keys(input).length === 0) {
       throw new BadRequestException('At least one field is required');
     }
 
     this.validateInput(input);
+    await this.findOne(id);
 
-    const updated: Product = {
-      ...current,
+    const updated = await this.repository.update(id, {
       ...this.sanitizeInput(input),
-      updatedAt: new Date().toISOString(),
-    };
+    });
 
-    this.products.set(id, updated);
+    if (!updated) {
+      throw new NotFoundException(`Product ${id} not found`);
+    }
+
     return updated;
   }
 
-  remove(id: string): { deleted: true; id: string } {
-    this.findOne(id);
-    this.products.delete(id);
+  async remove(id: string): Promise<{ deleted: true; id: string }> {
+    await this.findOne(id);
+    await this.repository.remove(id);
     return { deleted: true, id };
   }
 

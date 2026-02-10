@@ -32,6 +32,11 @@ Copiar `apps/api/.env.example` y completar:
 - `PATCH /products/:id`
 - `DELETE /products/:id`
 
+## Persistencia de productos
+- Si `SUPABASE_URL` y `SUPABASE_ANON_KEY` están configuradas, `ProductsService` usa `SupabaseProductsRepository`.
+- Si faltan variables de Supabase, se usa fallback `InMemoryProductsRepository` para desarrollo local.
+- Tabla por defecto: `products` (override con `SUPABASE_PRODUCTS_TABLE`).
+
 ## Deploy en Vercel
 - Entry serverless: `apps/api/api/index.ts`
 - Config: `apps/api/vercel.json`
