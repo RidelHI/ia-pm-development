@@ -9,6 +9,7 @@ export class HealthService {
     return {
       status: 'ok',
       service: 'warehouse-api',
+      version: process.env.APP_VERSION ?? '0.1.0',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV ?? 'development',
       integrations: {

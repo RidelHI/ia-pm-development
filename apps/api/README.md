@@ -25,7 +25,7 @@ Copiar `apps/api/.env.example` y completar:
 
 ## Endpoints actuales
 - `GET /` info básica de la API
-- `GET /health` estado del servicio e integración Supabase
+- `GET /health` estado del servicio, versión e integración Supabase
 - `GET /products`
 - `GET /products/:id`
 - `POST /products`

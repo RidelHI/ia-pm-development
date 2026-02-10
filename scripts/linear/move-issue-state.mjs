@@ -10,7 +10,13 @@ function readArg(name, fallback = null) {
     return fallback;
   }
 
-  return args[index + 1] ?? true;
+  const value = args[index + 1];
+
+  if (!value || value.startsWith('--')) {
+    return fallback;
+  }
+
+  return value;
 }
 
 if (args.includes('--help') || args.includes('-h')) {
