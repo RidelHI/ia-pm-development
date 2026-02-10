@@ -11,11 +11,25 @@ let isBootstrapped = false;
 async function bootstrap() {
   if (!isBootstrapped) {
     try {
+      console.log('bootstrap: creating Nest application');
       const app = await NestFactory.create(
         AppModule,
         new ExpressAdapter(expressApp),
       );
-      await app.init();
+      console.log('bootstrap: initializing Nest application');
+
+      const timeoutMs = Number(process.env.BOOTSTRAP_TIMEOUT_MS ?? 25000);
+      await Promise.race([
+        app.init(),
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error(`Bootstrap timeout after ${timeoutMs}ms`)),
+            timeoutMs,
+          ),
+        ),
+      ]);
+
+      console.log('bootstrap: Nest application initialized');
       isBootstrapped = true;
     } catch (error) {
       // Vercel will show this in runtime logs (vercel logs).
