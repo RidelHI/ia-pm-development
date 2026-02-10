@@ -1,0 +1,96 @@
+{
+  "project": "WMS Backend (NestJS)",
+  "labelPalette": {
+    "backend": "#4EA7FC",
+    "nestjs": "#EA2845",
+    "supabase": "#3ECF8E",
+    "vercel": "#111827",
+    "testing": "#F2994A",
+    "docs": "#9B51E0",
+    "api": "#56CCF2",
+    "security": "#EB5757",
+    "infra": "#2D9CDB"
+  },
+  "issues": [
+    {
+      "title": "BE-01: Estructurar módulos NestJS (health, products, integrations)",
+      "priority": 2,
+      "state": "Todo",
+      "estimate": 2,
+      "labels": ["backend", "nestjs", "api"],
+      "description": "## Objetivo\nRefactorizar la API para usar módulos explícitos por dominio y reducir acoplamiento.\n\n## Alcance\n- Crear `HealthModule`, `ProductsModule`, `IntegrationsModule`\n- Registrar providers/controllers por módulo\n- Mantener comportamiento actual sin regresiones\n\n## Criterios de aceptación\n- app.module.ts liviano\n- estructura por módulos en `apps/api/src/**`\n- lint/test/build en verde\n"
+    },
+    {
+      "title": "BE-02: Definir DTOs y validación global (ValidationPipe)",
+      "priority": 2,
+      "state": "Todo",
+      "estimate": 3,
+      "labels": ["backend", "nestjs", "api", "security"],
+      "description": "## Objetivo\nAplicar validaciones consistentes en requests de productos.\n\n## Alcance\n- DTOs de create/update/list\n- `ValidationPipe` global con `whitelist`\n- mensajes de error consistentes\n\n## Criterios de aceptación\n- controladores sin `as` inseguros\n- errores 400 claros ante payload inválido\n- tests de validación mínimos\n"
+    },
+    {
+      "title": "BE-03: Documentación OpenAPI (Swagger) para endpoints actuales",
+      "priority": 3,
+      "state": "Backlog",
+      "estimate": 2,
+      "labels": ["backend", "nestjs", "docs", "api"],
+      "description": "## Objetivo\nPublicar contrato API navegable para equipo y frontend.\n\n## Alcance\n- setup Swagger en Nest\n- documentación de `/health` y `/products`\n- ejemplos de request/response\n\n## Criterios de aceptación\n- endpoint docs accesible en local\n- README con ruta de Swagger\n"
+    },
+    {
+      "title": "BE-04: Capa de repositorio para productos (abstracción de persistencia)",
+      "priority": 2,
+      "state": "Backlog",
+      "estimate": 3,
+      "labels": ["backend", "nestjs", "api", "supabase"],
+      "description": "## Objetivo\nSeparar dominio de productos de la tecnología de almacenamiento.\n\n## Alcance\n- interface `ProductsRepository`\n- implementación `InMemoryProductsRepository`\n- service consume repositorio, no Map directo\n\n## Criterios de aceptación\n- productos service desacoplado de storage\n- tests unitarios sobre service usando repo mock\n"
+    },
+    {
+      "title": "BE-05: SQL base en Supabase para tabla products",
+      "priority": 1,
+      "state": "Backlog",
+      "estimate": 3,
+      "labels": ["backend", "supabase", "infra"],
+      "description": "## Objetivo\nCrear esquema base productivo para persistencia real.\n\n## Alcance\n- script SQL versionado en repo\n- columnas de product + timestamps\n- índices mínimos (`sku`, `status`)\n\n## Criterios de aceptación\n- script ejecutable en Supabase SQL editor\n- documentación de ejecución\n"
+    },
+    {
+      "title": "BE-06: Políticas RLS mínimas para products",
+      "priority": 1,
+      "state": "Backlog",
+      "estimate": 5,
+      "labels": ["backend", "supabase", "security"],
+      "description": "## Objetivo\nAsegurar acceso mínimo seguro desde etapas tempranas.\n\n## Alcance\n- habilitar RLS en `products`\n- política de lectura autenticada\n- política de escritura restringida por rol\n\n## Criterios de aceptación\n- script SQL de políticas versionado\n- pruebas manuales documentadas (casos permitido/denegado)\n"
+    },
+    {
+      "title": "BE-07: Integrar repositorio Supabase en ProductsService",
+      "priority": 1,
+      "state": "Backlog",
+      "estimate": 5,
+      "labels": ["backend", "nestjs", "supabase", "api"],
+      "description": "## Objetivo\nSustituir persistencia in-memory por Supabase manteniendo contrato API.\n\n## Alcance\n- `SupabaseProductsRepository`\n- wiring por providers en módulo\n- manejo básico de errores de infraestructura\n\n## Criterios de aceptación\n- CRUD operando con tabla real\n- tests unitarios y de integración básicos\n"
+    },
+    {
+      "title": "BE-08: E2E tests de API (health + products)",
+      "priority": 2,
+      "state": "Backlog",
+      "estimate": 3,
+      "labels": ["backend", "testing", "api"],
+      "description": "## Objetivo\nSubir confianza del backend con pruebas end-to-end.\n\n## Alcance\n- ampliar suite `test/app.e2e-spec.ts`\n- casos felices y errores principales\n- setup reproducible para CI\n\n## Criterios de aceptación\n- tests e2e corren en CI\n- cobertura de endpoints críticos\n"
+    },
+    {
+      "title": "BE-09: Hardening de deploy Vercel para API",
+      "priority": 2,
+      "state": "Backlog",
+      "estimate": 2,
+      "labels": ["backend", "vercel", "infra", "docs"],
+      "description": "## Objetivo\nAsegurar despliegue estable en entorno serverless.\n\n## Alcance\n- revisar `vercel.json` y runtime\n- validar variables requeridas en README/runbook\n- smoke test post deploy\n\n## Criterios de aceptación\n- workflow deploy API sin errores\n- runbook actualizado\n"
+    },
+    {
+      "title": "BE-10: Versionado y contrato de respuesta estándar",
+      "priority": 3,
+      "state": "Backlog",
+      "estimate": 2,
+      "labels": ["backend", "api", "docs"],
+      "description": "## Objetivo\nEstandarizar respuestas para facilitar consumo desde frontend.\n\n## Alcance\n- convención de envelope (`data`, `meta`, `error`) donde aplique\n- versionado básico del API\n- docs de contrato\n\n## Criterios de aceptación\n- formato homogéneo en endpoints nuevos\n- guía breve en docs/api\n"
+    }
+  ]
+}

@@ -59,3 +59,15 @@ Criterios de aceptación:
 - PR con referencia a issue Linear.
 - Documentación actualizada (si aplica).
 - Sin scope creep respecto al issue.
+
+## Plan backend NestJS (detalle)
+- Seed dedicado: `docs/planning/linear-backend-nest.seed.json`.
+- Comandos:
+  - `pnpm linear:dry-run:backend`
+  - `pnpm linear:create:backend`
+- Incluye tareas para:
+  - módulos/controladores/servicios en NestJS;
+  - documentación OpenAPI;
+  - testing unitario/e2e;
+  - integración Supabase (schema + RLS + repositorio);
+  - hardening de deploy Vercel.

@@ -17,6 +17,8 @@
     "linear:check": "node scripts/linear/check-setup.mjs",
     "linear:create": "node scripts/linear/create-issues.mjs --file docs/planning/linear-issues.seed.json",
     "linear:dry-run": "node scripts/linear/create-issues.mjs --file docs/planning/linear-issues.seed.json --dry-run",
+    "linear:create:backend": "node scripts/linear/create-issues.mjs --file docs/planning/linear-backend-nest.seed.json",
+    "linear:dry-run:backend": "node scripts/linear/create-issues.mjs --file docs/planning/linear-backend-nest.seed.json --dry-run",
     "linear:move": "node scripts/linear/move-issue-state.mjs"
   }
 }

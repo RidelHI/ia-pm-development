@@ -105,11 +105,24 @@ Creación real:
 pnpm linear:create
 ```
 
+Backlog backend NestJS (plan detallado):
+```bash
+pnpm linear:dry-run:backend
+pnpm linear:create:backend
+```
+
 Mover un issue de estado (kanban):
 ```bash
-pnpm linear:move -- --issue WMS-4 --state \"In Progress\"
-pnpm linear:move -- --issue WMS-4 --state \"In Review\"
-pnpm linear:move -- --issue WMS-4 --state \"Done\"
+pnpm linear:move -- --issue WMS-4 --state "In Progress"
+pnpm linear:move -- --issue WMS-4 --state "In Review"
+pnpm linear:move -- --issue WMS-4 --state "Done"
 ```
 
 Archivo semilla: `docs/planning/linear-issues.seed.json`.
+
+Soporte del script de creación:
+- `state`
+- `priority`
+- `estimate`
+- `labels` (crea tags faltantes automáticamente por team)
+- `dueDate` (opcional, formato `YYYY-MM-DD`)

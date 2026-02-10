@@ -10,11 +10,18 @@ function readArg(name, fallback = null) {
     return fallback;
   }
 
-  return args[index + 1] ?? true;
+  const value = args[index + 1];
+  if (!value || value.startsWith('--')) {
+    return fallback;
+  }
+
+  return value;
 }
 
 if (args.includes('--help') || args.includes('-h')) {
-  console.log('Usage: node create-issues.mjs --file <json> [--team <KEY>] [--dry-run]');
+  console.log(
+    'Usage: node create-issues.mjs --file <json> [--team <KEY>] [--dry-run]',
+  );
   process.exit(0);
 }
 
@@ -78,6 +85,26 @@ const queryTeam = `
             type
           }
         }
+        labels {
+          nodes {
+            id
+            name
+            color
+          }
+        }
+      }
+    }
+  }
+`;
+
+const mutationCreateIssueLabel = `
+  mutation CreateIssueLabel($input: IssueLabelCreateInput!) {
+    issueLabelCreate(input: $input) {
+      success
+      issueLabel {
+        id
+        name
+        color
       }
     }
   }
@@ -92,9 +119,16 @@ const mutationCreateIssue = `
         identifier
         title
         url
+        estimate
         state {
           id
           name
+        }
+        labels {
+          nodes {
+            id
+            name
+          }
         }
       }
     }
@@ -114,13 +148,61 @@ function resolveStateId(team, stateName) {
   return state?.id ?? null;
 }
 
+function normalizeLabelName(label) {
+  return label.trim().toLowerCase();
+}
+
+async function resolveLabelIds(team, issueLabels, labelPalette) {
+  if (!issueLabels || issueLabels.length === 0) {
+    return [];
+  }
+
+  const existingByName = new Map(
+    team.labels.nodes.map((label) => [normalizeLabelName(label.name), label]),
+  );
+
+  const ids = [];
+  for (const rawLabel of issueLabels) {
+    const labelName = rawLabel.trim();
+    if (!labelName) {
+      continue;
+    }
+
+    const normalized = normalizeLabelName(labelName);
+    let label = existingByName.get(normalized);
+
+    if (!label) {
+      const created = await linearRequest(mutationCreateIssueLabel, {
+        input: {
+          teamId: team.id,
+          name: labelName,
+          color: labelPalette?.[labelName] ?? '#7F8EA3',
+        },
+      });
+
+      label = created.issueLabelCreate.issueLabel;
+      existingByName.set(normalized, label);
+      team.labels.nodes.push(label);
+      console.log(`Created label: ${label.name}`);
+    }
+
+    ids.push(label.id);
+  }
+
+  return [...new Set(ids)];
+}
+
 if (dryRun) {
   console.log('DRY RUN - no issues will be created');
   console.log(`Team: ${teamKey ?? '<not-set>'}`);
   console.log(`Issues to create: ${payload.issues.length}`);
 
   for (const issue of payload.issues) {
-    console.log(`- [${issue.state ?? 'Backlog'}] ${issue.title}`);
+    const labels = issue.labels?.length ? ` labels=${issue.labels.join(',')}` : '';
+    const estimate = issue.estimate ? ` estimate=${issue.estimate}` : '';
+    console.log(
+      `- [${issue.state ?? 'Backlog'}] p${issue.priority ?? '-'} ${issue.title}${labels}${estimate}`,
+    );
   }
 
   process.exit(0);
@@ -155,10 +237,29 @@ for (const issue of payload.issues) {
     }
   }
 
+  if (issue.estimate !== undefined) {
+    input.estimate = issue.estimate;
+  }
+
+  if (issue.dueDate) {
+    input.dueDate = issue.dueDate;
+  }
+
+  if (issue.labels?.length) {
+    input.labelIds = await resolveLabelIds(team, issue.labels, payload.labelPalette);
+  }
+
   const result = await linearRequest(mutationCreateIssue, { input });
   const created = result.issueCreate.issue;
+  const createdLabels = created.labels.nodes.map((label) => label.name).join(', ');
+
   console.log(
-    `Created ${created.identifier} [${created.state?.name ?? 'unknown'}]: ${created.title}`,
+    `Created ${created.identifier} [${created.state?.name ?? 'unknown'}] (p${issue.priority ?? '-'}) ${created.title}`,
   );
+
+  if (createdLabels) {
+    console.log(`  labels: ${createdLabels}`);
+  }
+
   console.log(`  ${created.url}`);
 }
