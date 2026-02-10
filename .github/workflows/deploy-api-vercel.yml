@@ -67,7 +67,7 @@ jobs:
         shell: bash
         run: |
           rm -rf apps/api/.vercel-deploy
-          pnpm --filter api deploy apps/api/.vercel-deploy --prod
+          pnpm --filter api deploy apps/api/.vercel-deploy --prod --legacy
 
       - name: Pull Vercel environment
         if: steps.preflight.outputs.ready == 'true'
