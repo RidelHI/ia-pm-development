@@ -43,7 +43,6 @@ Payload recomendado (`main-protection.json`):
 - `required_pull_request_reviews.required_approving_review_count = 1`
 - `dismiss_stale_reviews = true`
 - `required_conversation_resolution = true`
-- `required_linear_history = true`
 - `allow_force_pushes = false`
 - `allow_deletions = false`
 - `enforce_admins = true`

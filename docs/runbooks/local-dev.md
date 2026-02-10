@@ -5,12 +5,12 @@
 - Git 2.45+
 - Corepack habilitado (`corepack` viene con Node moderno)
 
-## Instalación
+## Instalacion
 Opciones evaluadas para `pnpm`:
 1. Instalar `pnpm` global con `npm i -g pnpm`.
 2. Usar `corepack` fijado por el repo (`packageManager`).
 
-Elección recomendada: opción 2 (más reproducible por versión).
+Eleccion recomendada: opcion 2 (mas reproducible por version).
 
 ```bash
 corepack enable
@@ -49,7 +49,7 @@ pnpm build
 ```
 
 ## Deploy Web (GitHub Pages)
-1. El workflow intenta habilitar Pages automáticamente en el primer despliegue.
+1. El workflow intenta habilitar Pages automaticamente en el primer despliegue.
 2. Si falla por permisos, habilitar Pages en el repo (source: GitHub Actions).
 3. Push a `main` con cambios en `apps/web`.
 4. Workflow: `.github/workflows/deploy-web-pages.yml`.
@@ -65,15 +65,15 @@ pnpm build
    - Si faltan secrets, el job se marca como `skipped` (no falla CI).
 
 ## Notas
-- No hardcodear secretos en código ni en workflows.
+- No hardcodear secretos en codigo ni en workflows.
 - `apps/api/vercel.json` y `apps/api/api/index.ts` dejan lista la estructura serverless.
-- Flujo PR/protección de `main`: ver `docs/runbooks/github-pr-flow.md`.
-- Flujo operativo con Linear + agente: ver `docs/runbooks/linear-agentic-workflow.md`.
-- Decisión técnica local-first (Linear + Codex): ver `docs/adr/0003-linear-codex-local-first.md`.
+- Flujo PR/proteccion de `main`: ver `docs/runbooks/github-pr-flow.md`.
+- Flujo operativo de planificacion y seguimiento: ver `docs/runbooks/github-project-workflow.md`.
+- Decision tecnica local-first (GitHub Projects + Codex): ver `docs/adr/0003-github-project-local-first.md`.
 
-## Quickstart Linear (opcional)
+## Quickstart GitHub Projects
 ```bash
-pnpm linear:mcp
-pnpm linear:check
-pnpm linear:dry-run
+gh auth status
+gh project view 1 --owner RidelHI --web
+gh issue list --state open
 ```
