@@ -29,6 +29,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate branch naming convention
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          if [[ "$BRANCH" =~ ^(feature|fix|chore)\/[a-z0-9._-]+$ ]]; then
+            echo "Branch name is valid: $BRANCH"
+          else
+            echo "Invalid branch name: $BRANCH"
+            echo "Use one of: feature/<slug>, fix/<slug>, chore/<slug>"
+            exit 1
+          fi
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:

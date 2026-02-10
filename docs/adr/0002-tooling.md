@@ -30,7 +30,16 @@ Opciones evaluadas:
 Elección: opción 2.
 Razón: evita drift de estilo al escalar features y mantiene consistencia desde el primer comando `ng generate`.
 
+## Decisión 4: Reglas de PR y protección de `main`
+Opciones evaluadas:
+1. Repo privado + GitHub Pro para branch protection completa.
+2. Repo público + branch protection completa en plan free.
+
+Elección: opción 2 para este proyecto de aprendizaje.
+Razón: mantener costo cero y enforcement real de PR/checks obligatorios.
+
 ## Consecuencias
 - Menos fricción al generar artefactos Angular.
 - Menos conflictos de line endings.
 - Requiere documentar claramente fallback para entornos restringidos.
+- `main` no permite push directo: exige PR + checks + review.
