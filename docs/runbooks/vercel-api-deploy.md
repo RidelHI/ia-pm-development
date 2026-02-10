@@ -69,7 +69,7 @@ El workflow tiene preflight de secretos: si falta alguno, el job no falla por co
 
 ## Nota de monorepo/pnpm
 En monorepos con `pnpm` (node_modules con symlinks), Vercel puede fallar en runtime si el bundle no incluye dependencias.
-El workflow genera un directorio standalone con `pnpm --filter api deploy ... --prod` antes de `vercel build/deploy` para evitar el problema.
+El workflow genera un directorio standalone con `pnpm --filter api deploy ...` antes de `vercel build/deploy` para reducir problemas de empaquetado.
 
 ## Deployment Protection (401 Unauthorized)
 Si tu deployment responde `401 Authentication Required`, es porque Vercel tiene activada proteccion de despliegue.
