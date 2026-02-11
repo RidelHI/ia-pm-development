@@ -24,6 +24,11 @@ Copiar `apps/api/.env.example` y completar:
 - `SUPABASE_PRODUCTS_TABLE` (default recomendado: `products`)
 - `APP_CORS_ORIGINS` (lista separada por comas)
 - `APP_DOCS_ENABLED` / `APP_DOCS_PATH`
+- `AUTH_USERNAME`
+- `AUTH_PASSWORD`
+- `AUTH_PASSWORD_HASH` (bcrypt; obligatorio en `production`)
+- `AUTH_JWT_SECRET` (minimo 32 caracteres en `production`)
+- `AUTH_JWT_EXPIRES_IN_SECONDS` / `AUTH_JWT_ISSUER` / `AUTH_JWT_AUDIENCE`
 
 ## Endpoints actuales
 - `GET /v1` info básica de la API

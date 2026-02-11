@@ -26,3 +26,17 @@ services:
         value: "false"
       - key: APP_DOCS_PATH
         value: docs
+      - key: AUTH_USERNAME
+        sync: false
+      - key: AUTH_PASSWORD
+        sync: false
+      - key: AUTH_PASSWORD_HASH
+        sync: false
+      - key: AUTH_JWT_SECRET
+        sync: false
+      - key: AUTH_JWT_EXPIRES_IN_SECONDS
+        value: "900"
+      - key: AUTH_JWT_ISSUER
+        value: warehouse-api
+      - key: AUTH_JWT_AUDIENCE
+        value: warehouse-clients

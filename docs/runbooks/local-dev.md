@@ -63,6 +63,7 @@ pnpm build
    - Start: `node apps/api/dist/main.js`
    - Health check: `/v1/health/live`
 4. Configurar variables de entorno del API en Render.
+   - Importante en `production`: definir `AUTH_USERNAME`, `AUTH_PASSWORD`, `AUTH_PASSWORD_HASH` y `AUTH_JWT_SECRET`.
 5. Alternativa si no hay Blueprint: crear `Web Service` manual con la misma configuracion.
 6. Runbook detallado: `docs/runbooks/render-api-deploy.md`.
 
