@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -9,11 +8,11 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import type {
-  CreateProductInput,
-  ProductFilters,
-  UpdateProductInput,
-} from './product.types';
+import { CreateProductDto } from './dto/create-product.dto';
+import { ProductIdParamDto } from './dto/product-id-param.dto';
+import { ProductResponseDto } from './dto/product-response.dto';
+import { ProductsQueryDto } from './dto/products-query.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsService } from './products.service';
 
 @Controller('products')
@@ -21,53 +20,38 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  findAll(@Query('q') q?: string, @Query('status') status?: string) {
-    const filters: ProductFilters = { q };
-
-    if (status !== undefined) {
-      if (status !== 'active' && status !== 'inactive') {
-        throw new BadRequestException('status must be active or inactive');
-      }
-
-      filters.status = status;
-    }
-
-    return this.productsService.findAll(filters);
+  async findAll(
+    @Query() filters: ProductsQueryDto,
+  ): Promise<ProductResponseDto[]> {
+    const products = await this.productsService.findAll(filters);
+    return ProductResponseDto.fromDomainList(products);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(id);
+  async findOne(
+    @Param() params: ProductIdParamDto,
+  ): Promise<ProductResponseDto> {
+    const product = await this.productsService.findOne(params.id);
+    return ProductResponseDto.fromDomain(product);
   }
 
   @Post()
-  create(@Body() input: unknown) {
-    return this.productsService.create(this.toCreateInput(input));
+  async create(@Body() input: CreateProductDto): Promise<ProductResponseDto> {
+    const product = await this.productsService.create(input);
+    return ProductResponseDto.fromDomain(product);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() input: unknown) {
-    return this.productsService.update(id, this.toUpdateInput(input));
+  async update(
+    @Param() params: ProductIdParamDto,
+    @Body() input: UpdateProductDto,
+  ): Promise<ProductResponseDto> {
+    const product = await this.productsService.update(params.id, input);
+    return ProductResponseDto.fromDomain(product);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(id);
-  }
-
-  private toCreateInput(input: unknown): CreateProductInput {
-    if (!input || typeof input !== 'object') {
-      throw new BadRequestException('body must be a JSON object');
-    }
-
-    return input as CreateProductInput;
-  }
-
-  private toUpdateInput(input: unknown): UpdateProductInput {
-    if (!input || typeof input !== 'object') {
-      throw new BadRequestException('body must be a JSON object');
-    }
-
-    return input as UpdateProductInput;
+  remove(@Param() params: ProductIdParamDto) {
+    return this.productsService.remove(params.id);
   }
 }

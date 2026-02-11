@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import supabaseConfig from '../../config/supabase.config';
 
 interface SupabaseConfig {
   url: string;
@@ -11,9 +13,14 @@ interface SupabaseConfig {
 export class SupabaseService {
   private client: SupabaseClient | null = null;
 
+  constructor(
+    @Inject(supabaseConfig.KEY)
+    private readonly config: ConfigType<typeof supabaseConfig>,
+  ) {}
+
   getConfig(): SupabaseConfig | null {
-    const url = process.env.SUPABASE_URL;
-    const apiKey = this.resolveApiKey();
+    const url = this.config.url;
+    const apiKey = this.config.apiKey;
 
     if (!url || !apiKey) {
       return null;
@@ -22,7 +29,7 @@ export class SupabaseService {
     return {
       url,
       apiKey,
-      productsTable: process.env.SUPABASE_PRODUCTS_TABLE ?? 'products',
+      productsTable: this.config.productsTable,
     };
   }
 
@@ -46,14 +53,5 @@ export class SupabaseService {
     }
 
     return this.client;
-  }
-
-  private resolveApiKey(): string | null {
-    return (
-      process.env.SUPABASE_SECRET_KEY ??
-      process.env.SUPABASE_SERVICE_ROLE_KEY ??
-      process.env.SUPABASE_ANON_KEY ??
-      null
-    );
   }
 }

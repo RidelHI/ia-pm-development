@@ -38,17 +38,18 @@ export class ProductsService {
   }
 
   async create(input: CreateProductInput): Promise<Product> {
-    this.validateInput(input);
+    const sanitizedInput = this.sanitizeInput(input);
+    this.validateInput(sanitizedInput);
 
     const now = new Date().toISOString();
     const product: Product = {
       id: crypto.randomUUID(),
-      sku: input.sku.trim(),
-      name: input.name.trim(),
-      quantity: input.quantity,
-      unitPriceCents: input.unitPriceCents,
-      status: input.status ?? 'active',
-      location: input.location?.trim(),
+      sku: sanitizedInput.sku,
+      name: sanitizedInput.name,
+      quantity: sanitizedInput.quantity,
+      unitPriceCents: sanitizedInput.unitPriceCents,
+      status: sanitizedInput.status ?? 'active',
+      location: sanitizedInput.location,
       createdAt: now,
       updatedAt: now,
     };
@@ -61,12 +62,16 @@ export class ProductsService {
       throw new BadRequestException('At least one field is required');
     }
 
-    this.validateInput(input);
+    const patch = this.stripUndefinedValues(this.sanitizeInput(input));
+
+    if (Object.keys(patch).length === 0) {
+      throw new BadRequestException('At least one field is required');
+    }
+
+    this.validateInput(patch);
     await this.findOne(id);
 
-    const updated = await this.repository.update(id, {
-      ...this.sanitizeInput(input),
-    });
+    const updated = await this.repository.update(id, patch);
 
     if (!updated) {
       throw new NotFoundException(`Product ${id} not found`);
@@ -95,6 +100,14 @@ export class ProductsService {
           ? input.location.trim()
           : input.location,
     };
+  }
+
+  private stripUndefinedValues<T extends Record<string, unknown>>(value: T): T {
+    const entries = Object.entries(value).filter(([, fieldValue]) => {
+      return fieldValue !== undefined;
+    });
+
+    return Object.fromEntries(entries) as T;
   }
 
   private validateInput(input: UpdateProductInput | CreateProductInput): void {

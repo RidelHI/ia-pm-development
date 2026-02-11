@@ -54,4 +54,17 @@ describe('ProductsService', () => {
       }),
     ).rejects.toThrow(BadRequestException);
   });
+
+  it('throws when update payload has no defined fields', async () => {
+    const created = await service.create({
+      sku: 'SKU-TEA-005',
+      name: 'Tea Box',
+      quantity: 6,
+      unitPriceCents: 399,
+    });
+
+    await expect(
+      service.update(created.id, { name: undefined }),
+    ).rejects.toThrow(BadRequestException);
+  });
 });
