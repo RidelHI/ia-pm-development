@@ -46,9 +46,9 @@ Copiar `apps/api/.env.example` y completar:
 - Runbook de setup/verificacion: `docs/runbooks/supabase-setup.md`.
 
 ## Deploy en Render
-- Tipo de servicio: `Web Service` (creacion manual en Render, seleccionando la rama).
+- Via recomendada: `Blueprint` con `render.yaml` (seleccionando la rama en Render).
 - Build command: `pnpm install --frozen-lockfile && pnpm --filter api build`
 - Start command: `node apps/api/dist/main.js`
 - Health check recomendado: `/v1/health/live`
-- Referencia opcional: `render.yaml` (raiz del repo).
+- Alternativa: crear `Web Service` manual con la misma configuracion.
 - Runbook de setup/verificacion: `docs/runbooks/render-api-deploy.md`.

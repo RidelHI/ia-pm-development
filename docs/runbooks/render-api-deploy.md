@@ -1,7 +1,7 @@
 # Runbook: Deploy API en Render
 
 ## Objetivo
-Configurar y verificar el deploy de `apps/api` hacia Render mediante un `Web Service` creado manualmente.
+Configurar y verificar el deploy de `apps/api` hacia Render, priorizando `Blueprint` (`render.yaml`).
 
 ## Prerrequisitos
 - Cuenta en Render.
@@ -9,13 +9,14 @@ Configurar y verificar el deploy de `apps/api` hacia Render mediante un `Web Ser
 - Rama de deploy definida (ejemplo: `main`).
 - Variables de entorno del API disponibles (Supabase y CORS).
 
-## 1) Crear servicio Web Service (manual)
-1. En Render, entrar a `New` -> `Web Service`.
+## 1) Crear servicio desde Blueprint (recomendado)
+1. En Render, entrar a `Blueprints`.
 2. Seleccionar este repositorio.
 3. Elegir la rama a desplegar.
-4. Configurar nombre del servicio (ejemplo: `warehouse-api`).
+4. Confirmar configuracion detectada desde `render.yaml`.
+5. Crear el servicio (ejemplo: `warehouse-api`).
 
-## 2) Comandos esperados
+## 2) Configuracion esperada
 - Build:
 ```bash
 pnpm install --frozen-lockfile && pnpm --filter api build
@@ -53,4 +54,4 @@ curl https://<tu-servicio>.onrender.com/v1
 
 ## Nota operativa
 - El API usa `PORT` de entorno (inyectado por Render), no requiere adaptador serverless.
-- `render.yaml` queda como referencia opcional de configuracion declarativa.
+- Si no puedes usar Blueprint, crear `Web Service` manual con los mismos comandos y health check.

@@ -56,13 +56,14 @@ pnpm build
 4. Workflow: `.github/workflows/deploy-web-pages.yml`.
 
 ## Deploy API (Render)
-1. Crear un `Web Service` en Render conectado a este repo.
-2. Seleccionar la rama objetivo en la configuracion del servicio.
-3. Configurar manualmente:
+1. Usar `Blueprint` de Render con `render.yaml` (recomendado).
+2. Seleccionar la rama objetivo en la configuracion del Blueprint.
+3. Confirmar que Render toma:
    - Build: `pnpm install --frozen-lockfile && pnpm --filter api build`
    - Start: `node apps/api/dist/main.js`
-4. Configurar `Health Check Path`: `/v1/health/live`.
-5. Configurar variables de entorno del API en Render.
+   - Health check: `/v1/health/live`
+4. Configurar variables de entorno del API en Render.
+5. Alternativa si no hay Blueprint: crear `Web Service` manual con la misma configuracion.
 6. Runbook detallado: `docs/runbooks/render-api-deploy.md`.
 
 ## Notas
