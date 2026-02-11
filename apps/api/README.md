@@ -47,7 +47,7 @@ Copiar `apps/api/.env.example` y completar:
 
 ## Deploy en Render
 - Via recomendada: `Blueprint` con `render.yaml` (seleccionando la rama en Render).
-- Build command: `pnpm install --frozen-lockfile && pnpm --filter api build`
+- Build command: `pnpm install --frozen-lockfile --filter api... && pnpm --filter api build`
 - Start command: `node apps/api/dist/main.js`
 - Health check recomendado: `/v1/health/live`
 - Alternativa: crear `Web Service` manual con la misma configuracion.

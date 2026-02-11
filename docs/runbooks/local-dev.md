@@ -59,7 +59,7 @@ pnpm build
 1. Usar `Blueprint` de Render con `render.yaml` (recomendado).
 2. Seleccionar la rama objetivo en la configuracion del Blueprint.
 3. Confirmar que Render toma:
-   - Build: `pnpm install --frozen-lockfile && pnpm --filter api build`
+   - Build: `pnpm install --frozen-lockfile --filter api... && pnpm --filter api build`
    - Start: `node apps/api/dist/main.js`
    - Health check: `/v1/health/live`
 4. Configurar variables de entorno del API en Render.

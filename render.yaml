@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     rootDir: .
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter api build
+    buildCommand: pnpm install --frozen-lockfile --filter api... && pnpm --filter api build
     startCommand: node apps/api/dist/main.js
     healthCheckPath: /v1/health/live
     envVars:

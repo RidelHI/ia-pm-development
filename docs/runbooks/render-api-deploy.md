@@ -19,7 +19,7 @@ Configurar y verificar el deploy de `apps/api` hacia Render, priorizando `Bluepr
 ## 2) Configuracion esperada
 - Build:
 ```bash
-pnpm install --frozen-lockfile && pnpm --filter api build
+pnpm install --frozen-lockfile --filter api... && pnpm --filter api build
 ```
 - Start:
 ```bash
