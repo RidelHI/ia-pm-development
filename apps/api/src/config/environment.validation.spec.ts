@@ -33,6 +33,8 @@ describe('validateEnvironment', () => {
         AUTH_JWT_SECRET: 'short-secret',
         AUTH_USERNAME: 'prod-user',
         AUTH_PASSWORD: 'prod-password-123',
+        AUTH_PASSWORD_HASH:
+          '$2b$10$el.bxN9lA3ac2A5i8W0eHezzpkxMduf74s33vpjVGD3h7P0Amd5hu',
       }),
     ).toThrow('Invalid environment configuration');
   });
@@ -46,6 +48,27 @@ describe('validateEnvironment', () => {
         AUTH_JWT_SECRET: 'long-enough-secret-for-production-1234',
         AUTH_USERNAME: 'prod-user',
         AUTH_PASSWORD: 'prod-password-123',
+        AUTH_PASSWORD_HASH:
+          '$2b$10$el.bxN9lA3ac2A5i8W0eHezzpkxMduf74s33vpjVGD3h7P0Amd5hu',
+      }),
+    ).toThrow('Invalid environment configuration');
+  });
+
+  it('throws in production when AUTH_PASSWORD_HASH is not set', () => {
+    expect(() =>
+      validateEnvironment({
+        NODE_ENV: 'production',
+        AUTH_JWT_SECRET: 'long-enough-secret-for-production-1234',
+        AUTH_USERNAME: 'prod-user',
+        AUTH_PASSWORD: 'prod-password-123',
+      }),
+    ).toThrow('Invalid environment configuration');
+  });
+
+  it('throws when AUTH_PASSWORD_HASH is not a bcrypt hash', () => {
+    expect(() =>
+      validateEnvironment({
+        AUTH_PASSWORD_HASH: 'not-bcrypt',
       }),
     ).toThrow('Invalid environment configuration');
   });

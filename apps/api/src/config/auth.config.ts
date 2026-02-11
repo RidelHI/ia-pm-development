@@ -1,25 +1,14 @@
 import { registerAs } from '@nestjs/config';
+import { parsePositiveInteger } from './config.utils';
 
 export interface AuthConfig {
   username: string;
   password: string;
+  passwordHash: string | null;
   jwtSecret: string;
   jwtExpiresInSeconds: number;
   jwtIssuer: string;
   jwtAudience: string;
-}
-
-function parsePositiveInteger(
-  value: string | undefined,
-  fallback: number,
-): number {
-  const parsed = Number.parseInt(value ?? String(fallback), 10);
-
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    return fallback;
-  }
-
-  return parsed;
 }
 
 export default registerAs(
@@ -27,6 +16,7 @@ export default registerAs(
   (): AuthConfig => ({
     username: process.env.AUTH_USERNAME ?? 'admin',
     password: process.env.AUTH_PASSWORD ?? 'admin123!',
+    passwordHash: process.env.AUTH_PASSWORD_HASH ?? null,
     jwtSecret:
       process.env.AUTH_JWT_SECRET ??
       'development-only-secret-change-in-production',

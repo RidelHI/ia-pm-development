@@ -24,7 +24,7 @@ describe('AppController (e2e)', () => {
         username: 'admin',
         password: 'admin123!',
       })
-      .expect(201);
+      .expect(200);
 
     const body = tokenResponse.body as { accessToken: string };
     accessToken = body.accessToken;
@@ -110,12 +110,20 @@ describe('AppController (e2e)', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(200);
 
-    const firstBody = firstPage.body as Array<{ id: string }>;
-    const secondBody = secondPage.body as Array<{ id: string }>;
+    const firstBody = firstPage.body as {
+      data: Array<{ id: string }>;
+      meta: { page: number; limit: number; total: number; totalPages: number };
+    };
+    const secondBody = secondPage.body as {
+      data: Array<{ id: string }>;
+      meta: { page: number; limit: number; total: number; totalPages: number };
+    };
 
-    expect(firstBody).toHaveLength(1);
-    expect(secondBody).toHaveLength(1);
-    expect(firstBody[0]?.id).not.toBe(secondBody[0]?.id);
+    expect(firstBody.data).toHaveLength(1);
+    expect(secondBody.data).toHaveLength(1);
+    expect(firstBody.meta.page).toBe(1);
+    expect(secondBody.meta.page).toBe(2);
+    expect(firstBody.data[0]?.id).not.toBe(secondBody.data[0]?.id);
   });
 
   it('/v1/products (GET) validates pagination params', () => {

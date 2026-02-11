@@ -2,14 +2,10 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { compare } from 'bcryptjs';
 import authConfig from '../config/auth.config';
+import { AccessTokenResponseDto } from './dto/access-token-response.dto';
 import type { AuthTokenPayload } from './auth.types';
-
-export interface AccessTokenResponse {
-  accessToken: string;
-  tokenType: 'Bearer';
-  expiresInSeconds: number;
-}
 
 @Injectable()
 export class AuthService {
@@ -19,12 +15,15 @@ export class AuthService {
     private readonly config: ConfigType<typeof authConfig>,
   ) {}
 
-  issueAccessToken(username: string, password: string): AccessTokenResponse {
+  async issueAccessToken(
+    username: string,
+    password: string,
+  ): Promise<AccessTokenResponseDto> {
     if (!this.safeCompare(username, this.config.username)) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (!this.safeCompare(password, this.config.password)) {
+    if (!(await this.verifyPassword(password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -39,6 +38,14 @@ export class AuthService {
       tokenType: 'Bearer',
       expiresInSeconds: this.config.jwtExpiresInSeconds,
     };
+  }
+
+  private async verifyPassword(password: string): Promise<boolean> {
+    if (this.config.passwordHash) {
+      return compare(password, this.config.passwordHash);
+    }
+
+    return this.safeCompare(password, this.config.password);
   }
 
   private safeCompare(value: string, expected: string): boolean {

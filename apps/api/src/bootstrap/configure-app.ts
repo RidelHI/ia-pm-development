@@ -9,7 +9,6 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import type { AppConfig } from '../config/app.config';
-import { RequestLoggingInterceptor } from '../common/interceptors/request-logging.interceptor';
 
 export function resolveLoggerLevels(nodeEnv: string | undefined): LogLevel[] {
   if (nodeEnv === 'production') {
@@ -52,7 +51,6 @@ export function configureApp(app: INestApplication): void {
     defaultVersion: '1',
   });
 
-  app.useGlobalInterceptors(app.get(RequestLoggingInterceptor));
   app.enableShutdownHooks();
 
   if (appConfig.docs.enabled) {

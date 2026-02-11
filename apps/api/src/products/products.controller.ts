@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Delete,
+  HttpCode,
+  HttpStatus,
   Get,
   Param,
   Patch,
@@ -9,11 +11,23 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiUnauthorizedResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CreateProductDto } from './dto/create-product.dto';
+import { PaginatedProductsResponseDto } from './dto/paginated-products-response.dto';
 import { ProductIdParamDto } from './dto/product-id-param.dto';
 import { ProductResponseDto } from './dto/product-response.dto';
 import { ProductsQueryDto } from './dto/products-query.dto';
@@ -33,15 +47,22 @@ export class ProductsController {
 
   @Get()
   @ApiOperation({ summary: 'List products' })
+  @ApiOkResponse({ type: PaginatedProductsResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Invalid or expired token' })
+  @ApiForbiddenResponse({ description: 'Missing required role' })
   async findAll(
     @Query() filters: ProductsQueryDto,
-  ): Promise<ProductResponseDto[]> {
+  ): Promise<PaginatedProductsResponseDto> {
     const products = await this.productsService.findAll(filters);
-    return ProductResponseDto.fromDomainList(products);
+    return PaginatedProductsResponseDto.fromDomain(products);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get product by id' })
+  @ApiOkResponse({ type: ProductResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Invalid or expired token' })
+  @ApiForbiddenResponse({ description: 'Missing required role' })
+  @ApiNotFoundResponse({ description: 'Product not found' })
   async findOne(
     @Param() params: ProductIdParamDto,
   ): Promise<ProductResponseDto> {
@@ -51,6 +72,10 @@ export class ProductsController {
 
   @Post()
   @ApiOperation({ summary: 'Create product' })
+  @ApiCreatedResponse({ type: ProductResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid request body' })
+  @ApiUnauthorizedResponse({ description: 'Invalid or expired token' })
+  @ApiForbiddenResponse({ description: 'Missing required role' })
   async create(@Body() input: CreateProductDto): Promise<ProductResponseDto> {
     const product = await this.productsService.create(input);
     return ProductResponseDto.fromDomain(product);
@@ -58,6 +83,11 @@ export class ProductsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update product' })
+  @ApiOkResponse({ type: ProductResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid request body' })
+  @ApiUnauthorizedResponse({ description: 'Invalid or expired token' })
+  @ApiForbiddenResponse({ description: 'Missing required role' })
+  @ApiNotFoundResponse({ description: 'Product not found' })
   async update(
     @Param() params: ProductIdParamDto,
     @Body() input: UpdateProductDto,
@@ -68,7 +98,12 @@ export class ProductsController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete product' })
-  remove(@Param() params: ProductIdParamDto) {
-    return this.productsService.remove(params.id);
+  @ApiNoContentResponse({ description: 'Product deleted' })
+  @ApiUnauthorizedResponse({ description: 'Invalid or expired token' })
+  @ApiForbiddenResponse({ description: 'Missing required role' })
+  @ApiNotFoundResponse({ description: 'Product not found' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param() params: ProductIdParamDto): Promise<void> {
+    await this.productsService.remove(params.id);
   }
 }

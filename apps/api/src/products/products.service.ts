@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import {
   CreateProductInput,
+  PaginatedResult,
   Product,
   ProductFilters,
   UpdateProductInput,
@@ -22,7 +23,7 @@ export class ProductsService {
     private readonly repository: ProductsRepository,
   ) {}
 
-  async findAll(filters: ProductFilters): Promise<Product[]> {
+  async findAll(filters: ProductFilters): Promise<PaginatedResult<Product>> {
     return await this.repository.findAll(filters);
   }
 
@@ -73,14 +74,12 @@ export class ProductsService {
     return updated;
   }
 
-  async remove(id: string): Promise<{ deleted: true; id: string }> {
+  async remove(id: string): Promise<void> {
     const wasDeleted = await this.repository.remove(id);
 
     if (!wasDeleted) {
       throw new NotFoundException(`Product ${id} not found`);
     }
-
-    return { deleted: true, id };
   }
 
   private stripUndefinedValues(value: UpdateProductInput): UpdateProductInput {

@@ -6,6 +6,7 @@ import {
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SupabaseService } from '../../integrations/supabase/supabase.service';
 import type {
+  PaginatedResult,
   Product,
   ProductFilters,
   UpdateProductInput,
@@ -21,6 +22,10 @@ interface QueryResult<T> {
   error: QueryError | null;
 }
 
+interface QueryResultWithCount<T> extends QueryResult<T> {
+  count: number | null;
+}
+
 @Injectable()
 export class SupabaseProductsRepository implements ProductsRepository {
   private static readonly DEFAULT_PAGE = 1;
@@ -30,12 +35,15 @@ export class SupabaseProductsRepository implements ProductsRepository {
 
   constructor(private readonly supabaseService: SupabaseService) {}
 
-  async findAll(filters: ProductFilters): Promise<Product[]> {
+  async findAll(filters: ProductFilters): Promise<PaginatedResult<Product>> {
     const client = this.clientOrThrow();
     const table = this.supabaseService.getProductsTable();
-    const { from, to } = this.resolvePagination(filters.page, filters.limit);
+    const { page, limit, from, to } = this.resolvePagination(
+      filters.page,
+      filters.limit,
+    );
 
-    let query = client.from(table).select('*');
+    let query = client.from(table).select('*', { count: 'exact' });
 
     if (filters.status) {
       query = query.eq('status', filters.status);
@@ -48,8 +56,31 @@ export class SupabaseProductsRepository implements ProductsRepository {
 
     query = query.range(from, to);
 
-    const data = await this.runQuery<Product[]>(query, 'query');
-    return data ?? [];
+    const result = (await query) as QueryResultWithCount<Product[]>;
+
+    if (result.error) {
+      this.logger.error(
+        'Supabase query failed',
+        JSON.stringify({ message: result.error.message }),
+      );
+      throw new ServiceUnavailableException(
+        'Product storage is temporarily unavailable',
+      );
+    }
+
+    const data = result.data ?? [];
+    const total = result.count ?? data.length;
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
   }
 
   async findById(id: string): Promise<Product | null> {
@@ -129,7 +160,7 @@ export class SupabaseProductsRepository implements ProductsRepository {
   private resolvePagination(
     pageCandidate: number | undefined,
     limitCandidate: number | undefined,
-  ): { from: number; to: number } {
+  ): { page: number; limit: number; from: number; to: number } {
     const page =
       typeof pageCandidate === 'number' &&
       Number.isInteger(pageCandidate) &&
@@ -145,7 +176,7 @@ export class SupabaseProductsRepository implements ProductsRepository {
     const limit = Math.min(rawLimit, SupabaseProductsRepository.MAX_LIMIT);
     const from = (page - 1) * limit;
 
-    return { from, to: from + limit - 1 };
+    return { page, limit, from, to: from + limit - 1 };
   }
 
   private async runQuery<T>(

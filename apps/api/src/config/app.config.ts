@@ -1,4 +1,5 @@
 import { registerAs } from '@nestjs/config';
+import { parsePositiveInteger } from './config.utils';
 
 export type AppEnvironment = 'development' | 'production' | 'test';
 
@@ -26,19 +27,6 @@ function parsePort(value: string | undefined): number {
 
   if (!Number.isInteger(parsed) || parsed <= 0) {
     return 3000;
-  }
-
-  return parsed;
-}
-
-function parsePositiveInteger(
-  value: string | undefined,
-  fallback: number,
-): number {
-  const parsed = Number.parseInt(value ?? String(fallback), 10);
-
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    return fallback;
   }
 
   return parsed;

@@ -1,4 +1,5 @@
 import type {
+  PaginatedResult,
   Product,
   ProductFilters,
   UpdateProductInput,
@@ -7,7 +8,7 @@ import type {
 export const PRODUCTS_REPOSITORY = Symbol('PRODUCTS_REPOSITORY');
 
 export interface ProductsRepository {
-  findAll(filters: ProductFilters): Promise<Product[]>;
+  findAll(filters: ProductFilters): Promise<PaginatedResult<Product>>;
   findById(id: string): Promise<Product | null>;
   create(product: Product): Promise<Product>;
   update(id: string, patch: UpdateProductInput): Promise<Product | null>;

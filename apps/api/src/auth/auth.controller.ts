@@ -1,11 +1,15 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import {
+  ApiBadRequestResponse,
   ApiOperation,
+  ApiOkResponse,
   ApiTags,
   ApiTooManyRequestsResponse,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AuthService, type AccessTokenResponse } from './auth.service';
+import { AuthService } from './auth.service';
+import { AccessTokenResponseDto } from './dto/access-token-response.dto';
 import { LoginDto } from './dto/login.dto';
 
 @Controller({
@@ -18,9 +22,13 @@ export class AuthController {
 
   @Post('token')
   @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Issue access token' })
+  @ApiOkResponse({ type: AccessTokenResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid request body' })
+  @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
   @ApiTooManyRequestsResponse({ description: 'Rate limit exceeded' })
-  createToken(@Body() input: LoginDto): AccessTokenResponse {
+  async createToken(@Body() input: LoginDto): Promise<AccessTokenResponseDto> {
     return this.authService.issueAccessToken(input.username, input.password);
   }
 }

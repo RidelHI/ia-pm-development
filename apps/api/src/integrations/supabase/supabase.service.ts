@@ -1,13 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import supabaseConfig from '../../config/supabase.config';
+import supabaseConfig, {
+  type SupabaseConfig,
+} from '../../config/supabase.config';
 
-interface SupabaseConfig {
+type ResolvedSupabaseConfig = Omit<SupabaseConfig, 'url' | 'apiKey'> & {
   url: string;
   apiKey: string;
-  productsTable: string;
-}
+};
 
 @Injectable()
 export class SupabaseService {
@@ -18,7 +19,7 @@ export class SupabaseService {
     private readonly config: ConfigType<typeof supabaseConfig>,
   ) {}
 
-  getConfig(): SupabaseConfig | null {
+  getConfig(): ResolvedSupabaseConfig | null {
     const url = this.config.url;
     const apiKey = this.config.apiKey;
 

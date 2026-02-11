@@ -3,6 +3,7 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
+  HttpStatus,
   Logger,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
@@ -61,16 +62,20 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 
   private resolveCode(exception: unknown, status: number): string {
-    if (status === 401) {
-      return 'UNAUTHORIZED';
-    }
+    const knownCodes: Record<number, string> = {
+      [HttpStatus.BAD_REQUEST]: 'BAD_REQUEST',
+      [HttpStatus.UNAUTHORIZED]: 'UNAUTHORIZED',
+      [HttpStatus.FORBIDDEN]: 'FORBIDDEN',
+      [HttpStatus.NOT_FOUND]: 'NOT_FOUND',
+      [HttpStatus.CONFLICT]: 'CONFLICT',
+      [HttpStatus.UNPROCESSABLE_ENTITY]: 'UNPROCESSABLE_ENTITY',
+      [HttpStatus.TOO_MANY_REQUESTS]: 'TOO_MANY_REQUESTS',
+    };
 
-    if (status === 400) {
-      return 'BAD_REQUEST';
-    }
+    const knownCode = knownCodes[status];
 
-    if (status === 404) {
-      return 'NOT_FOUND';
+    if (knownCode) {
+      return knownCode;
     }
 
     if (status >= 500) {
@@ -78,6 +83,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     if (exception instanceof HttpException) {
+      const statusName = HttpStatus[status];
+
+      if (typeof statusName === 'string') {
+        return statusName;
+      }
+
       return exception.name;
     }
 

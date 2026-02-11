@@ -29,16 +29,18 @@ describe('ProductsService', () => {
 
   it('returns seed products', async () => {
     const products = await service.findAll({});
-    expect(products.length).toBeGreaterThanOrEqual(2);
+    expect(products.data.length).toBeGreaterThanOrEqual(2);
+    expect(products.meta.total).toBeGreaterThanOrEqual(2);
   });
 
   it('applies pagination when listing products', async () => {
     const firstPage = await service.findAll({ page: 1, limit: 1 });
     const secondPage = await service.findAll({ page: 2, limit: 1 });
 
-    expect(firstPage).toHaveLength(1);
-    expect(secondPage).toHaveLength(1);
-    expect(firstPage[0]?.id).not.toBe(secondPage[0]?.id);
+    expect(firstPage.data).toHaveLength(1);
+    expect(secondPage.data).toHaveLength(1);
+    expect(firstPage.data[0]?.id).not.toBe(secondPage.data[0]?.id);
+    expect(firstPage.meta.totalPages).toBeGreaterThanOrEqual(2);
   });
 
   it('creates a product', async () => {

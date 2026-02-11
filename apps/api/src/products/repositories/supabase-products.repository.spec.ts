@@ -19,11 +19,13 @@ describe('SupabaseProductsRepository', () => {
   it('escapes search input and applies pagination in findAll', async () => {
     type QueryPayload = {
       data: never[];
+      count: number;
       error: null;
     };
 
     const queryResult: Promise<QueryPayload> = Promise.resolve({
       data: [],
+      count: 0,
       error: null,
     });
     const then: PromiseLike<QueryPayload>['then'] = (onfulfilled, onrejected) =>
@@ -48,12 +50,14 @@ describe('SupabaseProductsRepository', () => {
 
     const repository = new SupabaseProductsRepository(supabaseService);
 
-    await repository.findAll({
+    const result = await repository.findAll({
       q: 'milk,50%_()',
       page: 2,
       limit: 5,
     });
 
+    expect(result.meta.page).toBe(2);
+    expect(result.meta.limit).toBe(5);
     expect(query.range).toHaveBeenCalledWith(5, 9);
     expect(query.or).toHaveBeenCalledWith(
       'name.ilike.%milk\\,50\\%\\_\\(\\)%,sku.ilike.%milk\\,50\\%\\_\\(\\)%',

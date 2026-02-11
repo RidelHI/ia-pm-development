@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, type ConfigType } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import appConfig from './config/app.config';
@@ -52,7 +52,6 @@ import { ProductsModule } from './products/products.module';
   controllers: [AppController],
   providers: [
     AppService,
-    RequestLoggingInterceptor,
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
@@ -60,6 +59,10 @@ import { ProductsModule } from './products/products.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestLoggingInterceptor,
     },
   ],
 })
