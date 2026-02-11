@@ -38,7 +38,7 @@ export class ProductsService {
   }
 
   async create(input: CreateProductInput): Promise<Product> {
-    const sanitizedInput = this.sanitizeInput(input);
+    const sanitizedInput = this.sanitizeCreateInput(input);
     this.validateInput(sanitizedInput);
 
     const now = new Date().toISOString();
@@ -62,7 +62,7 @@ export class ProductsService {
       throw new BadRequestException('At least one field is required');
     }
 
-    const patch = this.stripUndefinedValues(this.sanitizeInput(input));
+    const patch = this.stripUndefinedValues(this.sanitizeUpdateInput(input));
 
     if (Object.keys(patch).length === 0) {
       throw new BadRequestException('At least one field is required');
@@ -86,11 +86,19 @@ export class ProductsService {
     return { deleted: true, id };
   }
 
-  private sanitizeInput(input: UpdateProductInput): UpdateProductInput;
-  private sanitizeInput(input: CreateProductInput): CreateProductInput;
-  private sanitizeInput(
-    input: UpdateProductInput | CreateProductInput,
-  ): UpdateProductInput | CreateProductInput {
+  private sanitizeCreateInput(input: CreateProductInput): CreateProductInput {
+    return {
+      ...input,
+      sku: input.sku.trim(),
+      name: input.name.trim(),
+      location:
+        typeof input.location === 'string'
+          ? input.location.trim()
+          : input.location,
+    };
+  }
+
+  private sanitizeUpdateInput(input: UpdateProductInput): UpdateProductInput {
     return {
       ...input,
       sku: typeof input.sku === 'string' ? input.sku.trim() : input.sku,
@@ -102,12 +110,12 @@ export class ProductsService {
     };
   }
 
-  private stripUndefinedValues<T extends Record<string, unknown>>(value: T): T {
+  private stripUndefinedValues(value: UpdateProductInput): UpdateProductInput {
     const entries = Object.entries(value).filter(([, fieldValue]) => {
       return fieldValue !== undefined;
     });
 
-    return Object.fromEntries(entries) as T;
+    return Object.fromEntries(entries) as UpdateProductInput;
   }
 
   private validateInput(input: UpdateProductInput | CreateProductInput): void {
