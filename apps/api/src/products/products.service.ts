@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import {
   CreateProductInput,
+  PaginatedResult,
   Product,
   ProductFilters,
-  ProductStatus,
   UpdateProductInput,
 } from './product.types';
 import {
@@ -23,7 +23,7 @@ export class ProductsService {
     private readonly repository: ProductsRepository,
   ) {}
 
-  async findAll(filters: ProductFilters): Promise<Product[]> {
+  async findAll(filters: ProductFilters): Promise<PaginatedResult<Product>> {
     return await this.repository.findAll(filters);
   }
 
@@ -38,17 +38,15 @@ export class ProductsService {
   }
 
   async create(input: CreateProductInput): Promise<Product> {
-    this.validateInput(input);
-
     const now = new Date().toISOString();
     const product: Product = {
       id: crypto.randomUUID(),
-      sku: input.sku.trim(),
-      name: input.name.trim(),
+      sku: input.sku,
+      name: input.name,
       quantity: input.quantity,
       unitPriceCents: input.unitPriceCents,
       status: input.status ?? 'active',
-      location: input.location?.trim(),
+      location: input.location,
       createdAt: now,
       updatedAt: now,
     };
@@ -61,12 +59,13 @@ export class ProductsService {
       throw new BadRequestException('At least one field is required');
     }
 
-    this.validateInput(input);
-    await this.findOne(id);
+    const patch = this.stripUndefinedValues(input);
 
-    const updated = await this.repository.update(id, {
-      ...this.sanitizeInput(input),
-    });
+    if (Object.keys(patch).length === 0) {
+      throw new BadRequestException('At least one field is required');
+    }
+
+    const updated = await this.repository.update(id, patch);
 
     if (!updated) {
       throw new NotFoundException(`Product ${id} not found`);
@@ -75,59 +74,19 @@ export class ProductsService {
     return updated;
   }
 
-  async remove(id: string): Promise<{ deleted: true; id: string }> {
-    await this.findOne(id);
-    await this.repository.remove(id);
-    return { deleted: true, id };
-  }
+  async remove(id: string): Promise<void> {
+    const wasDeleted = await this.repository.remove(id);
 
-  private sanitizeInput(input: UpdateProductInput): UpdateProductInput;
-  private sanitizeInput(input: CreateProductInput): CreateProductInput;
-  private sanitizeInput(
-    input: UpdateProductInput | CreateProductInput,
-  ): UpdateProductInput | CreateProductInput {
-    return {
-      ...input,
-      sku: typeof input.sku === 'string' ? input.sku.trim() : input.sku,
-      name: typeof input.name === 'string' ? input.name.trim() : input.name,
-      location:
-        typeof input.location === 'string'
-          ? input.location.trim()
-          : input.location,
-    };
-  }
-
-  private validateInput(input: UpdateProductInput | CreateProductInput): void {
-    if (input.sku !== undefined && input.sku.trim().length < 3) {
-      throw new BadRequestException('sku must have at least 3 characters');
-    }
-
-    if (input.name !== undefined && input.name.trim().length < 3) {
-      throw new BadRequestException('name must have at least 3 characters');
-    }
-
-    if (
-      input.quantity !== undefined &&
-      (!Number.isInteger(input.quantity) || input.quantity < 0)
-    ) {
-      throw new BadRequestException('quantity must be a positive integer');
-    }
-
-    if (
-      input.unitPriceCents !== undefined &&
-      (!Number.isInteger(input.unitPriceCents) || input.unitPriceCents < 0)
-    ) {
-      throw new BadRequestException(
-        'unitPriceCents must be a positive integer',
-      );
-    }
-
-    if (input.status !== undefined && !this.isValidStatus(input.status)) {
-      throw new BadRequestException('status must be active or inactive');
+    if (!wasDeleted) {
+      throw new NotFoundException(`Product ${id} not found`);
     }
   }
 
-  private isValidStatus(status: string): status is ProductStatus {
-    return status === 'active' || status === 'inactive';
+  private stripUndefinedValues(value: UpdateProductInput): UpdateProductInput {
+    const entries = Object.entries(value).filter(([, fieldValue]) => {
+      return fieldValue !== undefined;
+    });
+
+    return Object.fromEntries(entries) as UpdateProductInput;
   }
 }

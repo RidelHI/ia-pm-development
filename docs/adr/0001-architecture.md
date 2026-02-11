@@ -32,11 +32,11 @@ Razón: estructura enterprise-ready con convenciones claras para módulos y prue
 
 ## Decisión 4: Deploy gratuito
 Opciones evaluadas:
-1. Web en GitHub Pages y API en Vercel (serverless).
-2. Un único proveedor para todo (más acoplamiento y/o límites gratuitos más estrictos).
+1. Web en GitHub Pages y API en Render (web service).
+2. Un único proveedor para todo (más acoplamiento y/o limites gratuitos mas estrictos).
 
 Elección: opción 1.
-Razón: encaja con el objetivo de costo cero y separa claramente frontend estático y backend serverless.
+Razon: encaja con el objetivo de costo cero y separa claramente frontend estatico y backend.
 
 ## Alcance inicial
 - Monorepo con `apps/web`, `apps/api`, `libs/shared`.
@@ -46,4 +46,4 @@ Razón: encaja con el objetivo de costo cero y separa claramente frontend estát
 ## Consecuencias
 - Menor complejidad de arranque.
 - Posible incorporación futura de Nx/Turborepo si crece el número de apps/libs.
-- Vercel requiere secretos de CI (`VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`).
+- Render simplifica el deploy de API al no requerir workflow custom de CI para publicar.

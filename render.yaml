@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: warehouse-api
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: pnpm install --frozen-lockfile --filter api... && pnpm --filter api build
+    startCommand: node apps/api/dist/main.js
+    healthCheckPath: /v1/health/live
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 22.11.0
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: SUPABASE_PRODUCTS_TABLE
+        value: products
+      - key: APP_CORS_ORIGINS
+        sync: false
+      - key: APP_CORS_CREDENTIALS
+        value: "false"
+      - key: APP_DOCS_ENABLED
+        value: "false"
+      - key: APP_DOCS_PATH
+        value: docs
+      - key: AUTH_USERNAME
+        sync: false
+      - key: AUTH_PASSWORD
+        sync: false
+      - key: AUTH_PASSWORD_HASH
+        sync: false
+      - key: AUTH_JWT_SECRET
+        sync: false
+      - key: AUTH_JWT_EXPIRES_IN_SECONDS
+        value: "900"
+      - key: AUTH_JWT_ISSUER
+        value: warehouse-api
+      - key: AUTH_JWT_AUDIENCE
+        value: warehouse-clients

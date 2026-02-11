@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type {
+  PaginatedResult,
   Product,
   ProductFilters,
   UpdateProductInput,
@@ -8,6 +9,9 @@ import type { ProductsRepository } from './products.repository';
 
 @Injectable()
 export class InMemoryProductsRepository implements ProductsRepository {
+  private static readonly DEFAULT_PAGE = 1;
+  private static readonly DEFAULT_LIMIT = 20;
+
   private readonly products = new Map<string, Product>();
 
   constructor() {
@@ -41,24 +45,43 @@ export class InMemoryProductsRepository implements ProductsRepository {
     }
   }
 
-  findAll(filters: ProductFilters): Promise<Product[]> {
+  findAll(filters: ProductFilters): Promise<PaginatedResult<Product>> {
     const products = Array.from(this.products.values());
     const normalizedQuery = filters.q?.trim().toLowerCase();
-
-    return Promise.resolve(
-      products.filter((product) => {
-        const matchesStatus = filters.status
-          ? product.status === filters.status
-          : true;
-
-        const matchesQuery = normalizedQuery
-          ? product.name.toLowerCase().includes(normalizedQuery) ||
-            product.sku.toLowerCase().includes(normalizedQuery)
-          : true;
-
-        return matchesStatus && matchesQuery;
-      }),
+    const page = Math.max(
+      filters.page ?? InMemoryProductsRepository.DEFAULT_PAGE,
+      1,
     );
+    const limit = Math.max(
+      filters.limit ?? InMemoryProductsRepository.DEFAULT_LIMIT,
+      1,
+    );
+    const offset = (page - 1) * limit;
+
+    const filtered = products.filter((product) => {
+      const matchesStatus = filters.status
+        ? product.status === filters.status
+        : true;
+
+      const matchesQuery = normalizedQuery
+        ? product.name.toLowerCase().includes(normalizedQuery) ||
+          product.sku.toLowerCase().includes(normalizedQuery)
+        : true;
+
+      return matchesStatus && matchesQuery;
+    });
+    const total = filtered.length;
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+
+    return Promise.resolve({
+      data: filtered.slice(offset, offset + limit),
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    });
   }
 
   findById(id: string): Promise<Product | null> {

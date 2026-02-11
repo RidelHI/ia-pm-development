@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module';
 import { IntegrationsModule } from '../integrations/integrations.module';
 import { SupabaseService } from '../integrations/supabase/supabase.service';
 import { ProductsController } from './products.controller';
@@ -12,7 +13,7 @@ import { SupabaseProductsRepository } from './repositories/supabase-products.rep
 import { ProductsService } from './products.service';
 
 @Module({
-  imports: [IntegrationsModule],
+  imports: [IntegrationsModule, AuthModule],
   controllers: [ProductsController],
   providers: [
     ProductsService,

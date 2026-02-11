@@ -3,8 +3,11 @@ import { Injectable } from '@nestjs/common';
 export interface AppInfo {
   message: string;
   docs: {
-    health: string;
+    healthLive: string;
+    healthReady: string;
+    authToken: string;
     products: string;
+    openApi: string;
   };
 }
 
@@ -14,8 +17,11 @@ export class AppService {
     return {
       message: 'Warehouse API online',
       docs: {
-        health: '/health',
-        products: '/products',
+        healthLive: '/v1/health/live',
+        healthReady: '/v1/health/ready',
+        authToken: '/v1/auth/token',
+        products: '/v1/products',
+        openApi: '/docs',
       },
     };
   }

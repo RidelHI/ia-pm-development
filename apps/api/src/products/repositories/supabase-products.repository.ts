@@ -1,7 +1,12 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SupabaseService } from '../../integrations/supabase/supabase.service';
 import type {
+  PaginatedResult,
   Product,
   ProductFilters,
   UpdateProductInput,
@@ -17,15 +22,28 @@ interface QueryResult<T> {
   error: QueryError | null;
 }
 
+interface QueryResultWithCount<T> extends QueryResult<T> {
+  count: number | null;
+}
+
 @Injectable()
 export class SupabaseProductsRepository implements ProductsRepository {
+  private static readonly DEFAULT_PAGE = 1;
+  private static readonly DEFAULT_LIMIT = 20;
+  private static readonly MAX_LIMIT = 100;
+  private readonly logger = new Logger(SupabaseProductsRepository.name);
+
   constructor(private readonly supabaseService: SupabaseService) {}
 
-  async findAll(filters: ProductFilters): Promise<Product[]> {
+  async findAll(filters: ProductFilters): Promise<PaginatedResult<Product>> {
     const client = this.clientOrThrow();
     const table = this.supabaseService.getProductsTable();
+    const { page, limit, from, to } = this.resolvePagination(
+      filters.page,
+      filters.limit,
+    );
 
-    let query = client.from(table).select('*');
+    let query = client.from(table).select('*', { count: 'exact' });
 
     if (filters.status) {
       query = query.eq('status', filters.status);
@@ -36,8 +54,33 @@ export class SupabaseProductsRepository implements ProductsRepository {
       query = query.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
     }
 
-    const data = await this.runQuery<Product[]>(query, 'query');
-    return data ?? [];
+    query = query.range(from, to);
+
+    const result = (await query) as QueryResultWithCount<Product[]>;
+
+    if (result.error) {
+      this.logger.error(
+        'Supabase query failed',
+        JSON.stringify({ message: result.error.message }),
+      );
+      throw new ServiceUnavailableException(
+        'Product storage is temporarily unavailable',
+      );
+    }
+
+    const data = result.data ?? [];
+    const total = result.count ?? data.length;
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
   }
 
   async findById(id: string): Promise<Product | null> {
@@ -104,7 +147,36 @@ export class SupabaseProductsRepository implements ProductsRepository {
   }
 
   private escapeLike(value: string): string {
-    return value.replaceAll(',', '\\,');
+    return value
+      .replaceAll('\\', '\\\\')
+      .replaceAll('%', '\\%')
+      .replaceAll('_', '\\_')
+      .replaceAll(',', '\\,')
+      .replaceAll('(', '\\(')
+      .replaceAll(')', '\\)')
+      .replaceAll('"', '\\"');
+  }
+
+  private resolvePagination(
+    pageCandidate: number | undefined,
+    limitCandidate: number | undefined,
+  ): { page: number; limit: number; from: number; to: number } {
+    const page =
+      typeof pageCandidate === 'number' &&
+      Number.isInteger(pageCandidate) &&
+      pageCandidate > 0
+        ? pageCandidate
+        : SupabaseProductsRepository.DEFAULT_PAGE;
+    const rawLimit =
+      typeof limitCandidate === 'number' &&
+      Number.isInteger(limitCandidate) &&
+      limitCandidate > 0
+        ? limitCandidate
+        : SupabaseProductsRepository.DEFAULT_LIMIT;
+    const limit = Math.min(rawLimit, SupabaseProductsRepository.MAX_LIMIT);
+    const from = (page - 1) * limit;
+
+    return { page, limit, from, to: from + limit - 1 };
   }
 
   private async runQuery<T>(
@@ -114,8 +186,12 @@ export class SupabaseProductsRepository implements ProductsRepository {
     const result = (await query) as QueryResult<T>;
 
     if (result.error) {
+      this.logger.error(
+        `Supabase ${operation} failed`,
+        JSON.stringify({ message: result.error.message }),
+      );
       throw new ServiceUnavailableException(
-        `Supabase ${operation} failed: ${result.error.message}`,
+        'Product storage is temporarily unavailable',
       );
     }
 

@@ -61,4 +61,4 @@ Construir una app full-stack profesional, simple y útil para gestionar producto
 - API con CRUD funcional y tests verdes.
 - Web consumiendo API con flujo CRUD básico.
 - CI obligatoria en PR.
-- Deploy operativo en GitHub Pages (web) y Vercel (api).
+- Deploy operativo en GitHub Pages (web) y Render (api).

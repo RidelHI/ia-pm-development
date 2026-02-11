@@ -1,36 +1,21 @@
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { configureApp, resolveLoggerLevels } from './bootstrap/configure-app';
 
-function loadLocalEnvFiles(): void {
-  const loader = (
-    process as unknown as {
-      loadEnvFile?: (path?: string) => void;
-    }
-  ).loadEnvFile;
+async function bootstrap(): Promise<void> {
+  const app = await NestFactory.create(AppModule, {
+    logger: resolveLoggerLevels(process.env.NODE_ENV),
+  });
 
-  if (!loader) {
-    return;
-  }
+  configureApp(app);
 
-  const candidates = [
-    resolve(process.cwd(), '.env'),
-    resolve(process.cwd(), '.env.local'),
-    resolve(process.cwd(), 'apps/api/.env'),
-    resolve(process.cwd(), 'apps/api/.env.local'),
-  ];
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('app.port', 3000);
 
-  for (const envPath of candidates) {
-    if (existsSync(envPath)) {
-      loader(envPath);
-    }
-  }
+  await app.listen(port);
+  new Logger('Bootstrap').log(`Warehouse API listening on port ${port}`);
 }
 
-async function bootstrap() {
-  loadLocalEnvFiles();
-  const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
-}
 void bootstrap();

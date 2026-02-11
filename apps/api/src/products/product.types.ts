@@ -1,4 +1,6 @@
-export type ProductStatus = 'active' | 'inactive';
+export const PRODUCT_STATUSES = ['active', 'inactive'] as const;
+
+export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
 
 export interface Product {
   id: string;
@@ -33,4 +35,18 @@ export interface UpdateProductInput {
 export interface ProductFilters {
   q?: string;
   status?: ProductStatus;
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  meta: PaginationMeta;
 }

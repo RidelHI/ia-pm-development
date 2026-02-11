@@ -5,7 +5,7 @@ Backend del proyecto de aprendizaje de gestión de productos de almacén.
 ## Stack
 - NestJS 11
 - Jest + ESLint
-- Deploy serverless en Vercel
+- Deploy en Render (web service)
 - Integración preparada con Supabase
 
 ## Scripts
@@ -22,15 +22,25 @@ Copiar `apps/api/.env.example` y completar:
 - `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY` (recomendado para backend server-to-server)
 - `SUPABASE_PRODUCTS_TABLE` (default recomendado: `products`)
+- `APP_CORS_ORIGINS` (lista separada por comas)
+- `APP_DOCS_ENABLED` / `APP_DOCS_PATH`
+- `AUTH_USERNAME`
+- `AUTH_PASSWORD`
+- `AUTH_PASSWORD_HASH` (bcrypt; obligatorio en `production`)
+- `AUTH_JWT_SECRET` (minimo 32 caracteres en `production`)
+- `AUTH_JWT_EXPIRES_IN_SECONDS` / `AUTH_JWT_ISSUER` / `AUTH_JWT_AUDIENCE`
 
 ## Endpoints actuales
-- `GET /` info básica de la API
-- `GET /health` estado del servicio, versión e integración Supabase
-- `GET /products`
-- `GET /products/:id`
-- `POST /products`
-- `PATCH /products/:id`
-- `DELETE /products/:id`
+- `GET /v1` info básica de la API
+- `POST /v1/auth/token` emite JWT
+- `GET /v1/health/live` liveness probe pública
+- `GET /v1/health/ready` readiness probe protegida (JWT + rol `admin`)
+- `GET /v1/products`
+- `GET /v1/products/:id`
+- `POST /v1/products`
+- `PATCH /v1/products/:id`
+- `DELETE /v1/products/:id`
+- `GET /docs` documentación OpenAPI (si `APP_DOCS_ENABLED=true`)
 
 ## Persistencia de productos
 - Si `SUPABASE_URL` y una key de Supabase están configuradas, `ProductsService` usa `SupabaseProductsRepository`.
@@ -40,11 +50,10 @@ Copiar `apps/api/.env.example` y completar:
 - Migracion SQL base: `db/migrations/0001_create_products.sql`.
 - Runbook de setup/verificacion: `docs/runbooks/supabase-setup.md`.
 
-## Deploy en Vercel
-- Entry serverless: `apps/api/api/index.ts`
-- Config: `apps/api/vercel.json`
-- Secrets esperados en GitHub Actions:
-  - `VERCEL_TOKEN`
-  - `VERCEL_ORG_ID`
-  - `VERCEL_PROJECT_ID`
-- Runbook de setup/verificacion: `docs/runbooks/vercel-api-deploy.md`.
+## Deploy en Render
+- Via recomendada: `Blueprint` con `render.yaml` (seleccionando la rama en Render).
+- Build command: `pnpm install --frozen-lockfile --filter api... && pnpm --filter api build`
+- Start command: `node apps/api/dist/main.js`
+- Health check recomendado: `/v1/health/live`
+- Alternativa: crear `Web Service` manual con la misma configuracion.
+- Runbook de setup/verificacion: `docs/runbooks/render-api-deploy.md`.

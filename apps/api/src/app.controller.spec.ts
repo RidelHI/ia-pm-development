@@ -19,8 +19,11 @@ describe('AppController', () => {
       expect(appController.getInfo()).toEqual({
         message: 'Warehouse API online',
         docs: {
-          health: '/health',
-          products: '/products',
+          healthLive: '/v1/health/live',
+          healthReady: '/v1/health/ready',
+          authToken: '/v1/auth/token',
+          products: '/v1/products',
+          openApi: '/docs',
         },
       });
     });
