@@ -77,6 +77,54 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer()).get('/v1/products').expect(401);
   });
 
+  it('/v1/products (GET) applies pagination', async () => {
+    const marker = `E2E-PAG-${Date.now()}`;
+    await request(app.getHttpServer())
+      .post('/v1/products')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        sku: `${marker}-001`,
+        name: `${marker} Product 1`,
+        quantity: 1,
+        unitPriceCents: 100,
+      })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post('/v1/products')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        sku: `${marker}-002`,
+        name: `${marker} Product 2`,
+        quantity: 2,
+        unitPriceCents: 200,
+      })
+      .expect(201);
+
+    const firstPage = await request(app.getHttpServer())
+      .get(`/v1/products?q=${marker}&page=1&limit=1`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+
+    const secondPage = await request(app.getHttpServer())
+      .get(`/v1/products?q=${marker}&page=2&limit=1`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+
+    const firstBody = firstPage.body as Array<{ id: string }>;
+    const secondBody = secondPage.body as Array<{ id: string }>;
+
+    expect(firstBody).toHaveLength(1);
+    expect(secondBody).toHaveLength(1);
+    expect(firstBody[0]?.id).not.toBe(secondBody[0]?.id);
+  });
+
+  it('/v1/products (GET) validates pagination params', () => {
+    return request(app.getHttpServer())
+      .get('/v1/products?page=0&limit=101')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(400);
+  });
+
   it('/v1/products (POST) rejects non-whitelisted fields', () => {
     return request(app.getHttpServer())
       .post('/v1/products')

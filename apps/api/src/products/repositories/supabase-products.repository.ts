@@ -23,6 +23,9 @@ interface QueryResult<T> {
 
 @Injectable()
 export class SupabaseProductsRepository implements ProductsRepository {
+  private static readonly DEFAULT_PAGE = 1;
+  private static readonly DEFAULT_LIMIT = 20;
+  private static readonly MAX_LIMIT = 100;
   private readonly logger = new Logger(SupabaseProductsRepository.name);
 
   constructor(private readonly supabaseService: SupabaseService) {}
@@ -30,6 +33,7 @@ export class SupabaseProductsRepository implements ProductsRepository {
   async findAll(filters: ProductFilters): Promise<Product[]> {
     const client = this.clientOrThrow();
     const table = this.supabaseService.getProductsTable();
+    const { from, to } = this.resolvePagination(filters.page, filters.limit);
 
     let query = client.from(table).select('*');
 
@@ -41,6 +45,8 @@ export class SupabaseProductsRepository implements ProductsRepository {
       const q = this.escapeLike(filters.q.trim());
       query = query.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
     }
+
+    query = query.range(from, to);
 
     const data = await this.runQuery<Product[]>(query, 'query');
     return data ?? [];
@@ -110,7 +116,36 @@ export class SupabaseProductsRepository implements ProductsRepository {
   }
 
   private escapeLike(value: string): string {
-    return value.replaceAll(',', '\\,');
+    return value
+      .replaceAll('\\', '\\\\')
+      .replaceAll('%', '\\%')
+      .replaceAll('_', '\\_')
+      .replaceAll(',', '\\,')
+      .replaceAll('(', '\\(')
+      .replaceAll(')', '\\)')
+      .replaceAll('"', '\\"');
+  }
+
+  private resolvePagination(
+    pageCandidate: number | undefined,
+    limitCandidate: number | undefined,
+  ): { from: number; to: number } {
+    const page =
+      typeof pageCandidate === 'number' &&
+      Number.isInteger(pageCandidate) &&
+      pageCandidate > 0
+        ? pageCandidate
+        : SupabaseProductsRepository.DEFAULT_PAGE;
+    const rawLimit =
+      typeof limitCandidate === 'number' &&
+      Number.isInteger(limitCandidate) &&
+      limitCandidate > 0
+        ? limitCandidate
+        : SupabaseProductsRepository.DEFAULT_LIMIT;
+    const limit = Math.min(rawLimit, SupabaseProductsRepository.MAX_LIMIT);
+    const from = (page - 1) * limit;
+
+    return { from, to: from + limit - 1 };
   }
 
   private async runQuery<T>(

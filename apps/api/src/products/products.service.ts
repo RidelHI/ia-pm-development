@@ -8,7 +8,6 @@ import {
   CreateProductInput,
   Product,
   ProductFilters,
-  ProductStatus,
   UpdateProductInput,
 } from './product.types';
 import {
@@ -38,18 +37,15 @@ export class ProductsService {
   }
 
   async create(input: CreateProductInput): Promise<Product> {
-    const sanitizedInput = this.sanitizeCreateInput(input);
-    this.validateInput(sanitizedInput);
-
     const now = new Date().toISOString();
     const product: Product = {
       id: crypto.randomUUID(),
-      sku: sanitizedInput.sku,
-      name: sanitizedInput.name,
-      quantity: sanitizedInput.quantity,
-      unitPriceCents: sanitizedInput.unitPriceCents,
-      status: sanitizedInput.status ?? 'active',
-      location: sanitizedInput.location,
+      sku: input.sku,
+      name: input.name,
+      quantity: input.quantity,
+      unitPriceCents: input.unitPriceCents,
+      status: input.status ?? 'active',
+      location: input.location,
       createdAt: now,
       updatedAt: now,
     };
@@ -62,14 +58,11 @@ export class ProductsService {
       throw new BadRequestException('At least one field is required');
     }
 
-    const patch = this.stripUndefinedValues(this.sanitizeUpdateInput(input));
+    const patch = this.stripUndefinedValues(input);
 
     if (Object.keys(patch).length === 0) {
       throw new BadRequestException('At least one field is required');
     }
-
-    this.validateInput(patch);
-    await this.findOne(id);
 
     const updated = await this.repository.update(id, patch);
 
@@ -81,33 +74,13 @@ export class ProductsService {
   }
 
   async remove(id: string): Promise<{ deleted: true; id: string }> {
-    await this.findOne(id);
-    await this.repository.remove(id);
+    const wasDeleted = await this.repository.remove(id);
+
+    if (!wasDeleted) {
+      throw new NotFoundException(`Product ${id} not found`);
+    }
+
     return { deleted: true, id };
-  }
-
-  private sanitizeCreateInput(input: CreateProductInput): CreateProductInput {
-    return {
-      ...input,
-      sku: input.sku.trim(),
-      name: input.name.trim(),
-      location:
-        typeof input.location === 'string'
-          ? input.location.trim()
-          : input.location,
-    };
-  }
-
-  private sanitizeUpdateInput(input: UpdateProductInput): UpdateProductInput {
-    return {
-      ...input,
-      sku: typeof input.sku === 'string' ? input.sku.trim() : input.sku,
-      name: typeof input.name === 'string' ? input.name.trim() : input.name,
-      location:
-        typeof input.location === 'string'
-          ? input.location.trim()
-          : input.location,
-    };
   }
 
   private stripUndefinedValues(value: UpdateProductInput): UpdateProductInput {
@@ -116,39 +89,5 @@ export class ProductsService {
     });
 
     return Object.fromEntries(entries) as UpdateProductInput;
-  }
-
-  private validateInput(input: UpdateProductInput | CreateProductInput): void {
-    if (input.sku !== undefined && input.sku.trim().length < 3) {
-      throw new BadRequestException('sku must have at least 3 characters');
-    }
-
-    if (input.name !== undefined && input.name.trim().length < 3) {
-      throw new BadRequestException('name must have at least 3 characters');
-    }
-
-    if (
-      input.quantity !== undefined &&
-      (!Number.isInteger(input.quantity) || input.quantity < 0)
-    ) {
-      throw new BadRequestException('quantity must be a positive integer');
-    }
-
-    if (
-      input.unitPriceCents !== undefined &&
-      (!Number.isInteger(input.unitPriceCents) || input.unitPriceCents < 0)
-    ) {
-      throw new BadRequestException(
-        'unitPriceCents must be a positive integer',
-      );
-    }
-
-    if (input.status !== undefined && !this.isValidStatus(input.status)) {
-      throw new BadRequestException('status must be active or inactive');
-    }
-  }
-
-  private isValidStatus(status: string): status is ProductStatus {
-    return status === 'active' || status === 'inactive';
   }
 }

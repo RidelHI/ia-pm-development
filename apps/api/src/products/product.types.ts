@@ -35,4 +35,6 @@ export interface UpdateProductInput {
 export interface ProductFilters {
   q?: string;
   status?: ProductStatus;
+  page?: number;
+  limit?: number;
 }

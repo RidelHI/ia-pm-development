@@ -8,6 +8,9 @@ import type { ProductsRepository } from './products.repository';
 
 @Injectable()
 export class InMemoryProductsRepository implements ProductsRepository {
+  private static readonly DEFAULT_PAGE = 1;
+  private static readonly DEFAULT_LIMIT = 20;
+
   private readonly products = new Map<string, Product>();
 
   constructor() {
@@ -44,20 +47,31 @@ export class InMemoryProductsRepository implements ProductsRepository {
   findAll(filters: ProductFilters): Promise<Product[]> {
     const products = Array.from(this.products.values());
     const normalizedQuery = filters.q?.trim().toLowerCase();
+    const page = Math.max(
+      filters.page ?? InMemoryProductsRepository.DEFAULT_PAGE,
+      1,
+    );
+    const limit = Math.max(
+      filters.limit ?? InMemoryProductsRepository.DEFAULT_LIMIT,
+      1,
+    );
+    const offset = (page - 1) * limit;
 
     return Promise.resolve(
-      products.filter((product) => {
-        const matchesStatus = filters.status
-          ? product.status === filters.status
-          : true;
+      products
+        .filter((product) => {
+          const matchesStatus = filters.status
+            ? product.status === filters.status
+            : true;
 
-        const matchesQuery = normalizedQuery
-          ? product.name.toLowerCase().includes(normalizedQuery) ||
-            product.sku.toLowerCase().includes(normalizedQuery)
-          : true;
+          const matchesQuery = normalizedQuery
+            ? product.name.toLowerCase().includes(normalizedQuery) ||
+              product.sku.toLowerCase().includes(normalizedQuery)
+            : true;
 
-        return matchesStatus && matchesQuery;
-      }),
+          return matchesStatus && matchesQuery;
+        })
+        .slice(offset, offset + limit),
     );
   }
 
