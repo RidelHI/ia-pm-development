@@ -1,12 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  INestApplication,
-  ValidationPipe,
-  VersioningType,
-} from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
+import { configureApp } from '../src/bootstrap/configure-app';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
@@ -18,20 +15,7 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-        transformOptions: {
-          enableImplicitConversion: true,
-        },
-      }),
-    );
-    app.enableVersioning({
-      type: VersioningType.URI,
-      defaultVersion: '1',
-    });
+    configureApp(app);
     await app.init();
 
     const tokenResponse = await request(app.getHttpServer())
@@ -61,12 +45,28 @@ describe('AppController (e2e)', () => {
           healthReady: '/v1/health/ready',
           authToken: '/v1/auth/token',
           products: '/v1/products',
+          openApi: '/docs',
         },
       });
   });
 
   it('/v1/health/live (GET) is public', () => {
     return request(app.getHttpServer()).get('/v1/health/live').expect(200);
+  });
+
+  it('/docs-json (GET) exposes OpenAPI document', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/docs-json')
+      .expect(200);
+    const body = response.body as {
+      openapi?: string;
+      info?: {
+        title?: string;
+      };
+    };
+
+    expect(body.openapi).toBeDefined();
+    expect(body.info?.title).toBe('Warehouse API');
   });
 
   it('/v1/health/ready (GET) requires auth', () => {

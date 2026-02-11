@@ -9,6 +9,7 @@ import authConfig from './config/auth.config';
 import { validateEnvironment } from './config/environment.validation';
 import supabaseConfig from './config/supabase.config';
 import { AuthModule } from './auth/auth.module';
+import { RequestLoggingInterceptor } from './common/interceptors/request-logging.interceptor';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { HealthModule } from './health/health.module';
 import { IntegrationsModule } from './integrations/integrations.module';
@@ -51,6 +52,7 @@ import { ProductsModule } from './products/products.module';
   controllers: [AppController],
   providers: [
     AppService,
+    RequestLoggingInterceptor,
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,

@@ -22,15 +22,20 @@ Copiar `apps/api/.env.example` y completar:
 - `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY` (recomendado para backend server-to-server)
 - `SUPABASE_PRODUCTS_TABLE` (default recomendado: `products`)
+- `APP_CORS_ORIGINS` (lista separada por comas)
+- `APP_DOCS_ENABLED` / `APP_DOCS_PATH`
 
 ## Endpoints actuales
-- `GET /` info básica de la API
-- `GET /health` estado del servicio, versión e integración Supabase
-- `GET /products`
-- `GET /products/:id`
-- `POST /products`
-- `PATCH /products/:id`
-- `DELETE /products/:id`
+- `GET /v1` info básica de la API
+- `POST /v1/auth/token` emite JWT
+- `GET /v1/health/live` liveness probe pública
+- `GET /v1/health/ready` readiness probe protegida (JWT + rol `admin`)
+- `GET /v1/products`
+- `GET /v1/products/:id`
+- `POST /v1/products`
+- `PATCH /v1/products/:id`
+- `DELETE /v1/products/:id`
+- `GET /docs` documentación OpenAPI (si `APP_DOCS_ENABLED=true`)
 
 ## Persistencia de productos
 - Si `SUPABASE_URL` y una key de Supabase están configuradas, `ProductsService` usa `SupabaseProductsRepository`.

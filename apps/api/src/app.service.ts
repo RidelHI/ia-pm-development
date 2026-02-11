@@ -7,6 +7,7 @@ export interface AppInfo {
     healthReady: string;
     authToken: string;
     products: string;
+    openApi: string;
   };
 }
 
@@ -20,6 +21,7 @@ export class AppService {
         healthReady: '/v1/health/ready',
         authToken: '/v1/auth/token',
         products: '/v1/products',
+        openApi: '/docs',
       },
     };
   }

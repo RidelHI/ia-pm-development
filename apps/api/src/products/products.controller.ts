@@ -9,7 +9,10 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductIdParamDto } from './dto/product-id-param.dto';
 import { ProductResponseDto } from './dto/product-response.dto';
@@ -21,11 +24,15 @@ import { ProductsService } from './products.service';
   path: 'products',
   version: '1',
 })
-@UseGuards(JwtAuthGuard)
+@ApiTags('products')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
+  @ApiOperation({ summary: 'List products' })
   async findAll(
     @Query() filters: ProductsQueryDto,
   ): Promise<ProductResponseDto[]> {
@@ -34,6 +41,7 @@ export class ProductsController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get product by id' })
   async findOne(
     @Param() params: ProductIdParamDto,
   ): Promise<ProductResponseDto> {
@@ -42,12 +50,14 @@ export class ProductsController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create product' })
   async create(@Body() input: CreateProductDto): Promise<ProductResponseDto> {
     const product = await this.productsService.create(input);
     return ProductResponseDto.fromDomain(product);
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update product' })
   async update(
     @Param() params: ProductIdParamDto,
     @Body() input: UpdateProductDto,
@@ -57,6 +67,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete product' })
   remove(@Param() params: ProductIdParamDto) {
     return this.productsService.remove(params.id);
   }

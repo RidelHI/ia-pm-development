@@ -4,6 +4,10 @@ import express from 'express';
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { AppModule } from '../src/app.module';
+import {
+  configureApp,
+  resolveLoggerLevels,
+} from '../src/bootstrap/configure-app';
 
 const expressApp = express();
 let isBootstrapped = false;
@@ -15,7 +19,11 @@ async function bootstrap() {
       const app = await NestFactory.create(
         AppModule,
         new ExpressAdapter(expressApp),
+        {
+          logger: resolveLoggerLevels(process.env.NODE_ENV),
+        },
       );
+      configureApp(app);
       console.log('bootstrap: initializing Nest application');
 
       const timeoutMs = Number(process.env.BOOTSTRAP_TIMEOUT_MS ?? 25000);

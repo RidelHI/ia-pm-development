@@ -14,6 +14,7 @@ interface HttpErrorBody {
   timestamp: string;
   path: string;
   method: string;
+  requestId?: string;
 }
 
 @Catch()
@@ -45,6 +46,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
       method: request.method,
+      requestId: this.resolveRequestId(request, response),
     };
 
     response.status(status).json(body);
@@ -113,5 +115,24 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     return exception.message;
+  }
+
+  private resolveRequestId(
+    request: Request,
+    response: Response,
+  ): string | undefined {
+    const responseHeader = response.getHeader('x-request-id');
+
+    if (typeof responseHeader === 'string' && responseHeader.length > 0) {
+      return responseHeader;
+    }
+
+    const requestHeader = request.headers['x-request-id'];
+
+    if (typeof requestHeader === 'string' && requestHeader.length > 0) {
+      return requestHeader;
+    }
+
+    return undefined;
   }
 }

@@ -33,6 +33,7 @@ export class RequestLoggingInterceptor implements NestInterceptor {
             requestId,
             method: request.method,
             path: request.originalUrl ?? request.url,
+            userAgent: request.headers['user-agent'],
             statusCode: response.statusCode,
             durationMs: Date.now() - startedAt,
           }),
@@ -44,6 +45,7 @@ export class RequestLoggingInterceptor implements NestInterceptor {
             requestId,
             method: request.method,
             path: request.originalUrl ?? request.url,
+            userAgent: request.headers['user-agent'],
             statusCode: response.statusCode,
             durationMs: Date.now() - startedAt,
             error:

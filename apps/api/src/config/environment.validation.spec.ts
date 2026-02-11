@@ -10,6 +10,10 @@ describe('validateEnvironment', () => {
     expect(validated.SUPABASE_PRODUCTS_TABLE).toBe('products');
     expect(validated.RATE_LIMIT_TTL_SECONDS).toBe(60);
     expect(validated.RATE_LIMIT_LIMIT).toBe(100);
+    expect(validated.APP_CORS_ORIGINS).toBe('*');
+    expect(validated.APP_CORS_CREDENTIALS).toBe(false);
+    expect(validated.APP_DOCS_ENABLED).toBe(true);
+    expect(validated.APP_DOCS_PATH).toBe('docs');
     expect(validated.AUTH_USERNAME).toBe('admin');
     expect(validated.AUTH_JWT_EXPIRES_IN_SECONDS).toBe(900);
   });
@@ -27,6 +31,19 @@ describe('validateEnvironment', () => {
       validateEnvironment({
         NODE_ENV: 'production',
         AUTH_JWT_SECRET: 'short-secret',
+        AUTH_USERNAME: 'prod-user',
+        AUTH_PASSWORD: 'prod-password-123',
+      }),
+    ).toThrow('Invalid environment configuration');
+  });
+
+  it('throws in production when only anon key is provided for supabase backend', () => {
+    expect(() =>
+      validateEnvironment({
+        NODE_ENV: 'production',
+        SUPABASE_URL: 'https://example.supabase.co',
+        SUPABASE_ANON_KEY: 'anon-key',
+        AUTH_JWT_SECRET: 'long-enough-secret-for-production-1234',
         AUTH_USERNAME: 'prod-user',
         AUTH_PASSWORD: 'prod-password-123',
       }),

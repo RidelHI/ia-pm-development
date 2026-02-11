@@ -1,35 +1,15 @@
-import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { RequestLoggingInterceptor } from './common/interceptors/request-logging.interceptor';
+import { configureApp, resolveLoggerLevels } from './bootstrap/configure-app';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
-    logger:
-      process.env.NODE_ENV === 'production'
-        ? ['error', 'warn', 'log']
-        : ['error', 'warn', 'log', 'debug', 'verbose'],
+    logger: resolveLoggerLevels(process.env.NODE_ENV),
   });
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      transformOptions: {
-        enableImplicitConversion: true,
-      },
-    }),
-  );
-
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '1',
-  });
-
-  app.useGlobalInterceptors(new RequestLoggingInterceptor());
-  app.enableShutdownHooks();
+  configureApp(app);
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('app.port', 3000);

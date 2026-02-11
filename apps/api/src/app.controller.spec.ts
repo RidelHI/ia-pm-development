@@ -23,6 +23,7 @@ describe('AppController', () => {
           healthReady: '/v1/health/ready',
           authToken: '/v1/auth/token',
           products: '/v1/products',
+          openApi: '/docs',
         },
       });
     });

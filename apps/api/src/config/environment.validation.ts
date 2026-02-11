@@ -7,6 +7,10 @@ export interface ValidatedEnvironment extends RawEnv {
   SUPABASE_PRODUCTS_TABLE: string;
   RATE_LIMIT_TTL_SECONDS: number;
   RATE_LIMIT_LIMIT: number;
+  APP_CORS_ORIGINS: string;
+  APP_CORS_CREDENTIALS: boolean;
+  APP_DOCS_ENABLED: boolean;
+  APP_DOCS_PATH: string;
   AUTH_USERNAME: string;
   AUTH_PASSWORD: string;
   AUTH_JWT_SECRET: string;
@@ -22,6 +26,26 @@ function toNonEmptyString(value: unknown): string | undefined {
 
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function parseBoolean(value: unknown, fallback: boolean): boolean {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+
+    if (['true', '1', 'yes', 'on'].includes(normalized)) {
+      return true;
+    }
+
+    if (['false', '0', 'no', 'off'].includes(normalized)) {
+      return false;
+    }
+  }
+
+  return fallback;
 }
 
 export function validateEnvironment(config: RawEnv): ValidatedEnvironment {
@@ -68,11 +92,21 @@ export function validateEnvironment(config: RawEnv): ValidatedEnvironment {
     errors.push('RATE_LIMIT_LIMIT must be a positive integer');
   }
 
+  const corsOrigins = toNonEmptyString(config.APP_CORS_ORIGINS) ?? '*';
+  const docsPath = toNonEmptyString(config.APP_DOCS_PATH) ?? 'docs';
+
+  if (docsPath.includes(' ')) {
+    errors.push('APP_DOCS_PATH must not contain spaces');
+  }
+
   const supabaseUrl = toNonEmptyString(config.SUPABASE_URL);
+  const supabaseSecretKey = toNonEmptyString(config.SUPABASE_SECRET_KEY);
+  const supabaseServiceRoleKey = toNonEmptyString(
+    config.SUPABASE_SERVICE_ROLE_KEY,
+  );
+  const supabaseAnonKey = toNonEmptyString(config.SUPABASE_ANON_KEY);
   const supabaseKey =
-    toNonEmptyString(config.SUPABASE_SECRET_KEY) ??
-    toNonEmptyString(config.SUPABASE_SERVICE_ROLE_KEY) ??
-    toNonEmptyString(config.SUPABASE_ANON_KEY);
+    supabaseSecretKey ?? supabaseServiceRoleKey ?? supabaseAnonKey;
 
   if (supabaseUrl && !supabaseKey) {
     errors.push(
@@ -102,6 +136,17 @@ export function validateEnvironment(config: RawEnv): ValidatedEnvironment {
   }
 
   if (nodeEnv === 'production') {
+    if (
+      supabaseUrl &&
+      !supabaseSecretKey &&
+      !supabaseServiceRoleKey &&
+      supabaseAnonKey
+    ) {
+      errors.push(
+        'SUPABASE_ANON_KEY is not allowed for backend production use; set SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY',
+      );
+    }
+
     if (authJwtSecret.length < 32) {
       errors.push(
         'AUTH_JWT_SECRET must have at least 32 characters in production',
@@ -134,6 +179,13 @@ export function validateEnvironment(config: RawEnv): ValidatedEnvironment {
       Number.isInteger(parsedRateLimit) && parsedRateLimit > 0
         ? parsedRateLimit
         : 100,
+    APP_CORS_ORIGINS: corsOrigins,
+    APP_CORS_CREDENTIALS: parseBoolean(config.APP_CORS_CREDENTIALS, false),
+    APP_DOCS_ENABLED: parseBoolean(
+      config.APP_DOCS_ENABLED,
+      nodeEnv !== 'production',
+    ),
+    APP_DOCS_PATH: docsPath.replace(/^\/+/, ''),
     AUTH_USERNAME: authUsername,
     AUTH_PASSWORD: authPassword,
     AUTH_JWT_SECRET: authJwtSecret,
