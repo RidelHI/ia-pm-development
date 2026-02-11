@@ -4,7 +4,7 @@ import type {
   UpdateProductInput,
 } from '../product.types';
 
-export const PRODUCTS_REPOSITORY = 'PRODUCTS_REPOSITORY';
+export const PRODUCTS_REPOSITORY = Symbol('PRODUCTS_REPOSITORY');
 
 export interface ProductsRepository {
   findAll(filters: ProductFilters): Promise<Product[]>;

@@ -1,4 +1,8 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SupabaseService } from '../../integrations/supabase/supabase.service';
 import type {
@@ -19,6 +23,8 @@ interface QueryResult<T> {
 
 @Injectable()
 export class SupabaseProductsRepository implements ProductsRepository {
+  private readonly logger = new Logger(SupabaseProductsRepository.name);
+
   constructor(private readonly supabaseService: SupabaseService) {}
 
   async findAll(filters: ProductFilters): Promise<Product[]> {
@@ -114,8 +120,12 @@ export class SupabaseProductsRepository implements ProductsRepository {
     const result = (await query) as QueryResult<T>;
 
     if (result.error) {
+      this.logger.error(
+        `Supabase ${operation} failed`,
+        JSON.stringify({ message: result.error.message }),
+      );
       throw new ServiceUnavailableException(
-        `Supabase ${operation} failed: ${result.error.message}`,
+        'Product storage is temporarily unavailable',
       );
     }
 

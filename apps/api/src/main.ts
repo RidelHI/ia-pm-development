@@ -1,7 +1,8 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { RequestLoggingInterceptor } from './common/interceptors/request-logging.interceptor';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
@@ -22,6 +23,12 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+  });
+
+  app.useGlobalInterceptors(new RequestLoggingInterceptor());
   app.enableShutdownHooks();
 
   const configService = app.get(ConfigService);

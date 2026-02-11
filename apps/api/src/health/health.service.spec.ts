@@ -2,7 +2,7 @@ import { SupabaseService } from '../integrations/supabase/supabase.service';
 import { HealthService } from './health.service';
 
 describe('HealthService', () => {
-  it('returns health payload with injected app configuration', () => {
+  it('returns liveness payload with injected app configuration', () => {
     const supabaseService = {
       isConfigured: () => true,
       getProductsTable: () => 'products',
@@ -17,15 +17,14 @@ describe('HealthService', () => {
       },
       supabaseService,
     );
-    const health = service.getHealth();
+    const health = service.getLiveness();
 
     expect(health.version).toBe('0.2.1');
     expect(health.service).toBe('warehouse-api');
     expect(health.environment).toBe('test');
-    expect(health.integrations.supabase.configured).toBe(true);
   });
 
-  it('returns unconfigured integration info', () => {
+  it('returns readiness payload without exposing table names', () => {
     const supabaseService = {
       isConfigured: () => false,
       getProductsTable: () => 'products',
@@ -40,9 +39,11 @@ describe('HealthService', () => {
       },
       supabaseService,
     );
-    const health = service.getHealth();
+    const health = service.getReadiness();
 
     expect(health.version).toBe('0.1.0');
+    expect(health.ready).toBe(true);
     expect(health.integrations.supabase.configured).toBe(false);
+    expect(health.integrations.supabase).not.toHaveProperty('productsTable');
   });
 });

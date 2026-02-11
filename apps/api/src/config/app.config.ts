@@ -7,6 +7,10 @@ export interface AppConfig {
   version: string;
   environment: AppEnvironment;
   port: number;
+  rateLimit: {
+    ttlMs: number;
+    limit: number;
+  };
 }
 
 function parsePort(value: string | undefined): number {
@@ -14,6 +18,19 @@ function parsePort(value: string | undefined): number {
 
   if (!Number.isInteger(parsed) || parsed <= 0) {
     return 3000;
+  }
+
+  return parsed;
+}
+
+function parsePositiveInteger(
+  value: string | undefined,
+  fallback: number,
+): number {
+  const parsed = Number.parseInt(value ?? String(fallback), 10);
+
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    return fallback;
   }
 
   return parsed;
@@ -27,5 +44,10 @@ export default registerAs(
     environment:
       (process.env.NODE_ENV as AppEnvironment | undefined) ?? 'development',
     port: parsePort(process.env.PORT),
+    rateLimit: {
+      ttlMs:
+        parsePositiveInteger(process.env.RATE_LIMIT_TTL_SECONDS, 60) * 1000,
+      limit: parsePositiveInteger(process.env.RATE_LIMIT_LIMIT, 100),
+    },
   }),
 );

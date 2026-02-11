@@ -1,10 +1,15 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, type ConfigType } from '@nestjs/config';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import appConfig from './config/app.config';
+import authConfig from './config/auth.config';
 import { validateEnvironment } from './config/environment.validation';
 import supabaseConfig from './config/supabase.config';
+import { AuthModule } from './auth/auth.module';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { HealthModule } from './health/health.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { ProductsModule } from './products/products.module';
@@ -25,14 +30,35 @@ import { ProductsModule } from './products/products.module';
         '.env.local',
         '.env',
       ],
-      load: [appConfig, supabaseConfig],
+      load: [appConfig, authConfig, supabaseConfig],
       validate: validateEnvironment,
     }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [appConfig.KEY],
+      useFactory: (config: ConfigType<typeof appConfig>) => [
+        {
+          ttl: config.rateLimit.ttlMs,
+          limit: config.rateLimit.limit,
+        },
+      ],
+    }),
+    AuthModule,
     IntegrationsModule,
     HealthModule,
     ProductsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

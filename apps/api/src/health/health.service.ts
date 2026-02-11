@@ -11,17 +11,27 @@ export class HealthService {
     private readonly supabaseService: SupabaseService,
   ) {}
 
-  getHealth() {
+  getLiveness() {
     return {
       status: 'ok',
       service: this.appConfiguration.name,
       version: this.appConfiguration.version,
       timestamp: new Date().toISOString(),
       environment: this.appConfiguration.environment,
+    };
+  }
+
+  getReadiness() {
+    return {
+      status: 'ok',
+      service: this.appConfiguration.name,
+      version: this.appConfiguration.version,
+      timestamp: new Date().toISOString(),
+      environment: this.appConfiguration.environment,
+      ready: true,
       integrations: {
         supabase: {
           configured: this.supabaseService.isConfigured(),
-          productsTable: this.supabaseService.getProductsTable(),
         },
       },
     };
