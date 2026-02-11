@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: warehouse-api
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter api build
+    startCommand: node apps/api/dist/main.js
+    healthCheckPath: /v1/health/live
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 22.11.0
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: SUPABASE_PRODUCTS_TABLE
+        value: products
+      - key: APP_CORS_ORIGINS
+        sync: false
+      - key: APP_CORS_CREDENTIALS
+        value: "false"
+      - key: APP_DOCS_ENABLED
+        value: "false"
+      - key: APP_DOCS_PATH
+        value: docs

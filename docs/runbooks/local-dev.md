@@ -55,20 +55,19 @@ pnpm build
 3. Push a `main` con cambios en `apps/web`.
 4. Workflow: `.github/workflows/deploy-web-pages.yml`.
 
-## Deploy API (Vercel)
-1. Crear proyecto Vercel apuntando a `apps/api`.
-2. Configurar secrets en GitHub:
-   - `VERCEL_TOKEN`
-   - `VERCEL_ORG_ID`
-   - `VERCEL_PROJECT_ID`
-3. Push a `main` con cambios en `apps/api` o ejecutar workflow manual.
-4. Workflow: `.github/workflows/deploy-api-vercel.yml`.
-   - Si faltan secrets, el job se marca como `skipped` (no falla CI).
-5. Runbook detallado: `docs/runbooks/vercel-api-deploy.md`.
+## Deploy API (Render)
+1. Crear un `Web Service` en Render conectado a este repo.
+2. Seleccionar la rama objetivo en la configuracion del servicio.
+3. Configurar manualmente:
+   - Build: `pnpm install --frozen-lockfile && pnpm --filter api build`
+   - Start: `node apps/api/dist/main.js`
+4. Configurar `Health Check Path`: `/v1/health/live`.
+5. Configurar variables de entorno del API en Render.
+6. Runbook detallado: `docs/runbooks/render-api-deploy.md`.
 
 ## Notas
 - No hardcodear secretos en codigo ni en workflows.
-- `apps/api/vercel.json` y `apps/api/api/index.ts` dejan lista la estructura serverless.
+- El backend corre como servicio Node tradicional y escucha el `PORT` que inyecta Render.
 - Flujo PR/proteccion de `main`: ver `docs/runbooks/github-pr-flow.md`.
 - Flujo operativo de planificacion y seguimiento: ver `docs/runbooks/github-project-workflow.md`.
 - Setup de Supabase para BE-14: ver `docs/runbooks/supabase-setup.md`.

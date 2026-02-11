@@ -5,7 +5,7 @@ Backend del proyecto de aprendizaje de gestión de productos de almacén.
 ## Stack
 - NestJS 11
 - Jest + ESLint
-- Deploy serverless en Vercel
+- Deploy en Render (web service)
 - Integración preparada con Supabase
 
 ## Scripts
@@ -45,11 +45,10 @@ Copiar `apps/api/.env.example` y completar:
 - Migracion SQL base: `db/migrations/0001_create_products.sql`.
 - Runbook de setup/verificacion: `docs/runbooks/supabase-setup.md`.
 
-## Deploy en Vercel
-- Entry serverless: `apps/api/api/index.ts`
-- Config: `apps/api/vercel.json`
-- Secrets esperados en GitHub Actions:
-  - `VERCEL_TOKEN`
-  - `VERCEL_ORG_ID`
-  - `VERCEL_PROJECT_ID`
-- Runbook de setup/verificacion: `docs/runbooks/vercel-api-deploy.md`.
+## Deploy en Render
+- Tipo de servicio: `Web Service` (creacion manual en Render, seleccionando la rama).
+- Build command: `pnpm install --frozen-lockfile && pnpm --filter api build`
+- Start command: `node apps/api/dist/main.js`
+- Health check recomendado: `/v1/health/live`
+- Referencia opcional: `render.yaml` (raiz del repo).
+- Runbook de setup/verificacion: `docs/runbooks/render-api-deploy.md`.
