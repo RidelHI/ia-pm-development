@@ -57,6 +57,10 @@ curl https://<tu-servicio>.onrender.com/v1/health/live
 curl https://<tu-servicio>.onrender.com/v1
 ```
 
+Recomendacion CORS para GitHub Pages:
+- `APP_CORS_ORIGINS=https://ridelhi.github.io,http://localhost:4200`
+- Usa solo origins (sin path), por ejemplo `https://ridelhi.github.io` y no `https://ridelhi.github.io/ia-pm-development`.
+
 ## Nota operativa
 - El API usa `PORT` de entorno (inyectado por Render), no requiere adaptador serverless.
 - Si no puedes usar Blueprint, crear `Web Service` manual con los mismos comandos y health check.
