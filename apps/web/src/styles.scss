@@ -1,1 +1,34 @@
-/* You can add global styles to this file, and also import other style files */
+@use 'tailwindcss';
+
+:root {
+  --bg-shell: radial-gradient(
+      120% 120% at 0% 0%,
+      #f9f6ef 0%,
+      #eef7f4 45%,
+      #e6eff8 100%
+    )
+    fixed;
+  --text-body: #0f172a;
+  --font-primary:
+    'Manrope', 'Avenir Next', 'Segoe UI Variable', 'Segoe UI', sans-serif;
+}
+
+@layer base {
+  html,
+  body {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    color: var(--text-body);
+    font-family: var(--font-primary);
+    background: var(--bg-shell);
+  }
+}
+
+@layer utilities {
+  .bg-shell {
+    background: var(--bg-shell);
+  }
+}
