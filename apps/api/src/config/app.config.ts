@@ -9,7 +9,7 @@ export interface AppConfig {
   environment: AppEnvironment;
   port: number;
   cors: {
-    origins: string[];
+    origins: string | string[];
     credentials: boolean;
   };
   docs: {
@@ -50,9 +50,9 @@ function parseBoolean(value: string | undefined, fallback: boolean): boolean {
   return fallback;
 }
 
-function parseOrigins(value: string | undefined): string[] {
+function parseOrigins(value: string | undefined): string | string[] {
   if (!value || value.trim().length === 0) {
-    return ['*'];
+    return '*';
   }
 
   const origins = value
@@ -60,7 +60,15 @@ function parseOrigins(value: string | undefined): string[] {
     .map((origin) => origin.trim())
     .filter((origin) => origin.length > 0);
 
-  return origins.length > 0 ? origins : ['*'];
+  if (origins.length === 0) {
+    return '*';
+  }
+
+  if (origins.includes('*')) {
+    return '*';
+  }
+
+  return origins;
 }
 
 function parseDocsPath(value: string | undefined): string {
