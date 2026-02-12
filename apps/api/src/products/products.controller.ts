@@ -41,11 +41,11 @@ import { ProductsService } from './products.service';
 @ApiTags('products')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
+  @Roles('admin', 'user')
   @ApiOperation({ summary: 'List products' })
   @ApiOkResponse({ type: PaginatedProductsResponseDto })
   @ApiUnauthorizedResponse({ description: 'Invalid or expired token' })
@@ -58,6 +58,7 @@ export class ProductsController {
   }
 
   @Get(':id')
+  @Roles('admin', 'user')
   @ApiOperation({ summary: 'Get product by id' })
   @ApiOkResponse({ type: ProductResponseDto })
   @ApiUnauthorizedResponse({ description: 'Invalid or expired token' })
@@ -71,6 +72,7 @@ export class ProductsController {
   }
 
   @Post()
+  @Roles('admin')
   @ApiOperation({ summary: 'Create product' })
   @ApiCreatedResponse({ type: ProductResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid request body' })
@@ -82,6 +84,7 @@ export class ProductsController {
   }
 
   @Patch(':id')
+  @Roles('admin')
   @ApiOperation({ summary: 'Update product' })
   @ApiOkResponse({ type: ProductResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid request body' })
@@ -97,6 +100,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @Roles('admin')
   @ApiOperation({ summary: 'Delete product' })
   @ApiNoContentResponse({ description: 'Product deleted' })
   @ApiUnauthorizedResponse({ description: 'Invalid or expired token' })

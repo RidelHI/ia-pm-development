@@ -12,9 +12,6 @@ export interface ValidatedEnvironment extends RawEnv {
   APP_CORS_CREDENTIALS: boolean;
   APP_DOCS_ENABLED: boolean;
   APP_DOCS_PATH: string;
-  AUTH_USERNAME: string;
-  AUTH_PASSWORD: string;
-  AUTH_PASSWORD_HASH: string | null;
   AUTH_JWT_SECRET: string;
   AUTH_JWT_EXPIRES_IN_SECONDS: number;
   AUTH_JWT_ISSUER: string;
@@ -116,9 +113,6 @@ export function validateEnvironment(config: RawEnv): ValidatedEnvironment {
     );
   }
 
-  const authUsername = toNonEmptyString(config.AUTH_USERNAME) ?? 'admin';
-  const authPassword = toNonEmptyString(config.AUTH_PASSWORD) ?? 'admin123!';
-  const authPasswordHash = toNonEmptyString(config.AUTH_PASSWORD_HASH) ?? null;
   const authJwtSecret =
     toNonEmptyString(config.AUTH_JWT_SECRET) ??
     'development-only-secret-change-in-production';
@@ -155,20 +149,6 @@ export function validateEnvironment(config: RawEnv): ValidatedEnvironment {
         'AUTH_JWT_SECRET must have at least 32 characters in production',
       );
     }
-
-    if (authUsername === 'admin' || authPassword === 'admin123!') {
-      errors.push(
-        'AUTH_USERNAME and AUTH_PASSWORD defaults are not allowed in production',
-      );
-    }
-
-    if (!authPasswordHash) {
-      errors.push('AUTH_PASSWORD_HASH must be set in production');
-    }
-  }
-
-  if (authPasswordHash && !/^\$2[aby]\$\d{2}\$/.test(authPasswordHash)) {
-    errors.push('AUTH_PASSWORD_HASH must be a valid bcrypt hash');
   }
 
   if (errors.length > 0) {
@@ -199,9 +179,6 @@ export function validateEnvironment(config: RawEnv): ValidatedEnvironment {
       nodeEnv !== 'production',
     ),
     APP_DOCS_PATH: docsPath.replace(/^\/+/, ''),
-    AUTH_USERNAME: authUsername,
-    AUTH_PASSWORD: authPassword,
-    AUTH_PASSWORD_HASH: authPasswordHash,
     AUTH_JWT_SECRET: authJwtSecret,
     AUTH_JWT_EXPIRES_IN_SECONDS:
       Number.isInteger(parsedJwtExpiresIn) && parsedJwtExpiresIn > 0

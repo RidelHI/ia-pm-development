@@ -3,9 +3,6 @@ import { JwtStrategy } from './jwt.strategy';
 
 describe('JwtStrategy', () => {
   const config = {
-    username: 'admin',
-    password: 'admin123!',
-    passwordHash: null,
     jwtSecret: 'development-only-secret-change-in-production',
     jwtExpiresInSeconds: 900,
     jwtIssuer: 'warehouse-api',

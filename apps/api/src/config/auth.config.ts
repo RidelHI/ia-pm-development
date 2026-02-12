@@ -2,9 +2,6 @@ import { registerAs } from '@nestjs/config';
 import { parsePositiveInteger } from './config.utils';
 
 export interface AuthConfig {
-  username: string;
-  password: string;
-  passwordHash: string | null;
   jwtSecret: string;
   jwtExpiresInSeconds: number;
   jwtIssuer: string;
@@ -14,9 +11,6 @@ export interface AuthConfig {
 export default registerAs(
   'auth',
   (): AuthConfig => ({
-    username: process.env.AUTH_USERNAME ?? 'admin',
-    password: process.env.AUTH_PASSWORD ?? 'admin123!',
-    passwordHash: process.env.AUTH_PASSWORD_HASH ?? null,
     jwtSecret:
       process.env.AUTH_JWT_SECRET ??
       'development-only-secret-change-in-production',

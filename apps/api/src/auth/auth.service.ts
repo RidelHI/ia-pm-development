@@ -1,4 +1,4 @@
-import { randomUUID, createHash, timingSafeEqual } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import {
   ConflictException,
   Inject,
@@ -56,18 +56,23 @@ export class AuthService {
     username: string,
     password: string,
   ): Promise<AccessTokenResponseDto> {
-    if (!this.safeCompare(username, this.config.username)) {
+    const normalizedUsername = username.trim().toLowerCase();
+    const user = await this.usersRepository.findByUsername(normalizedUsername);
+
+    if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (!(await this.verifyPassword(password))) {
+    const passwordMatches = await compare(password, user.passwordHash);
+
+    if (!passwordMatches) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const payload: AuthTokenPayload = {
-      sub: 'local-admin',
-      username: this.config.username,
-      roles: ['admin'],
+      sub: user.id,
+      username: user.username,
+      roles: [user.role],
     };
 
     return {
@@ -75,20 +80,5 @@ export class AuthService {
       tokenType: 'Bearer',
       expiresInSeconds: this.config.jwtExpiresInSeconds,
     };
-  }
-
-  private async verifyPassword(password: string): Promise<boolean> {
-    if (this.config.passwordHash) {
-      return compare(password, this.config.passwordHash);
-    }
-
-    return this.safeCompare(password, this.config.password);
-  }
-
-  private safeCompare(value: string, expected: string): boolean {
-    const valueHash = createHash('sha256').update(value).digest();
-    const expectedHash = createHash('sha256').update(expected).digest();
-
-    return timingSafeEqual(valueHash, expectedHash);
   }
 }

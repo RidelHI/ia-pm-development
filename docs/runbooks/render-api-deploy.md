@@ -36,22 +36,15 @@ node apps/api/dist/main.js
 - `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY`
 - `SUPABASE_PRODUCTS_TABLE` (default: `products`)
+- `SUPABASE_USERS_TABLE` (default: `users`)
 - `APP_CORS_ORIGINS`
 - `APP_CORS_CREDENTIALS`
 - `APP_DOCS_ENABLED`
 - `APP_DOCS_PATH`
-- `AUTH_USERNAME` (no usar `admin` en production)
-- `AUTH_PASSWORD` (no usar `admin123!` en production)
-- `AUTH_PASSWORD_HASH` (bcrypt, obligatorio en production)
 - `AUTH_JWT_SECRET` (minimo 32 caracteres en production)
 - `AUTH_JWT_EXPIRES_IN_SECONDS` (default: `900`)
 - `AUTH_JWT_ISSUER` (default: `warehouse-api`)
 - `AUTH_JWT_AUDIENCE` (default: `warehouse-clients`)
-
-Generar hash bcrypt para `AUTH_PASSWORD_HASH`:
-```bash
-node -e "console.log(require('bcryptjs').hashSync(process.argv[1], 10))" "TU_PASSWORD_SEGURA"
-```
 
 ## 5) Verificacion end-to-end
 1. Esperar `Deploy live` en Render.
@@ -71,4 +64,4 @@ curl https://<tu-servicio>.onrender.com/v1
 ## Postman (assets listos)
 - Collection: `docs/postman/warehouse-api.postman_collection.json`
 - Environment: `docs/postman/warehouse-api.render.postman_environment.json`
-- Flujo recomendado: `1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9`.
+- Flujo recomendado: `1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10`.
