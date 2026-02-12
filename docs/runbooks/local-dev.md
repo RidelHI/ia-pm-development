@@ -72,6 +72,9 @@ pnpm build
 - El backend corre como servicio Node tradicional y escucha el `PORT` que inyecta Render.
 - Flujo PR/proteccion de `main`: ver `docs/runbooks/github-pr-flow.md`.
 - Flujo operativo de planificacion y seguimiento: ver `docs/runbooks/github-project-workflow.md`.
+- Modelo operativo de agentes: ver `docs/ai/agent-operating-model.md`.
+- Workflows repetibles del agente: ver `docs/ai/workflows/`.
+- Prompt templates reutilizables: ver `docs/ai/prompts/`.
 - Setup de Supabase para BE-14: ver `docs/runbooks/supabase-setup.md`.
 - Decision tecnica local-first (GitHub Projects + Codex): ver `docs/adr/0003-github-project-local-first.md`.
 

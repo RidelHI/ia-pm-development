@@ -1,0 +1,35 @@
+name: Frontend task
+description: Angular UI, UX, state handling, and API integration work
+title: "FE-XX: "
+labels: ["type:frontend", "agent:frontend", "priority:p2"]
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What user-facing outcome should this task deliver?
+      placeholder: Implement products list..., add edit form..., improve loading state...
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Define exact UI and integration boundaries.
+      placeholder: |
+        - components and routes
+        - service calls and mapping
+        - loading/error/empty states
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Define clear done conditions.
+      placeholder: |
+        - [ ] flow works end to end from UI
+        - [ ] form validation and API errors are handled
+        - [ ] tests updated and passing
+    validations:
+      required: true
