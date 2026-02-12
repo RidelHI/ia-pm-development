@@ -48,6 +48,9 @@ export class InMemoryProductsRepository implements ProductsRepository {
   findAll(filters: ProductFilters): Promise<PaginatedResult<Product>> {
     const products = Array.from(this.products.values());
     const normalizedQuery = filters.q?.trim().toLowerCase();
+    const normalizedSku = filters.sku?.trim().toLowerCase();
+    const normalizedName = filters.name?.trim().toLowerCase();
+    const normalizedLocation = filters.location?.trim().toLowerCase();
     const page = Math.max(
       filters.page ?? InMemoryProductsRepository.DEFAULT_PAGE,
       1,
@@ -68,7 +71,43 @@ export class InMemoryProductsRepository implements ProductsRepository {
           product.sku.toLowerCase().includes(normalizedQuery)
         : true;
 
-      return matchesStatus && matchesQuery;
+      const matchesSku = normalizedSku
+        ? product.sku.toLowerCase().includes(normalizedSku)
+        : true;
+      const matchesName = normalizedName
+        ? product.name.toLowerCase().includes(normalizedName)
+        : true;
+      const matchesLocation = normalizedLocation
+        ? (product.location ?? '').toLowerCase().includes(normalizedLocation)
+        : true;
+      const matchesQuantityMin =
+        filters.quantityMin !== undefined
+          ? product.quantity >= filters.quantityMin
+          : true;
+      const matchesQuantityMax =
+        filters.quantityMax !== undefined
+          ? product.quantity <= filters.quantityMax
+          : true;
+      const matchesPriceMin =
+        filters.unitPriceMin !== undefined
+          ? product.unitPriceCents >= filters.unitPriceMin
+          : true;
+      const matchesPriceMax =
+        filters.unitPriceMax !== undefined
+          ? product.unitPriceCents <= filters.unitPriceMax
+          : true;
+
+      return (
+        matchesStatus &&
+        matchesQuery &&
+        matchesSku &&
+        matchesName &&
+        matchesLocation &&
+        matchesQuantityMin &&
+        matchesQuantityMax &&
+        matchesPriceMin &&
+        matchesPriceMax
+      );
     });
     const total = filtered.length;
     const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
