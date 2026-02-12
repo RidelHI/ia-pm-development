@@ -43,6 +43,35 @@ describe('ProductsService', () => {
     expect(firstPage.meta.totalPages).toBeGreaterThanOrEqual(2);
   });
 
+  it('filters products by explicit text fields', async () => {
+    const bySku = await service.findAll({ sku: 'APPLE' });
+    const byName = await service.findAll({ name: 'milk' });
+    const byLocation = await service.findAll({ location: 'B-03' });
+
+    expect(bySku.data).toHaveLength(1);
+    expect(bySku.data[0]?.sku).toBe('SKU-APPLE-001');
+    expect(byName.data).toHaveLength(1);
+    expect(byName.data[0]?.name).toBe('Milk Pack');
+    expect(byLocation.data).toHaveLength(1);
+    expect(byLocation.data[0]?.location).toBe('B-03');
+  });
+
+  it('filters products by numeric ranges', async () => {
+    const quantityRange = await service.findAll({
+      quantityMin: 20,
+      quantityMax: 50,
+    });
+    const priceRange = await service.findAll({
+      unitPriceMin: 500,
+      unitPriceMax: 700,
+    });
+
+    expect(quantityRange.data).toHaveLength(1);
+    expect(quantityRange.data[0]?.name).toBe('Apple Box');
+    expect(priceRange.data).toHaveLength(1);
+    expect(priceRange.data[0]?.name).toBe('Apple Box');
+  });
+
   it('creates a product', async () => {
     const product = await service.create({
       sku: 'SKU-BREAD-003',
