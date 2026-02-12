@@ -17,6 +17,7 @@ No se asume ejecucion paralela de cinco agentes independientes.
 2. Toda tarea nace como issue y debe tener exactamente un label `agent:*`.
 3. Cada cambio tecnico se entrega por PR pequena enlazada con `Closes #<issue_number>`.
 4. CI bloquea merge si falta issue enlazada o si la issue no tiene ownership por agente.
+5. La estrategia de ramas es `GitHub Flow` con ramas cortas segun `docs/runbooks/git-branching-model.md`.
 
 ## Taxonomia de agentes
 | Label | Rol | Responsabilidad principal | Entregables obligatorios |
@@ -82,6 +83,8 @@ Usar estos artefactos para repetir procesos con consistencia:
   - `docs/ai/workflows/new-feature.md`
   - `docs/ai/workflows/review-pr.md`
   - `docs/ai/workflows/deploy.md`
+- Git strategy:
+  - `docs/runbooks/git-branching-model.md`
 - Prompt templates:
   - `docs/ai/prompts/feature-spec-prompt.md`
   - `docs/ai/prompts/audit-prompt.md`
