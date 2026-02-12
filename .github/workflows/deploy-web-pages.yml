@@ -47,8 +47,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Write runtime config for Pages
+        env:
+          WEB_API_BASE_URL: ${{ vars.WEB_API_BASE_URL }}
+        run: |
+          API_BASE_URL="$WEB_API_BASE_URL"
+          if [ -z "$API_BASE_URL" ]; then
+            API_BASE_URL="https://ia-pm-development-api.vercel.app/v1"
+          fi
+          cat <<EOF > apps/web/public/env.js
+          window.__APP_CONFIG__ = window.__APP_CONFIG__ || {};
+          window.__APP_CONFIG__.apiBaseUrl = '$API_BASE_URL';
+          EOF
+          echo "Using API base URL: $API_BASE_URL"
+
       - name: Build Angular app
-        run: pnpm --filter web build -- --configuration production --base-href "/${{ github.event.repository.name }}/"
+        run: pnpm --filter web exec ng build --configuration production --base-href "/${{ github.event.repository.name }}/"
 
       - name: Resolve artifact path
         id: artifact
@@ -58,6 +72,11 @@ jobs:
           else
             echo "path=apps/web/dist/web" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Prepare SPA fallback files
+        run: |
+          cp "${{ steps.artifact.outputs.path }}/index.html" "${{ steps.artifact.outputs.path }}/404.html"
+          touch "${{ steps.artifact.outputs.path }}/.nojekyll"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
