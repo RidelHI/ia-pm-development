@@ -48,6 +48,7 @@ gh pr list --state open --limit 20
 
 ## Referencia
 - Modelo completo de roles y reglas: `docs/ai/agent-operating-model.md`
+- Estrategia de ramas por caso: `docs/runbooks/git-branching-model.md`
 - Instrucciones persistentes del agente: `AGENTS.md`
 - Workflows operativos: `docs/ai/workflows/`
 - Prompt templates: `docs/ai/prompts/`

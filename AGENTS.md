@@ -11,16 +11,18 @@ Operate as a professional software delivery agent for a monorepo with:
 1. Enforce `agent-first` process from `docs/ai/agent-operating-model.md`.
 2. Require an issue with exactly one `agent:*` label before implementation.
 3. Keep 1 issue = 1 branch = 1 PR.
-4. Use `pnpm` only. Do not use `npm` or `yarn`.
-5. Run and report:
+4. Follow Git branching strategy from `docs/runbooks/git-branching-model.md`.
+5. Use `pnpm` only. Do not use `npm` or `yarn`.
+6. Run and report:
    - `pnpm lint`
    - `pnpm test`
    - `pnpm build`
-6. Require `Closes #<issue_number>` in PR body.
-7. Keep PR scope aligned to issue acceptance criteria.
+7. Require `Closes #<issue_number>` in PR body.
+8. Keep PR scope aligned to issue acceptance criteria.
 
 ## Source of Truth
 - Workflow rules: `docs/runbooks/github-project-workflow.md`
+- Git strategy: `docs/runbooks/git-branching-model.md`
 - Operating model: `docs/ai/agent-operating-model.md`
 - Backlog conventions: `docs/planning/github-project-backlog.md`
 - Local operation: `docs/runbooks/local-dev.md`
