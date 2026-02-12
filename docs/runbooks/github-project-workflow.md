@@ -1,42 +1,53 @@
-# Runbook: GitHub Project Workflow (Local-First)
+# Runbook: GitHub Project Workflow (Agent-First)
 
 ## Objetivo
-Usar GitHub Issues + GitHub Projects como unico espacio de planificacion y seguimiento, con implementacion en local usando Codex y entrega por PRs pequenos.
+Operar con flujo profesional de entrega usando GitHub Issues + GitHub Projects + PR, con asignacion explicita a agentes por label.
 
 ## Fuente de verdad
 - Planificacion y estado: GitHub Project (`MVP - Warehouse Kanban`).
-- Ejecucion tecnica: ramas + commits + PR en el repo.
-- Cierre de trabajo: merge a `main` con issue cerrada.
+- Asignacion de ownership: label `agent:*` en cada issue.
+- Ejecucion tecnica: rama + commits + PR en el repo.
+- Cierre: merge a `main` con issue cerrada por `Closes #<issue_number>`.
+
+## Regla de ownership
+Cada issue debe tener exactamente un label `agent:*`:
+- `agent:pm`
+- `agent:backend`
+- `agent:frontend`
+- `agent:qa`
+- `agent:release`
+
+Sin ese label, la tarea se considera mal definida y no entra a ejecucion.
 
 ## Flujo estandar por tarea
-1. Seleccionar issue en estado `Todo` del Project.
-2. Mover issue a `In Progress`.
-3. Crear rama: `feature/<slug>` o `fix/<slug>`.
-4. Implementar alcance minimo definido en la issue.
-5. Ejecutar calidad local:
-   - `pnpm lint`
-   - `pnpm test`
-   - `pnpm build`
-6. Abrir PR con `Closes #<issue_number>`.
-7. Mover issue a `In Review`.
-8. Al merge, mover issue a `Done` (o automatizar desde el board).
+1. PM define o refina la issue con alcance y criterios de aceptacion.
+2. PM agrega labels `type:*`, `priority:*` y exactamente un `agent:*`.
+3. PM mueve la card a `Todo` en el Project.
+4. Agente owner toma la issue y la mueve a `In Progress`.
+5. Agente owner crea rama (`feature/<slug>` o `fix/<slug>`) y ejecuta implementacion acotada al scope.
+6. Agente owner ejecuta calidad local: `pnpm lint`, `pnpm test`, `pnpm build`.
+7. Agente owner abre PR con `Closes #<issue_number>`.
+8. Agente owner mueve la issue a `In Review`.
+9. QA/Reviewer valida criterios de aceptacion y evidencia tecnica.
+10. Al merge, la issue pasa a `Done`.
 
-## Convenciones recomendadas
+## Reglas operativas
 - 1 issue = 1 rama = 1 PR.
-- PR pequena, enfocada y trazable.
+- PR pequena y trazable.
 - No expandir scope fuera de criterios de aceptacion.
-- Si CI falla, se corrige antes de continuar con otra tarea.
+- CI debe pasar antes de merge.
+- El check `quality` valida convencion de rama y issue enlazada con label `agent:*`.
 
 ## Operacion diaria con CLI
 ```bash
-gh issue list --state open
+gh issue list --state open --limit 20
 gh project view 1 --owner RidelHI --web
-gh pr list --state open
+gh project item-list 1 --owner RidelHI --limit 30
+gh pr list --state open --limit 20
 ```
 
-## Plantilla minima para PR
-- Objetivo de la issue.
-- Cambios realizados.
-- Evidencia de pruebas (`lint/test/build`).
-- Riesgos/impacto.
-- `Closes #<issue_number>`.
+## Referencia
+- Modelo completo de roles y reglas: `docs/ai/agent-operating-model.md`
+- Instrucciones persistentes del agente: `AGENTS.md`
+- Workflows operativos: `docs/ai/workflows/`
+- Prompt templates: `docs/ai/prompts/`

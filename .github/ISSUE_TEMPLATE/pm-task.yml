@@ -1,0 +1,35 @@
+name: PM task
+description: Scope definition, prioritization, planning, and delivery coordination
+title: "PM-XX: "
+labels: ["type:docs", "agent:pm", "priority:p2"]
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What planning or coordination result is needed?
+      placeholder: Define MVP split..., refine backlog..., write delivery ADR...
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: List work items in scope only.
+      placeholder: |
+        - issue refinements
+        - project workflow updates
+        - runbook or ADR updates
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Define concrete completion conditions.
+      placeholder: |
+        - [ ] scope and AC are unambiguous
+        - [ ] ownership and priority are defined
+        - [ ] project status and docs are updated
+    validations:
+      required: true

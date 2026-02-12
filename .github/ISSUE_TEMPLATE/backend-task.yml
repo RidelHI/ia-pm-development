@@ -1,0 +1,35 @@
+name: Backend task
+description: API, domain, security, data, or NestJS architecture work
+title: "BE-XX: "
+labels: ["type:backend", "agent:backend", "priority:p2"]
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What outcome should this task achieve?
+      placeholder: Implement endpoint..., enforce guard..., refactor module...
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: List only in-scope changes.
+      placeholder: |
+        - API controller changes
+        - service logic
+        - data repository updates
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Add measurable criteria for done.
+      placeholder: |
+        - [ ] endpoint returns expected response
+        - [ ] invalid payload returns 400
+        - [ ] tests updated and passing
+    validations:
+      required: true

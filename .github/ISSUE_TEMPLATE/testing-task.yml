@@ -1,0 +1,35 @@
+name: Testing task
+description: Unit, integration, e2e, regression, and test strategy work
+title: "QA-XX: "
+labels: ["type:test", "agent:qa", "priority:p2"]
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What quality risk should be reduced?
+      placeholder: Expand e2e coverage..., stabilize flaky tests..., add contract tests...
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Specify suites, paths, and scenarios in scope.
+      placeholder: |
+        - suites and folders
+        - happy paths and error paths
+        - CI integration impact
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Define measurable outcomes.
+      placeholder: |
+        - [ ] target scenarios covered
+        - [ ] flakiness reduced or removed
+        - [ ] CI pipeline remains green
+    validations:
+      required: true

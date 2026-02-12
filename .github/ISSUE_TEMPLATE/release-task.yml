@@ -1,0 +1,35 @@
+name: Release task
+description: CI/CD, deployment, runtime hardening, and post-deploy validation
+title: "OPS-XX: "
+labels: ["type:devops", "agent:release", "priority:p2"]
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What release reliability outcome should this deliver?
+      placeholder: Harden deploy..., add smoke test..., update runtime config...
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Describe exact CI/CD and deployment boundaries.
+      placeholder: |
+        - workflow updates
+        - deploy config and env vars
+        - post-deploy checks
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Define measurable release outcomes.
+      placeholder: |
+        - [ ] workflow runs successfully
+        - [ ] deployed endpoint passes smoke test
+        - [ ] runbook reflects final process
+    validations:
+      required: true
