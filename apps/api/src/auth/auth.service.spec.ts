@@ -1,7 +1,11 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { hashSync } from 'bcryptjs';
+import { compare, hashSync } from 'bcryptjs';
 import { AuthService } from './auth.service';
+import type {
+  CreateUserInput,
+  UsersRepository,
+} from './repositories/users.repository';
 
 interface JwtPayload {
   username: string;
@@ -18,10 +22,18 @@ describe('AuthService', () => {
     jwtIssuer: 'warehouse-api',
     jwtAudience: 'warehouse-clients',
   };
+  const usersRepositoryStub: UsersRepository = {
+    findByUsername: jest.fn(),
+    create: jest.fn(),
+  };
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('issues an access token for valid credentials', async () => {
     const jwtService = new JwtService({ secret: config.jwtSecret });
-    const service = new AuthService(jwtService, config);
+    const service = new AuthService(jwtService, config, usersRepositoryStub);
 
     const token = await service.issueAccessToken('admin', 'admin123!');
     const payload = jwtService.verify<JwtPayload>(token.accessToken, {
@@ -36,7 +48,7 @@ describe('AuthService', () => {
 
   it('throws for invalid credentials', async () => {
     const jwtService = new JwtService({ secret: config.jwtSecret });
-    const service = new AuthService(jwtService, config);
+    const service = new AuthService(jwtService, config, usersRepositoryStub);
 
     await expect(
       service.issueAccessToken('admin', 'wrong-password'),
@@ -45,10 +57,14 @@ describe('AuthService', () => {
 
   it('supports bcrypt password hash when configured', async () => {
     const jwtService = new JwtService({ secret: config.jwtSecret });
-    const service = new AuthService(jwtService, {
-      ...config,
-      passwordHash: hashSync('admin123!', 10),
-    });
+    const service = new AuthService(
+      jwtService,
+      {
+        ...config,
+        passwordHash: hashSync('admin123!', 10),
+      },
+      usersRepositoryStub,
+    );
 
     await expect(
       service.issueAccessToken('admin', 'admin123!'),
@@ -60,13 +76,40 @@ describe('AuthService', () => {
 
   it('rejects invalid password against bcrypt hash', async () => {
     const jwtService = new JwtService({ secret: config.jwtSecret });
-    const service = new AuthService(jwtService, {
-      ...config,
-      passwordHash: hashSync('admin123!', 10),
-    });
+    const service = new AuthService(
+      jwtService,
+      {
+        ...config,
+        passwordHash: hashSync('admin123!', 10),
+      },
+      usersRepositoryStub,
+    );
 
     await expect(
       service.issueAccessToken('admin', 'wrong-password'),
     ).rejects.toThrow(UnauthorizedException);
+  });
+
+  it('registers user with hashed password and normalized username', async () => {
+    const jwtService = new JwtService({ secret: config.jwtSecret });
+    const create = jest.fn((input: CreateUserInput) => Promise.resolve(input));
+    const service = new AuthService(jwtService, config, {
+      ...usersRepositoryStub,
+      create,
+    });
+
+    const registered = await service.registerUser(
+      'Warehouse.User',
+      'StrongPassword123!',
+    );
+
+    expect(registered.username).toBe('warehouse.user');
+    expect(registered.role).toBe('user');
+    expect(registered.id.startsWith('usr_')).toBe(true);
+    expect(registered.passwordHash).not.toBe('StrongPassword123!');
+    await expect(
+      compare('StrongPassword123!', registered.passwordHash),
+    ).resolves.toBe(true);
+    expect(create).toHaveBeenCalledTimes(1);
   });
 });

@@ -8,6 +8,7 @@ describe('validateEnvironment', () => {
     expect(validated.PORT).toBe(3000);
     expect(validated.APP_VERSION).toBe('0.1.0');
     expect(validated.SUPABASE_PRODUCTS_TABLE).toBe('products');
+    expect(validated.SUPABASE_USERS_TABLE).toBe('users');
     expect(validated.RATE_LIMIT_TTL_SECONDS).toBe(60);
     expect(validated.RATE_LIMIT_LIMIT).toBe(100);
     expect(validated.APP_CORS_ORIGINS).toBe('*');

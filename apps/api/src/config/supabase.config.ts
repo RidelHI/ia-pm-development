@@ -4,6 +4,7 @@ export interface SupabaseConfig {
   url: string | null;
   apiKey: string | null;
   productsTable: string;
+  usersTable: string;
 }
 
 function resolveApiKey(): string | null {
@@ -21,5 +22,6 @@ export default registerAs(
     url: process.env.SUPABASE_URL ?? null,
     apiKey: resolveApiKey(),
     productsTable: process.env.SUPABASE_PRODUCTS_TABLE ?? 'products',
+    usersTable: process.env.SUPABASE_USERS_TABLE ?? 'users',
   }),
 );

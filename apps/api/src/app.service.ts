@@ -5,6 +5,7 @@ export interface AppInfo {
   docs: {
     healthLive: string;
     healthReady: string;
+    authRegister: string;
     authToken: string;
     products: string;
     openApi: string;
@@ -19,6 +20,7 @@ export class AppService {
       docs: {
         healthLive: '/v1/health/live',
         healthReady: '/v1/health/ready',
+        authRegister: '/v1/auth/register',
         authToken: '/v1/auth/token',
         products: '/v1/products',
         openApi: '/docs',

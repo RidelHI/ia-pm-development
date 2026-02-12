@@ -10,6 +10,7 @@ describe('supabaseConfig', () => {
     delete process.env.SUPABASE_SERVICE_ROLE_KEY;
     delete process.env.SUPABASE_ANON_KEY;
     delete process.env.SUPABASE_PRODUCTS_TABLE;
+    delete process.env.SUPABASE_USERS_TABLE;
   });
 
   afterAll(() => {
@@ -29,5 +30,6 @@ describe('supabaseConfig', () => {
   it('uses default products table when not set', () => {
     const config = supabaseConfig();
     expect(config.productsTable).toBe('products');
+    expect(config.usersTable).toBe('users');
   });
 });
