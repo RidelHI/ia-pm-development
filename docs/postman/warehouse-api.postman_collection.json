@@ -66,7 +66,60 @@
       ]
     },
     {
-      "name": "3. Auth Token (set accessToken)",
+      "name": "3. Auth Register (create user)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"warehouse.user.{{$timestamp}}\",\n  \"password\": \"StrongPassword123!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/auth/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201 or 409\", function () {",
+              "  pm.expect(pm.response.code).to.be.oneOf([201, 409]);",
+              "});",
+              "",
+              "if (pm.response.code === 201) {",
+              "  var data = pm.response.json();",
+              "  pm.test(\"Response does not expose passwordHash\", function () {",
+              "    pm.expect(data.passwordHash).to.eql(undefined);",
+              "  });",
+              "  if (data.id) {",
+              "    pm.environment.set(\"registeredUserId\", data.id);",
+              "  }",
+              "  if (data.username) {",
+              "    pm.environment.set(\"registeredUsername\", data.username);",
+              "  }",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Auth Token (set accessToken)",
       "request": {
         "method": "POST",
         "header": [
@@ -112,7 +165,7 @@
       ]
     },
     {
-      "name": "4. Health Ready (auth)",
+      "name": "5. Health Ready (auth)",
       "request": {
         "auth": {
           "type": "bearer",
@@ -156,7 +209,7 @@
       "name": "Products",
       "item": [
         {
-          "name": "5. List Products",
+          "name": "6. List Products",
           "request": {
             "auth": {
               "type": "bearer",
@@ -210,7 +263,7 @@
           ]
         },
         {
-          "name": "6. Create Product (set productId)",
+          "name": "7. Create Product (set productId)",
           "request": {
             "auth": {
               "type": "bearer",
@@ -264,7 +317,7 @@
           ]
         },
         {
-          "name": "7. Get Product By Id",
+          "name": "8. Get Product By Id",
           "request": {
             "auth": {
               "type": "bearer",
@@ -305,7 +358,7 @@
           ]
         },
         {
-          "name": "8. Update Product",
+          "name": "9. Update Product",
           "request": {
             "auth": {
               "type": "bearer",
@@ -355,7 +408,7 @@
           ]
         },
         {
-          "name": "9. Delete Product",
+          "name": "10. Delete Product",
           "request": {
             "auth": {
               "type": "bearer",
