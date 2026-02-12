@@ -34,6 +34,9 @@ describe('SupabaseProductsRepository', () => {
     const query = {
       eq: jest.fn().mockReturnThis(),
       or: jest.fn().mockReturnThis(),
+      ilike: jest.fn().mockReturnThis(),
+      gte: jest.fn().mockReturnThis(),
+      lte: jest.fn().mockReturnThis(),
       range: jest.fn().mockReturnThis(),
       then,
     };
@@ -52,6 +55,13 @@ describe('SupabaseProductsRepository', () => {
 
     const result = await repository.findAll({
       q: 'milk,50%_()',
+      sku: 'SKU-1',
+      name: 'milk',
+      location: 'A-01',
+      quantityMin: 2,
+      quantityMax: 9,
+      unitPriceMin: 100,
+      unitPriceMax: 900,
       page: 2,
       limit: 5,
     });
@@ -62,5 +72,12 @@ describe('SupabaseProductsRepository', () => {
     expect(query.or).toHaveBeenCalledWith(
       'name.ilike.%milk\\,50\\%\\_\\(\\)%,sku.ilike.%milk\\,50\\%\\_\\(\\)%',
     );
+    expect(query.ilike).toHaveBeenCalledWith('sku', '%SKU-1%');
+    expect(query.ilike).toHaveBeenCalledWith('name', '%milk%');
+    expect(query.ilike).toHaveBeenCalledWith('location', '%A-01%');
+    expect(query.gte).toHaveBeenCalledWith('quantity', 2);
+    expect(query.lte).toHaveBeenCalledWith('quantity', 9);
+    expect(query.gte).toHaveBeenCalledWith('unitPriceCents', 100);
+    expect(query.lte).toHaveBeenCalledWith('unitPriceCents', 900);
   });
 });

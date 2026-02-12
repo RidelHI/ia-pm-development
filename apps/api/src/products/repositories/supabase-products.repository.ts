@@ -54,6 +54,37 @@ export class SupabaseProductsRepository implements ProductsRepository {
       query = query.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
     }
 
+    if (filters.sku?.trim()) {
+      const sku = this.escapeLike(filters.sku.trim());
+      query = query.ilike('sku', `%${sku}%`);
+    }
+
+    if (filters.name?.trim()) {
+      const name = this.escapeLike(filters.name.trim());
+      query = query.ilike('name', `%${name}%`);
+    }
+
+    if (filters.location?.trim()) {
+      const location = this.escapeLike(filters.location.trim());
+      query = query.ilike('location', `%${location}%`);
+    }
+
+    if (filters.quantityMin !== undefined) {
+      query = query.gte('quantity', filters.quantityMin);
+    }
+
+    if (filters.quantityMax !== undefined) {
+      query = query.lte('quantity', filters.quantityMax);
+    }
+
+    if (filters.unitPriceMin !== undefined) {
+      query = query.gte('unitPriceCents', filters.unitPriceMin);
+    }
+
+    if (filters.unitPriceMax !== undefined) {
+      query = query.lte('unitPriceCents', filters.unitPriceMax);
+    }
+
     query = query.range(from, to);
 
     const result = (await query) as QueryResultWithCount<Product[]>;

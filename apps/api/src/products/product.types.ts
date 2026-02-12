@@ -34,7 +34,14 @@ export interface UpdateProductInput {
 
 export interface ProductFilters {
   q?: string;
+  sku?: string;
+  name?: string;
+  location?: string;
   status?: ProductStatus;
+  quantityMin?: number;
+  quantityMax?: number;
+  unitPriceMin?: number;
+  unitPriceMax?: number;
   page?: number;
   limit?: number;
 }
