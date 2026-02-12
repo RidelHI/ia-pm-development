@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AuthApiService } from '../../../core/auth/auth-api.service';
@@ -53,6 +53,12 @@ import { AuthApiService } from '../../../core/auth/auth-api.service';
               </p>
             }
 
+            @if (infoMessage()) {
+              <p class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                {{ infoMessage() }}
+              </p>
+            }
+
             <button
               [disabled]="isSubmitting()"
               class="w-full rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
@@ -78,6 +84,7 @@ export class LoginPageComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authApiService = inject(AuthApiService);
   private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
 
   readonly form = this.formBuilder.nonNullable.group({
     username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(64)]],
@@ -85,16 +92,32 @@ export class LoginPageComponent {
   });
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly infoMessage = signal<string | null>(null);
+
+  constructor() {
+    const registered = this.activatedRoute.snapshot.queryParamMap.get('registered');
+    const username = this.activatedRoute.snapshot.queryParamMap.get('username');
+
+    if (username) {
+      this.form.patchValue({ username });
+    }
+
+    if (registered === '1') {
+      this.infoMessage.set('Usuario registrado. Ahora inicia sesión.');
+    }
+  }
 
   async submit(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.errorMessage.set('Completa usuario y password con formato válido.');
+      this.infoMessage.set(null);
       return;
     }
 
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
+    this.infoMessage.set(null);
 
     try {
       await firstValueFrom(this.authApiService.login(this.form.getRawValue()));
@@ -107,8 +130,14 @@ export class LoginPageComponent {
   }
 
   private resolveErrorMessage(error: unknown): string {
-    if (error instanceof HttpErrorResponse && error.status === 401) {
-      return 'Credenciales inválidas. Revisa usuario y password.';
+    if (error instanceof HttpErrorResponse) {
+      if (error.status === 400) {
+        return 'Usuario y password deben cumplir el formato requerido.';
+      }
+
+      if (error.status === 401) {
+        return 'Credenciales inválidas. Revisa usuario y password.';
+      }
     }
 
     return 'No se pudo iniciar sesión. Intenta nuevamente.';
