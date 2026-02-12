@@ -23,6 +23,7 @@ Regla de seguridad:
 ## 2) Crear tabla `products`
 SQL versionado en repo:
 - `db/migrations/0001_create_products.sql`
+- `db/migrations/0002_create_users.sql`
 
 En `SQL Editor`, ejecutar el contenido de ese archivo:
 
@@ -41,6 +42,17 @@ create table if not exists public.products (
 
 create index if not exists products_status_idx on public.products (status);
 create index if not exists products_name_idx on public.products (name);
+
+create table if not exists public.users (
+  id text primary key,
+  username text not null unique,
+  "passwordHash" text not null,
+  role text not null check (role in ('admin', 'user')),
+  "createdAt" timestamptz not null default now(),
+  "updatedAt" timestamptz not null default now()
+);
+
+create index if not exists users_role_idx on public.users (role);
 ```
 
 ## 3) Configurar variables de entorno para desarrollo local
@@ -48,6 +60,7 @@ Variables requeridas por el API:
 - `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY`
 - `SUPABASE_PRODUCTS_TABLE` (usar `products`)
+- `SUPABASE_USERS_TABLE` (usar `users`)
 
 Opcion recomendada: archivo local `apps/api/.env.local` (no versionado):
 
@@ -55,6 +68,7 @@ Opcion recomendada: archivo local `apps/api/.env.local` (no versionado):
 SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_SECRET_KEY=<secret-key>
 SUPABASE_PRODUCTS_TABLE=products
+SUPABASE_USERS_TABLE=users
 PORT=3000
 ```
 

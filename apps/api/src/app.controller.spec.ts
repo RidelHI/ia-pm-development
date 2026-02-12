@@ -21,6 +21,7 @@ describe('AppController', () => {
         docs: {
           healthLive: '/v1/health/live',
           healthReady: '/v1/health/ready',
+          authRegister: '/v1/auth/register',
           authToken: '/v1/auth/token',
           products: '/v1/products',
           openApi: '/docs',

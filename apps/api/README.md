@@ -22,6 +22,7 @@ Copiar `apps/api/.env.example` y completar:
 - `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY` (recomendado para backend server-to-server)
 - `SUPABASE_PRODUCTS_TABLE` (default recomendado: `products`)
+- `SUPABASE_USERS_TABLE` (default recomendado: `users`)
 - `APP_CORS_ORIGINS` (lista separada por comas)
 - `APP_DOCS_ENABLED` / `APP_DOCS_PATH`
 - `AUTH_USERNAME`
@@ -32,6 +33,7 @@ Copiar `apps/api/.env.example` y completar:
 
 ## Endpoints actuales
 - `GET /v1` info básica de la API
+- `POST /v1/auth/register` registra usuario con password hasheado
 - `POST /v1/auth/token` emite JWT
 - `GET /v1/health/live` liveness probe pública
 - `GET /v1/health/ready` readiness probe protegida (JWT + rol `admin`)
@@ -47,7 +49,10 @@ Copiar `apps/api/.env.example` y completar:
 - Orden de prioridad de key: `SUPABASE_SECRET_KEY` -> `SUPABASE_SERVICE_ROLE_KEY` -> `SUPABASE_ANON_KEY` (legacy).
 - Si faltan variables de Supabase, se usa fallback `InMemoryProductsRepository` para desarrollo local.
 - Tabla por defecto: `products` (override con `SUPABASE_PRODUCTS_TABLE`).
-- Migracion SQL base: `db/migrations/0001_create_products.sql`.
+- Tabla de usuarios por defecto: `users` (override con `SUPABASE_USERS_TABLE`).
+- Migraciones SQL base:
+  - `db/migrations/0001_create_products.sql`
+  - `db/migrations/0002_create_users.sql`
 - Runbook de setup/verificacion: `docs/runbooks/supabase-setup.md`.
 
 ## Deploy en Render

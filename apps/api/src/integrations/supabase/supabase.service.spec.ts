@@ -6,6 +6,7 @@ describe('SupabaseService', () => {
       url: null,
       apiKey: null,
       productsTable: 'products',
+      usersTable: 'users',
     });
 
     expect(service.isConfigured()).toBe(false);
@@ -17,10 +18,12 @@ describe('SupabaseService', () => {
       url: 'https://example.supabase.co',
       apiKey: 'secret-key',
       productsTable: 'products',
+      usersTable: 'users',
     });
 
     expect(service.isConfigured()).toBe(true);
     expect(service.getProductsTable()).toBe('products');
+    expect(service.getUsersTable()).toBe('users');
   });
 
   it('uses custom products table when provided', () => {
@@ -28,8 +31,10 @@ describe('SupabaseService', () => {
       url: 'https://example.supabase.co',
       apiKey: 'secret-key',
       productsTable: 'warehouse_products',
+      usersTable: 'warehouse_users',
     });
 
     expect(service.getProductsTable()).toBe('warehouse_products');
+    expect(service.getUsersTable()).toBe('warehouse_users');
   });
 });

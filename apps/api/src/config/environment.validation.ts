@@ -5,6 +5,7 @@ export interface ValidatedEnvironment extends RawEnv {
   PORT: number;
   APP_VERSION: string;
   SUPABASE_PRODUCTS_TABLE: string;
+  SUPABASE_USERS_TABLE: string;
   RATE_LIMIT_TTL_SECONDS: number;
   RATE_LIMIT_LIMIT: number;
   APP_CORS_ORIGINS: string;
@@ -181,6 +182,8 @@ export function validateEnvironment(config: RawEnv): ValidatedEnvironment {
     APP_VERSION: toNonEmptyString(config.APP_VERSION) ?? '0.1.0',
     SUPABASE_PRODUCTS_TABLE:
       toNonEmptyString(config.SUPABASE_PRODUCTS_TABLE) ?? 'products',
+    SUPABASE_USERS_TABLE:
+      toNonEmptyString(config.SUPABASE_USERS_TABLE) ?? 'users',
     RATE_LIMIT_TTL_SECONDS:
       Number.isInteger(parsedRateLimitTtl) && parsedRateLimitTtl > 0
         ? parsedRateLimitTtl

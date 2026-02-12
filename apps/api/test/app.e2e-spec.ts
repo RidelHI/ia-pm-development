@@ -8,6 +8,19 @@ import { configureApp } from '../src/bootstrap/configure-app';
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
   let accessToken: string;
+  const previousSupabaseEnv = {
+    url: process.env.SUPABASE_URL,
+    secretKey: process.env.SUPABASE_SECRET_KEY,
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    anonKey: process.env.SUPABASE_ANON_KEY,
+  };
+
+  beforeAll(() => {
+    delete process.env.SUPABASE_URL;
+    delete process.env.SUPABASE_SECRET_KEY;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    delete process.env.SUPABASE_ANON_KEY;
+  });
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -34,6 +47,13 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
+  afterAll(() => {
+    process.env.SUPABASE_URL = previousSupabaseEnv.url;
+    process.env.SUPABASE_SECRET_KEY = previousSupabaseEnv.secretKey;
+    process.env.SUPABASE_SERVICE_ROLE_KEY = previousSupabaseEnv.serviceRoleKey;
+    process.env.SUPABASE_ANON_KEY = previousSupabaseEnv.anonKey;
+  });
+
   it('/v1 (GET)', () => {
     return request(app.getHttpServer())
       .get('/v1')
@@ -43,6 +63,7 @@ describe('AppController (e2e)', () => {
         docs: {
           healthLive: '/v1/health/live',
           healthReady: '/v1/health/ready',
+          authRegister: '/v1/auth/register',
           authToken: '/v1/auth/token',
           products: '/v1/products',
           openApi: '/docs',
@@ -71,6 +92,52 @@ describe('AppController (e2e)', () => {
 
   it('/v1/health/ready (GET) requires auth', () => {
     return request(app.getHttpServer()).get('/v1/health/ready').expect(401);
+  });
+
+  it('/v1/auth/register (POST) creates user without exposing password hash', async () => {
+    const username = `new.user.${Date.now()}`;
+    const response = await request(app.getHttpServer())
+      .post('/v1/auth/register')
+      .send({
+        username,
+        password: 'StrongPassword123!',
+      })
+      .expect(201);
+    const body = response.body as {
+      id: string;
+      username: string;
+      role: string;
+      createdAt: string;
+      updatedAt: string;
+      passwordHash?: string;
+    };
+
+    expect(body.id).toContain('usr_');
+    expect(body.username).toBe(username);
+    expect(body.role).toBe('user');
+    expect(body.createdAt).toBeDefined();
+    expect(body.updatedAt).toBeDefined();
+    expect(body.passwordHash).toBeUndefined();
+  });
+
+  it('/v1/auth/register (POST) rejects duplicated username', async () => {
+    const username = `dup.user.${Date.now()}`;
+
+    await request(app.getHttpServer())
+      .post('/v1/auth/register')
+      .send({
+        username,
+        password: 'StrongPassword123!',
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/v1/auth/register')
+      .send({
+        username,
+        password: 'StrongPassword123!',
+      })
+      .expect(409);
   });
 
   it('/v1/products (GET) requires auth', () => {

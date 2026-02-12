@@ -2,6 +2,8 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import {
   ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiCreatedResponse,
   ApiOperation,
   ApiOkResponse,
   ApiTags,
@@ -11,6 +13,8 @@ import {
 import { AuthService } from './auth.service';
 import { AccessTokenResponseDto } from './dto/access-token-response.dto';
 import { LoginDto } from './dto/login.dto';
+import { RegisterUserDto } from './dto/register-user.dto';
+import { RegisteredUserResponseDto } from './dto/registered-user-response.dto';
 
 @Controller({
   path: 'auth',
@@ -19,6 +23,25 @@ import { LoginDto } from './dto/login.dto';
 @ApiTags('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Post('register')
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Register a user account' })
+  @ApiCreatedResponse({ type: RegisteredUserResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid request body' })
+  @ApiConflictResponse({ description: 'Username already exists' })
+  @ApiTooManyRequestsResponse({ description: 'Rate limit exceeded' })
+  async register(
+    @Body() input: RegisterUserDto,
+  ): Promise<RegisteredUserResponseDto> {
+    const user = await this.authService.registerUser(
+      input.username,
+      input.password,
+    );
+
+    return RegisteredUserResponseDto.fromDomain(user);
+  }
 
   @Post('token')
   @Throttle({ default: { limit: 5, ttl: 60000 } })

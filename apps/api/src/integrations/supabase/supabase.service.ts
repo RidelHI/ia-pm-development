@@ -31,6 +31,7 @@ export class SupabaseService {
       url,
       apiKey,
       productsTable: this.config.productsTable,
+      usersTable: this.config.usersTable,
     };
   }
 
@@ -40,6 +41,10 @@ export class SupabaseService {
 
   getProductsTable(): string {
     return this.getConfig()?.productsTable ?? 'products';
+  }
+
+  getUsersTable(): string {
+    return this.getConfig()?.usersTable ?? 'users';
   }
 
   getClient(): SupabaseClient | null {
