@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AuthApiService } from '../../../core/auth/auth-api.service';
@@ -75,6 +75,7 @@ import { AuthApiService } from '../../../core/auth/auth-api.service';
 export class RegisterPageComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authApiService = inject(AuthApiService);
+  private readonly router = inject(Router);
 
   readonly form = this.formBuilder.nonNullable.group({
     username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(64)]],
@@ -100,12 +101,12 @@ export class RegisterPageComponent {
       const response = await firstValueFrom(
         this.authApiService.register(this.form.getRawValue()),
       );
-      this.successMessage.set(
-        `Usuario ${response.username} creado. Ahora puedes iniciar sesión.`,
-      );
-      this.form.reset({
-        username: '',
-        password: '',
+      this.successMessage.set(`Usuario ${response.username} creado correctamente.`);
+      await this.router.navigate(['/login'], {
+        queryParams: {
+          registered: '1',
+          username: response.username,
+        },
       });
     } catch (error) {
       this.errorMessage.set(this.resolveErrorMessage(error));
@@ -115,8 +116,14 @@ export class RegisterPageComponent {
   }
 
   private resolveErrorMessage(error: unknown): string {
-    if (error instanceof HttpErrorResponse && error.status === 409) {
-      return 'Ese usuario ya existe.';
+    if (error instanceof HttpErrorResponse) {
+      if (error.status === 400) {
+        return 'Usuario y password deben cumplir el formato requerido.';
+      }
+
+      if (error.status === 409) {
+        return 'Ese usuario ya existe.';
+      }
     }
 
     return 'No se pudo registrar el usuario. Intenta nuevamente.';
