@@ -28,3 +28,9 @@ Estructura base feature-first en `apps/web/src/app`:
 
 - Tailwind CSS habilitado con `@tailwindcss/postcss`.
 - Entrada global en `src/styles.scss` con variables y utilidades base (`bg-shell`).
+
+## Runtime API config
+
+- El frontend resuelve la base API desde `window.__APP_CONFIG__.apiBaseUrl` (archivo `public/env.js`).
+- Fallback local: `http://localhost:3000/v1`.
+- En GitHub Pages, el workflow escribe `env.js` usando la variable `WEB_API_BASE_URL`.
