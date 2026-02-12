@@ -1,19 +1,31 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
 import { configureApp } from '../src/bootstrap/configure-app';
+import { AppModule } from './../src/app.module';
+
+interface AuthConfigLike {
+  jwtSecret: string;
+  jwtExpiresInSeconds: number;
+  jwtIssuer: string;
+  jwtAudience: string;
+}
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
-  let accessToken: string;
+  let userAccessToken: string;
+  let adminAccessToken: string;
   const previousSupabaseEnv = {
     url: process.env.SUPABASE_URL,
     secretKey: process.env.SUPABASE_SECRET_KEY,
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
     anonKey: process.env.SUPABASE_ANON_KEY,
   };
+  const unique = (): string =>
+    `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
   beforeAll(() => {
     delete process.env.SUPABASE_URL;
@@ -31,16 +43,42 @@ describe('AppController (e2e)', () => {
     configureApp(app);
     await app.init();
 
+    const username = `auth.user.${unique()}`;
+    const password = 'StrongPassword123!';
+    await request(app.getHttpServer())
+      .post('/v1/auth/register')
+      .send({ username, password })
+      .expect(201);
+
     const tokenResponse = await request(app.getHttpServer())
       .post('/v1/auth/token')
-      .send({
-        username: 'admin',
-        password: 'admin123!',
-      })
+      .send({ username, password })
       .expect(200);
+    userAccessToken = (tokenResponse.body as { accessToken: string })
+      .accessToken;
 
-    const body = tokenResponse.body as { accessToken: string };
-    accessToken = body.accessToken;
+    const configService = app.get(ConfigService);
+    const authConfig =
+      configService.get<AuthConfigLike>('auth') ??
+      ({
+        jwtSecret: 'development-only-secret-change-in-production',
+        jwtExpiresInSeconds: 900,
+        jwtIssuer: 'warehouse-api',
+        jwtAudience: 'warehouse-clients',
+      } satisfies AuthConfigLike);
+    const jwtService = new JwtService({
+      secret: authConfig.jwtSecret,
+      signOptions: {
+        expiresIn: `${authConfig.jwtExpiresInSeconds}s`,
+        issuer: authConfig.jwtIssuer,
+        audience: authConfig.jwtAudience,
+      },
+    });
+    adminAccessToken = jwtService.sign({
+      sub: 'admin-e2e',
+      username: 'admin.e2e',
+      roles: ['admin'],
+    });
   });
 
   afterEach(async () => {
@@ -95,7 +133,7 @@ describe('AppController (e2e)', () => {
   });
 
   it('/v1/auth/register (POST) creates user without exposing password hash', async () => {
-    const username = `new.user.${Date.now()}`;
+    const username = `new.user.${unique()}`;
     const response = await request(app.getHttpServer())
       .post('/v1/auth/register')
       .send({
@@ -121,7 +159,7 @@ describe('AppController (e2e)', () => {
   });
 
   it('/v1/auth/register (POST) rejects duplicated username', async () => {
-    const username = `dup.user.${Date.now()}`;
+    const username = `dup.user.${unique()}`;
 
     await request(app.getHttpServer())
       .post('/v1/auth/register')
@@ -140,15 +178,34 @@ describe('AppController (e2e)', () => {
       .expect(409);
   });
 
+  it('/v1/auth/token (POST) authenticates persisted user', async () => {
+    const username = `login.user.${unique()}`;
+    const password = 'StrongPassword123!';
+
+    await request(app.getHttpServer())
+      .post('/v1/auth/register')
+      .send({ username, password })
+      .expect(201);
+
+    const tokenResponse = await request(app.getHttpServer())
+      .post('/v1/auth/token')
+      .send({ username, password })
+      .expect(200);
+
+    expect(
+      (tokenResponse.body as { accessToken?: string }).accessToken,
+    ).toBeDefined();
+  });
+
   it('/v1/products (GET) requires auth', () => {
     return request(app.getHttpServer()).get('/v1/products').expect(401);
   });
 
-  it('/v1/products (GET) applies pagination', async () => {
-    const marker = `E2E-PAG-${Date.now()}`;
+  it('/v1/products (GET) applies pagination for authenticated user', async () => {
+    const marker = `E2E-PAG-${unique()}`;
     await request(app.getHttpServer())
       .post('/v1/products')
-      .set('Authorization', `Bearer ${accessToken}`)
+      .set('Authorization', `Bearer ${adminAccessToken}`)
       .send({
         sku: `${marker}-001`,
         name: `${marker} Product 1`,
@@ -158,7 +215,7 @@ describe('AppController (e2e)', () => {
       .expect(201);
     await request(app.getHttpServer())
       .post('/v1/products')
-      .set('Authorization', `Bearer ${accessToken}`)
+      .set('Authorization', `Bearer ${adminAccessToken}`)
       .send({
         sku: `${marker}-002`,
         name: `${marker} Product 2`,
@@ -169,12 +226,12 @@ describe('AppController (e2e)', () => {
 
     const firstPage = await request(app.getHttpServer())
       .get(`/v1/products?q=${marker}&page=1&limit=1`)
-      .set('Authorization', `Bearer ${accessToken}`)
+      .set('Authorization', `Bearer ${userAccessToken}`)
       .expect(200);
 
     const secondPage = await request(app.getHttpServer())
       .get(`/v1/products?q=${marker}&page=2&limit=1`)
-      .set('Authorization', `Bearer ${accessToken}`)
+      .set('Authorization', `Bearer ${userAccessToken}`)
       .expect(200);
 
     const firstBody = firstPage.body as {
@@ -193,17 +250,17 @@ describe('AppController (e2e)', () => {
     expect(firstBody.data[0]?.id).not.toBe(secondBody.data[0]?.id);
   });
 
-  it('/v1/products (GET) validates pagination params', () => {
+  it('/v1/products (GET) validates pagination params for user token', () => {
     return request(app.getHttpServer())
       .get('/v1/products?page=0&limit=101')
-      .set('Authorization', `Bearer ${accessToken}`)
+      .set('Authorization', `Bearer ${userAccessToken}`)
       .expect(400);
   });
 
-  it('/v1/products (POST) rejects non-whitelisted fields', () => {
+  it('/v1/products (POST) rejects non-whitelisted fields for admin', () => {
     return request(app.getHttpServer())
       .post('/v1/products')
-      .set('Authorization', `Bearer ${accessToken}`)
+      .set('Authorization', `Bearer ${adminAccessToken}`)
       .send({
         sku: 'SKU-VALID-001',
         name: 'Valid Product',
@@ -212,5 +269,18 @@ describe('AppController (e2e)', () => {
         adminOnlyField: true,
       })
       .expect(400);
+  });
+
+  it('/v1/products (POST) denies user role for mutable endpoint', () => {
+    return request(app.getHttpServer())
+      .post('/v1/products')
+      .set('Authorization', `Bearer ${userAccessToken}`)
+      .send({
+        sku: 'SKU-USER-FORBIDDEN-001',
+        name: 'User Forbidden Product',
+        quantity: 1,
+        unitPriceCents: 100,
+      })
+      .expect(403);
   });
 });

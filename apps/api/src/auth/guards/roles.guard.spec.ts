@@ -45,4 +45,13 @@ describe('RolesGuard', () => {
 
     expect(guard.canActivate(createContext(['admin']))).toBe(true);
   });
+
+  it('allows when route accepts multiple roles and user has one', () => {
+    const reflector = {
+      getAllAndOverride: jest.fn().mockReturnValue(['admin', 'user']),
+    } as unknown as Reflector;
+    const guard = new RolesGuard(reflector);
+
+    expect(guard.canActivate(createContext(['user']))).toBe(true);
+  });
 });

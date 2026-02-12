@@ -111,6 +111,8 @@
               "  }",
               "  if (data.username) {",
               "    pm.environment.set(\"registeredUsername\", data.username);",
+              "    pm.environment.set(\"authUsername\", data.username);",
+              "    pm.environment.set(\"authPassword\", \"StrongPassword123!\");",
               "  }",
               "}"
             ]

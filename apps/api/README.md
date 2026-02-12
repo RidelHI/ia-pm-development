@@ -25,16 +25,13 @@ Copiar `apps/api/.env.example` y completar:
 - `SUPABASE_USERS_TABLE` (default recomendado: `users`)
 - `APP_CORS_ORIGINS` (lista separada por comas)
 - `APP_DOCS_ENABLED` / `APP_DOCS_PATH`
-- `AUTH_USERNAME`
-- `AUTH_PASSWORD`
-- `AUTH_PASSWORD_HASH` (bcrypt; obligatorio en `production`)
 - `AUTH_JWT_SECRET` (minimo 32 caracteres en `production`)
 - `AUTH_JWT_EXPIRES_IN_SECONDS` / `AUTH_JWT_ISSUER` / `AUTH_JWT_AUDIENCE`
 
 ## Endpoints actuales
 - `GET /v1` info básica de la API
 - `POST /v1/auth/register` registra usuario con password hasheado
-- `POST /v1/auth/token` emite JWT
+- `POST /v1/auth/token` autentica contra usuarios persistidos y emite JWT
 - `GET /v1/health/live` liveness probe pública
 - `GET /v1/health/ready` readiness probe protegida (JWT + rol `admin`)
 - `GET /v1/products`
@@ -53,6 +50,8 @@ Copiar `apps/api/.env.example` y completar:
 - Migraciones SQL base:
   - `db/migrations/0001_create_products.sql`
   - `db/migrations/0002_create_users.sql`
+- Los usuarios registrados via endpoint se crean con rol `user`.
+- Para habilitar operaciones mutables de productos se requiere token con rol `admin`.
 - Runbook de setup/verificacion: `docs/runbooks/supabase-setup.md`.
 
 ## Deploy en Render
