@@ -26,17 +26,18 @@ Sin ese label, la tarea se considera mal definida y no entra a ejecucion.
 4. Agente owner toma la issue y la mueve a `In Progress`.
 5. Agente owner crea rama (`feature/<slug>` o `fix/<slug>`) y ejecuta implementacion acotada al scope.
 6. Agente owner ejecuta calidad local: `pnpm lint`, `pnpm test`, `pnpm build`.
-7. Agente owner abre PR con `Closes #<issue_number>`.
-8. Agente owner mueve la issue a `In Review`.
-9. QA/Reviewer valida criterios de aceptacion y evidencia tecnica.
-10. Al merge, la issue pasa a `Done`.
+7. Agente owner ejecuta self-review final con `docs/ai/checklists/ai-self-review-gate.md`.
+8. Agente owner abre PR con `Closes #<issue_number>` y seccion `AI Self-Review Gate`.
+9. Agente owner mueve la issue a `In Review`.
+10. QA/Reviewer valida criterios de aceptacion y evidencia tecnica.
+11. Al merge, la issue pasa a `Done`.
 
 ## Reglas operativas
 - 1 issue = 1 rama = 1 PR.
 - PR pequena y trazable.
 - No expandir scope fuera de criterios de aceptacion.
 - CI debe pasar antes de merge.
-- El check `quality` valida convencion de rama y issue enlazada con label `agent:*`.
+- El check `quality` valida convencion de rama, issue enlazada con label `agent:*` y `AI Self-Review Gate` en PR.
 
 ## Operacion diaria con CLI
 ```bash

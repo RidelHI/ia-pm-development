@@ -19,6 +19,7 @@
 - Require linked issue with exactly one `agent:*` label.
 - Keep `1 issue = 1 branch = 1 PR`.
 - Include `Closes #<issue_number>` in PR body.
+- Complete `AI Self-Review Gate` in PR body using `docs/ai/checklists/ai-self-review-gate.md`.
 - Validate and report:
   - `pnpm lint`
   - `pnpm test`

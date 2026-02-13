@@ -17,6 +17,7 @@ Necesito que generes una especificación ejecutable con:
 6) Riesgos y mitigaciones.
 7) Plan de pruebas mínimo (unit/integration/e2e si aplica).
 8) Definition of done.
+9) Criterios del `AI Self-Review Gate` antes de PR (`docs/ai/checklists/ai-self-review-gate.md`).
 
 Responde en español y alineado al modelo agent-first del repo.
 ```

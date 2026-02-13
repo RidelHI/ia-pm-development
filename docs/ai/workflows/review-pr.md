@@ -12,6 +12,7 @@ description: Review a pull request against issue scope, agent ownership, and qua
 1. Read PR description and linked issue.
 2. Confirm PR includes `Closes #<issue_number>`.
 3. Confirm issue has exactly one `agent:*` label.
+4. Confirm PR includes `AI Self-Review Gate` with framework marked and decision.
 
 ## Step 2: Scope Validation
 1. Compare issue acceptance criteria vs implemented behavior.
@@ -27,6 +28,7 @@ description: Review a pull request against issue scope, agent ownership, and qua
 1. Verify `pnpm lint`, `pnpm test`, `pnpm build` status.
 2. Verify CI `quality` check is passing.
 3. Check for release-impacting risk when workflow or runtime config changed.
+4. Cross-check self-review claims against actual code changes.
 
 ## Step 5: Decision
 1. Approve when criteria and quality gates are satisfied.

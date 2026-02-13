@@ -17,7 +17,8 @@ Instrucciones:
 4) Diferencia entre bloqueo vs recomendación.
 5) Evalúa cobertura de acceptance criteria y DoD del agente owner.
 6) Evalúa si lint/test/build son evidencia suficiente.
-7) Termina con veredicto: approve o changes requested.
+7) Verifica consistencia del `AI Self-Review Gate` contra el código real.
+8) Termina con veredicto: approve o changes requested.
 
 Responde en español, concreto y accionable.
 ```

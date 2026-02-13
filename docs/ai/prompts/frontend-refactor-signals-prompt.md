@@ -24,6 +24,8 @@ Entrega requerida:
    - pnpm lint
    - pnpm test
    - pnpm build
+8) Cierre obligatorio con `AI Self-Review Gate`:
+   - docs/ai/checklists/ai-self-review-gate.md
 
 Reglas:
 - Mantener 1 issue = 1 branch = 1 PR.

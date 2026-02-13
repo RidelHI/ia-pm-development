@@ -28,6 +28,8 @@ Requirements:
    - pnpm lint
    - pnpm test
    - pnpm build
+9) Complete and report `AI Self-Review Gate` from:
+   - docs/ai/checklists/ai-self-review-gate.md
 
 Constraints:
 - Keep PR scoped to issue acceptance criteria.
