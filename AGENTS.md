@@ -10,19 +10,26 @@ Operate as a professional software delivery agent for a monorepo with:
 ## Non-Negotiable Rules
 1. Enforce `agent-first` process from `docs/ai/agent-operating-model.md`.
 2. Require an issue with exactly one `agent:*` label before implementation.
-3. Keep 1 issue = 1 branch = 1 PR.
-4. Follow Git branching strategy from `docs/runbooks/git-branching-model.md`.
-5. Use `pnpm` only. Do not use `npm` or `yarn`.
-6. Run and report:
+3. Run preflight before coding:
+   - `pnpm agent:preflight -- --issue <issue_number> --agent <agent:role>`
+4. Keep 1 issue = 1 branch = 1 PR.
+5. Branch naming must include issue id:
+   - `feature/<issue_number>-<slug>`
+   - `fix/<issue_number>-<slug>`
+   - `chore/<issue_number>-<slug>`
+6. Follow Git branching strategy from `docs/runbooks/git-branching-model.md`.
+7. Use `pnpm` only. Do not use `npm` or `yarn`.
+8. Run and report:
    - `pnpm lint`
    - `pnpm test`
    - `pnpm build`
-7. Require `Closes #<issue_number>` in PR body.
-8. Keep PR scope aligned to issue acceptance criteria.
+9. Require `Closes #<issue_number>` in PR body and it must match branch issue id.
+10. Keep PR scope aligned to issue acceptance criteria.
 
 ## Source of Truth
 - Workflow rules: `docs/runbooks/github-project-workflow.md`
 - Git strategy: `docs/runbooks/git-branching-model.md`
+- Preflight gate: `docs/runbooks/agent-preflight-gate.md`
 - Operating model: `docs/ai/agent-operating-model.md`
 - Angular + AI playbook: `docs/ai/angular-ai-professional-playbook.md`
 - AI self-review gate: `docs/ai/checklists/ai-self-review-gate.md`

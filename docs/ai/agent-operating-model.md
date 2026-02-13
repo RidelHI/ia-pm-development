@@ -75,8 +75,9 @@ Los labels `agent:*` siguen siendo obligatorios para ownership y trazabilidad, a
 ## Reglas de orquestacion
 1. Sin issue refinada, no hay desarrollo.
 2. Sin ownership por agente, la issue no entra en ejecucion.
-3. Sin PR enlazada a issue, no hay merge.
-4. Sin evidencia de calidad, no hay cierre.
+3. Sin preflight (`pnpm agent:preflight -- --issue <issue_number> --agent <agent:role>`), no hay implementacion.
+4. Sin PR enlazada a issue, no hay merge.
+5. Sin evidencia de calidad, no hay cierre.
 
 ## Workflows y prompts
 Usar estos artefactos para repetir procesos con consistencia:
@@ -86,6 +87,7 @@ Usar estos artefactos para repetir procesos con consistencia:
   - `docs/ai/workflows/deploy.md`
 - Git strategy:
   - `docs/runbooks/git-branching-model.md`
+  - `docs/runbooks/agent-preflight-gate.md`
 - Angular + AI:
   - `docs/ai/angular-ai-professional-playbook.md`
   - `docs/runbooks/angular-frontend-architecture.md`

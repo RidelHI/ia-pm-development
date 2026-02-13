@@ -19,11 +19,11 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           BRANCH="${{ github.head_ref }}"
-          if [[ "$BRANCH" =~ ^(feature|fix|chore)\/[a-z0-9._-]+$ ]]; then
+          if [[ "$BRANCH" =~ ^(feature|fix|chore)\/([0-9]+)-[a-z0-9._-]+$ ]]; then
             echo "Branch name is valid: $BRANCH"
           else
             echo "Invalid branch name: $BRANCH"
-            echo "Use one of: feature/<slug>, fix/<slug>, chore/<slug>"
+            echo "Use one of: feature/<issue_number>-<slug>, fix/<issue_number>-<slug>, chore/<issue_number>-<slug>"
             exit 1
           fi
 
@@ -33,6 +33,16 @@ jobs:
         with:
           script: |
             const body = context.payload.pull_request.body || '';
+            const headRef = context.payload.pull_request.head.ref || '';
+            const branchMatch = /^(feature|fix|chore)\/(\d+)-[a-z0-9._-]+$/i.exec(headRef);
+            if (!branchMatch) {
+              core.setFailed(
+                `Branch ${headRef} must follow feature|fix|chore/<issue_number>-<slug>.`,
+              );
+              return;
+            }
+
+            const branchIssueNumber = Number(branchMatch[2]);
             const regex = /closes\s+#(\d+)/ig;
             const matches = [...body.matchAll(regex)];
 
@@ -47,6 +57,89 @@ jobs:
                 `PR must reference exactly 1 closing issue. Found: ${issueNumbers.join(', ')}.`,
               );
               return;
+            }
+
+            if (issueNumbers[0] !== branchIssueNumber) {
+              core.setFailed(
+                `Branch issue #${branchIssueNumber} must match PR closing issue #${issueNumbers[0]}.`,
+              );
+              return;
+            }
+
+            async function getProjectItemStatus(issueNumber) {
+              let after = null;
+              do {
+                const response = await github.graphql(
+                  `
+                    query ($owner: String!, $projectNumber: Int!, $after: String) {
+                      user(login: $owner) {
+                        projectV2(number: $projectNumber) {
+                          items(first: 100, after: $after) {
+                            nodes {
+                              content {
+                                __typename
+                                ... on Issue {
+                                  number
+                                }
+                              }
+                              fieldValues(first: 20) {
+                                nodes {
+                                  ... on ProjectV2ItemFieldSingleSelectValue {
+                                    name
+                                    field {
+                                      ... on ProjectV2SingleSelectField {
+                                        name
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                            pageInfo {
+                              hasNextPage
+                              endCursor
+                            }
+                          }
+                        }
+                      }
+                    }
+                  `,
+                  {
+                    owner: context.repo.owner,
+                    projectNumber: 1,
+                    after,
+                  },
+                );
+
+                const project = response?.user?.projectV2;
+                if (!project) {
+                  return null;
+                }
+
+                const items = project.items.nodes ?? [];
+                for (const item of items) {
+                  if (item?.content?.__typename !== 'Issue') {
+                    continue;
+                  }
+
+                  if (item.content.number !== issueNumber) {
+                    continue;
+                  }
+
+                  const values = item.fieldValues?.nodes ?? [];
+                  const status = values.find((value) => {
+                    return value?.field?.name === 'Status';
+                  });
+
+                  return status?.name ?? null;
+                }
+
+                after = project.items.pageInfo.hasNextPage
+                  ? project.items.pageInfo.endCursor
+                  : null;
+              } while (after);
+
+              return undefined;
             }
 
             for (const issue_number of issueNumbers) {
@@ -69,6 +162,17 @@ jobs:
 
               if (issue.state !== 'open') {
                 core.setFailed(`Issue #${issue_number} must be open while PR is in review.`);
+              }
+
+              const projectStatus = await getProjectItemStatus(issue_number);
+              if (projectStatus === undefined) {
+                core.setFailed(
+                  `Issue #${issue_number} must be added to project #1 (${context.repo.owner}).`,
+                );
+              } else if (!['In Progress', 'In Review'].includes(projectStatus)) {
+                core.setFailed(
+                  `Issue #${issue_number} must be In Progress or In Review in project #1. Current: ${projectStatus ?? 'unset'}.`,
+                );
               }
             }
 

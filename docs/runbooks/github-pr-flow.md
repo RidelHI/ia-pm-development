@@ -39,9 +39,9 @@ Modo equipo:
 
 ## 3) Convencion de ramas
 La convencion se valida en CI (`.github/workflows/ci.yml`):
-- `feature/<slug>`
-- `fix/<slug>`
-- `chore/<slug>`
+- `feature/<issue_number>-<slug>`
+- `fix/<issue_number>-<slug>`
+- `chore/<issue_number>-<slug>`
 
 Si la rama no cumple, CI falla y bloquea merge por el check requerido `quality`.
 
@@ -55,7 +55,9 @@ gh api repos/<owner>/<repo>/branches/main/protection
 El job `quality` en `.github/workflows/ci.yml` valida adicionalmente:
 - PR body con `Closes #<issue_number>` exacto.
 - Exactamente 1 issue de cierre por PR.
+- Issue de cierre debe coincidir con el issue id incluido en el nombre de rama.
 - Issue de cierre abierta y con exactamente 1 label `agent:*`.
+- Issue de cierre debe existir en Project #1 y estar en `In Progress` o `In Review`.
 - Seccion `AI Self-Review Gate` presente en PR body.
 - Framework marcado en self-review (`Angular way` o `NestJS way`).
 - Decision de self-review (`Compliant` o `Needs Changes`).

@@ -15,9 +15,14 @@ Reglas base:
 6. Releases por tags/versionado, no por ramas largas de release.
 
 Convencion de ramas:
-- `feature/<slug>`
-- `fix/<slug>`
-- `chore/<slug>`
+- `feature/<issue_number>-<slug>`
+- `fix/<issue_number>-<slug>`
+- `chore/<issue_number>-<slug>`
+
+Preflight obligatorio antes de codificar:
+```bash
+pnpm agent:preflight -- --issue <issue_number> --agent <agent:role>
+```
 
 ## Preparacion local (una vez por repo)
 ```bash
@@ -33,21 +38,21 @@ git config --local rerere.enabled true
 git fetch origin
 git switch main
 git pull --ff-only origin main
-git switch -c feature/<slug>
+git switch -c feature/<issue_number>-<slug>
 ```
 
 Implementar cambios pequenos y commitear de forma clara:
 ```bash
 git add .
 git commit -m "feat(api): <resumen>"
-git push -u origin feature/<slug>
+git push -u origin feature/<issue_number>-<slug>
 ```
 
 Abrir PR enlazando issue:
 - `Closes #<issue_number>`
 
 ### Caso 2: Bug normal (no urgente)
-Mismo flujo que feature, pero usando `fix/<slug>`.
+Mismo flujo que feature, pero usando `fix/<issue_number>-<slug>`.
 
 ### Caso 3: Hotfix urgente en produccion
 1. Crear issue de hotfix.
@@ -56,7 +61,7 @@ Mismo flujo que feature, pero usando `fix/<slug>`.
 git fetch origin
 git switch main
 git pull --ff-only origin main
-git switch -c fix/<slug-hotfix>
+git switch -c fix/<issue_number>-<slug-hotfix>
 ```
 3. Abrir PR pequena, validar CI y merge prioritario.
 4. Verificar deploy/smoke test.
@@ -96,7 +101,7 @@ git push origin main
 5. Si el contexto cambio fuerte, cerrar rama y crear una nueva desde `main`.
 
 ## Checklist rapido antes de abrir PR
-1. Rama correcta (`feature/`, `fix/` o `chore/`).
+1. Rama correcta (`feature/<issue_number>-...`, `fix/<issue_number>-...` o `chore/<issue_number>-...`).
 2. Issue enlazada en descripcion (`Closes #...`).
 3. Cambios acotados al scope.
 4. `pnpm lint`, `pnpm test`, `pnpm build` en verde.
