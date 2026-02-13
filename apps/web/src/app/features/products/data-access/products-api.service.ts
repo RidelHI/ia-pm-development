@@ -1,8 +1,12 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../core/config/api-base-url.token';
 import type { PaginatedProductsResponse } from '../domain/products.models';
+import {
+  toPaginatedProductsResponse,
+  type PaginatedProductsResponseDto,
+} from '../domain/products.mappers';
 
 @Injectable({
   providedIn: 'root',
@@ -18,11 +22,10 @@ export class ProductsApiService {
       params = params.set('q', query.trim());
     }
 
-    return this.http.get<PaginatedProductsResponse>(
-      `${this.baseApiUrl}/products`,
-      {
+    return this.http
+      .get<PaginatedProductsResponseDto>(`${this.baseApiUrl}/products`, {
         params,
-      },
-    );
+      })
+      .pipe(map((response) => toPaginatedProductsResponse(response)));
   }
 }

@@ -76,12 +76,13 @@ describe('AuthApiService', () => {
     expect(request.request.method).toBe('POST');
     request.flush({
       accessToken: 'token-123',
-      tokenType: 'Bearer',
+      tokenType: 'JWT',
       expiresInSeconds: 900,
     });
 
     await responsePromise;
     expect(authStore.isAuthenticated()).toBe(true);
     expect(authStore.accessToken()).toBe('token-123');
+    expect(authStore.session()?.tokenType).toBe('Bearer');
   });
 });

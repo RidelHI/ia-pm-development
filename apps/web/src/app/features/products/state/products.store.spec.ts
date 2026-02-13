@@ -90,4 +90,39 @@ describe('ProductsStore', () => {
     expect(store.errorCode()).toBe(401);
     expect(store.error()).toContain('sesión expiró');
   });
+
+  it('exposes empty state after successful empty response', async () => {
+    listProductsImplementation = () =>
+      of({
+        data: [],
+        meta: {
+          page: 1,
+          limit: 20,
+          total: 0,
+          totalPages: 0,
+        },
+      });
+
+    store.loadProducts('');
+    await Promise.resolve();
+
+    expect(store.error()).toBeNull();
+    expect(store.isEmpty()).toBe(true);
+  });
+
+  it('clears error state with clearError', async () => {
+    listProductsImplementation = () =>
+      throwError(() => new HttpErrorResponse({ status: 403 }));
+
+    store.loadProducts('');
+    await Promise.resolve();
+    expect(store.error()).toContain('permisos');
+    expect(store.errorCode()).toBe(403);
+
+    store.clearError();
+    await Promise.resolve();
+
+    expect(store.error()).toBeNull();
+    expect(store.errorCode()).toBeNull();
+  });
 });

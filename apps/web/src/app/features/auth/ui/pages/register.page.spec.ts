@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 import { AuthApiService } from '../../data-access/auth-api.service';
 import { RegisterPageComponent } from './register.page';
 
@@ -75,5 +75,39 @@ describe('RegisterPageComponent', () => {
 
     expect(component.errorMessage()).toContain('ya existe');
     expect(navigateCalls).toEqual([]);
+  });
+
+  it('shows loading state while register request is pending', async () => {
+    const registerSubject = new Subject<unknown>();
+    registerImplementation = () => registerSubject.asObservable();
+    const fixture = TestBed.createComponent(RegisterPageComponent);
+    const component = fixture.componentInstance;
+    const router = TestBed.inject(Router);
+    router.navigate = (() => Promise.resolve(true)) as Router['navigate'];
+
+    component.form.setValue({
+      username: 'warehouse.user',
+      password: 'StrongPassword123!',
+    });
+
+    const submitPromise = component.submit();
+    fixture.detectChanges();
+
+    const submitButton = fixture.nativeElement.querySelector(
+      'button[type="submit"]',
+    ) as HTMLButtonElement;
+    expect(component.isSubmitting()).toBe(true);
+    expect(submitButton.disabled).toBe(true);
+    expect(submitButton.textContent).toContain('Registrando...');
+
+    registerSubject.next({
+      id: 'usr_01',
+      username: 'warehouse.user',
+      role: 'user',
+      createdAt: '2026-02-13T00:00:00.000Z',
+      updatedAt: '2026-02-13T00:00:00.000Z',
+    });
+    registerSubject.complete();
+    await submitPromise;
   });
 });

@@ -74,4 +74,40 @@ describe('ProductsApiService', () => {
       },
     });
   });
+
+  it('maps dto payload to product model contract', async () => {
+    const responsePromise = firstValueFrom(service.listProducts());
+    const request = httpController.expectOne(
+      (req) =>
+        req.url === 'http://localhost:3000/v1/products' &&
+        req.params.get('page') === '1' &&
+        req.params.get('limit') === '20',
+    );
+
+    request.flush({
+      data: [
+        {
+          id: 'prod-01',
+          sku: 'SKU-01',
+          name: 'Product 01',
+          quantity: 3,
+          unitPriceCents: 1200,
+          status: 'archived',
+          location: '',
+          createdAt: '2026-02-13T00:00:00.000Z',
+          updatedAt: '2026-02-13T00:00:00.000Z',
+        },
+      ],
+      meta: {
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+      },
+    });
+
+    const response = await responsePromise;
+    expect(response.data[0]?.status).toBe('inactive');
+    expect(response.data[0]?.location).toBeNull();
+  });
 });

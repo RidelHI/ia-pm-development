@@ -19,7 +19,7 @@ function isStorageAvailable(): boolean {
   return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
 }
 
-function readInitialSession(): AuthSession | null {
+export function readInitialSession(): AuthSession | null {
   if (!isStorageAvailable()) {
     return null;
   }

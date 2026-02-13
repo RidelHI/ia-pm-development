@@ -1,5 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthStore } from './auth.store';
+import {
+  AUTH_SESSION_STORAGE_KEY,
+  AuthStore,
+  readInitialSession,
+} from './auth.store';
 
 type AuthStoreInstance = InstanceType<typeof AuthStore>;
 
@@ -34,5 +38,13 @@ describe('AuthStore', () => {
 
     expect(store.isAuthenticated()).toBe(false);
     expect(store.accessToken()).toBeNull();
+  });
+
+  it('removes malformed session data from storage', () => {
+    localStorage.setItem(AUTH_SESSION_STORAGE_KEY, '{bad-json');
+    const malformedSession = readInitialSession();
+
+    expect(malformedSession).toBeNull();
+    expect(localStorage.getItem(AUTH_SESSION_STORAGE_KEY)).toBeNull();
   });
 });

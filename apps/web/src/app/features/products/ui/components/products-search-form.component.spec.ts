@@ -29,4 +29,19 @@ describe('ProductsSearchFormComponent', () => {
 
     expect(emitted).toBe(true);
   });
+
+  it('shows loading label and disables submit while loading', () => {
+    const fixture = TestBed.createComponent(ProductsSearchFormComponent);
+
+    fixture.componentRef.setInput('loading', true);
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector(
+      'button[type="submit"]',
+    ) as HTMLButtonElement;
+
+    expect(button.disabled).toBe(true);
+    expect(button.textContent).toContain('Cargando...');
+    expect(button.getAttribute('aria-busy')).toBe('true');
+  });
 });
