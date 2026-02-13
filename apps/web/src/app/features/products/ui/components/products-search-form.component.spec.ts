@@ -19,15 +19,19 @@ describe('ProductsSearchFormComponent', () => {
 
   it('emits search event on submit', () => {
     const fixture = TestBed.createComponent(ProductsSearchFormComponent);
+    fixture.detectChanges();
     const component = fixture.componentInstance;
     let emitted = false;
+    const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
 
     component.searchRequested.subscribe(() => {
       emitted = true;
     });
-    component.submitSearch();
+    form.dispatchEvent(submitEvent);
 
     expect(emitted).toBe(true);
+    expect(submitEvent.defaultPrevented).toBe(true);
   });
 
   it('shows loading label and disables submit while loading', () => {
