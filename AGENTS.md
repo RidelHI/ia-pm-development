@@ -27,6 +27,7 @@ Operate as a professional software delivery agent for a monorepo with:
 10. Keep PR scope aligned to issue acceptance criteria.
 
 ## Source of Truth
+- Governance policy (machine-readable): `governance/policy.json`
 - Workflow rules: `docs/runbooks/github-project-workflow.md`
 - Git strategy: `docs/runbooks/git-branching-model.md`
 - Preflight gate: `docs/runbooks/agent-preflight-gate.md`

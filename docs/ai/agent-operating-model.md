@@ -103,6 +103,7 @@ Usar estos artefactos para repetir procesos con consistencia:
 ## Context files para asistentes IA
 Archivos versionados para mantener consistencia entre herramientas:
 - `AGENTS.md`
+- `governance/policy.json`
 - `.github/copilot-instructions.md`
 - `.instructions.md`
 - `.cursor/rules/angular-web.mdc`
