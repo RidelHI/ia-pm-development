@@ -1,29 +1,89 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-products-search-form',
+  imports: [
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressSpinnerModule,
+  ],
   template: `
-    <form class="flex flex-wrap gap-3" (submit)="onSubmit($event)" novalidate>
-      <label class="sr-only" for="products-query">Buscar productos</label>
-      <input
-        id="products-query"
-        [value]="query()"
-        (input)="onQueryInput($event)"
-        aria-label="Buscar productos por nombre o SKU"
-        class="min-w-64 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
-        placeholder="Buscar por nombre o SKU"
-        type="search"
-      />
+    <form class="search-form" (submit)="onSubmit($event)" novalidate>
+      <mat-form-field appearance="outline" class="search-input">
+        <mat-label>Buscar productos</mat-label>
+        <input
+          matInput
+          id="products-query"
+          [value]="query()"
+          (input)="onQueryInput($event)"
+          aria-label="Buscar productos por nombre o SKU"
+          placeholder="Buscar por nombre o SKU"
+          type="search"
+        />
+      </mat-form-field>
+
       <button
+        mat-flat-button
+        color="primary"
         [attr.aria-busy]="loading()"
         [disabled]="loading()"
-        class="rounded-lg bg-cyan-700 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
         type="submit"
       >
-        @if (loading()) { Cargando... } @else { Buscar }
+        @if (loading()) {
+          <mat-progress-spinner
+            class="button-spinner"
+            diameter="18"
+            mode="indeterminate"
+          ></mat-progress-spinner>
+          Cargando...
+        } @else {
+          Buscar
+        }
       </button>
     </form>
   `,
+  styles: [
+    `
+      .search-form {
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      .search-input {
+        width: 100%;
+      }
+
+      button[type='submit'] {
+        width: 100%;
+        min-height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .button-spinner {
+        --mdc-circular-progress-active-indicator-color: currentColor;
+      }
+
+      @media (min-width: 760px) {
+        .search-form {
+          grid-template-columns: minmax(280px, 1fr) auto;
+          align-items: center;
+        }
+
+        button[type='submit'] {
+          width: auto;
+          padding-inline: 1.2rem;
+        }
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductsSearchFormComponent {

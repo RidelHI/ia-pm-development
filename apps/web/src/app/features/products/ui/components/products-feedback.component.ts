@@ -1,25 +1,42 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-products-feedback',
+  imports: [MatCardModule],
   template: `
     @if (errorMessage()) {
-      <section
-        aria-live="assertive"
-        class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-        role="alert"
-      >
-        {{ errorMessage() }}
-      </section>
+      <mat-card class="feedback-card feedback-error" appearance="outlined" role="alert" aria-live="assertive">
+        <p>{{ errorMessage() }}</p>
+      </mat-card>
     } @else if (isEmpty()) {
-      <section
-        aria-live="polite"
-        class="rounded-2xl border border-stone-200 bg-white px-4 py-8 text-center text-sm text-slate-600 shadow-sm"
-      >
-        No hay productos para mostrar con los filtros actuales.
-      </section>
+      <mat-card class="feedback-card feedback-empty" appearance="outlined" role="status" aria-live="polite">
+        <p>No hay productos para mostrar con los filtros actuales.</p>
+      </mat-card>
     }
   `,
+  styles: [
+    `
+      .feedback-card {
+        border-radius: 14px;
+      }
+
+      .feedback-card p {
+        margin: 0;
+      }
+
+      .feedback-error {
+        border-color: #f2b0b0;
+        background: #fff4f4;
+        color: var(--status-error);
+      }
+
+      .feedback-empty {
+        border-color: color-mix(in srgb, var(--border-soft) 80%, white);
+        color: var(--text-muted);
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductsFeedbackComponent {

@@ -1,94 +1,231 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { firstValueFrom } from 'rxjs';
 import { AuthApiService } from '../../data-access/auth-api.service';
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    MatButtonModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressSpinnerModule,
+  ],
   template: `
-    <main class="min-h-screen bg-shell p-6 md:p-10">
-      <section class="mx-auto grid max-w-5xl overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-2xl shadow-sky-950/10 md:grid-cols-2">
-        <article class="bg-gradient-to-br from-sky-900 to-cyan-700 p-8 text-white md:p-10">
-          <p class="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200">
-            Warehouse Portal
+    <main class="auth-page">
+      <section class="auth-layout">
+        <mat-card class="brand-panel" appearance="outlined">
+          <p class="brand-eyebrow">Warehouse Portal</p>
+          <h1>Controla inventario y operaciones desde un solo panel</h1>
+          <p class="brand-copy">
+            Flujo autenticado con guard + interceptor y dashboard operativo en Angular Material.
           </p>
-          <h1 class="mt-3 text-3xl font-semibold leading-tight md:text-4xl">
-            Login para ver productos protegidos
-          </h1>
-          <p class="mt-4 text-sm leading-relaxed text-cyan-100/90">
-            Base FE-03 con arquitectura feature-first, guard funcional e interceptor HTTP.
-          </p>
-        </article>
+        </mat-card>
 
-        <article class="p-8 md:p-10">
-          <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4" novalidate>
-            <label class="block space-y-1">
-              <span class="text-sm font-semibold text-slate-700">Usuario</span>
+        <mat-card class="auth-panel" appearance="outlined">
+          <h2>Iniciar sesión</h2>
+          <p class="subtitle">Accede a la gestión de productos protegida.</p>
+
+          <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <mat-form-field appearance="outline">
+              <mat-label>Usuario</mat-label>
               <input
+                matInput
                 formControlName="username"
                 [attr.aria-invalid]="form.controls.username.invalid && form.controls.username.touched"
                 autocomplete="username"
-                class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:ring-2"
                 placeholder="warehouse.user"
                 type="text"
               />
-            </label>
+            </mat-form-field>
 
-            <label class="block space-y-1">
-              <span class="text-sm font-semibold text-slate-700">Password</span>
+            <mat-form-field appearance="outline">
+              <mat-label>Password</mat-label>
               <input
+                matInput
                 formControlName="password"
                 [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
                 autocomplete="current-password"
-                class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:ring-2"
                 placeholder="StrongPassword123!"
                 type="password"
               />
-            </label>
+            </mat-form-field>
 
             @if (errorMessage()) {
-              <p
-                aria-live="assertive"
-                class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"
-                role="alert"
-              >
+              <p aria-live="assertive" class="message message-error" role="alert">
                 {{ errorMessage() }}
               </p>
             }
 
             @if (infoMessage()) {
-              <p
-                aria-live="polite"
-                class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
-                role="status"
-              >
+              <p aria-live="polite" class="message message-info" role="status">
                 {{ infoMessage() }}
               </p>
             }
 
             <button
+              mat-flat-button
+              color="primary"
               [attr.aria-busy]="isSubmitting()"
               [disabled]="isSubmitting()"
-              class="w-full rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
               type="submit"
             >
-              @if (isSubmitting()) { Entrando... } @else { Entrar }
+              @if (isSubmitting()) {
+                <mat-progress-spinner
+                  class="button-spinner"
+                  diameter="18"
+                  mode="indeterminate"
+                ></mat-progress-spinner>
+                Entrando...
+              } @else {
+                Entrar
+              }
             </button>
           </form>
 
-          <p class="mt-4 text-sm text-slate-600">
+          <p class="link-line">
             ¿No tienes cuenta?
-            <a routerLink="/register" class="font-semibold text-cyan-700 underline">
-              Crear usuario
-            </a>
+            <a routerLink="/register">Crear usuario</a>
           </p>
-        </article>
+        </mat-card>
       </section>
     </main>
   `,
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+
+      .auth-page {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: clamp(1rem, 3vw, 2.5rem);
+      }
+
+      .auth-layout {
+        width: min(1100px, 100%);
+        display: grid;
+        gap: 1rem;
+      }
+
+      .brand-panel {
+        border-color: color-mix(in srgb, var(--border-soft) 75%, white);
+        background:
+          linear-gradient(155deg, #0f2f57 0%, #236ca4 45%, #62b4dc 100%)
+          border-box;
+        color: #eaf6ff;
+      }
+
+      .brand-eyebrow {
+        margin: 0;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+
+      .brand-panel h1 {
+        margin: 0.8rem 0;
+        max-width: 22ch;
+        font-size: clamp(1.6rem, 3vw, 2.2rem);
+        line-height: 1.15;
+      }
+
+      .brand-copy {
+        margin: 0;
+        max-width: 34ch;
+        color: #ddf2ff;
+      }
+
+      .auth-panel {
+        border-color: color-mix(in srgb, var(--border-soft) 70%, white);
+        background: var(--panel-background);
+        backdrop-filter: blur(8px);
+      }
+
+      .auth-panel h2 {
+        margin: 0;
+        font-size: 1.4rem;
+      }
+
+      .subtitle {
+        margin: 0.4rem 0 1rem;
+        color: var(--text-muted);
+      }
+
+      form {
+        display: grid;
+        gap: 0.5rem;
+      }
+
+      mat-form-field {
+        width: 100%;
+      }
+
+      button[type='submit'] {
+        width: 100%;
+        min-height: 46px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .button-spinner {
+        --mdc-circular-progress-active-indicator-color: currentColor;
+      }
+
+      .message {
+        margin: 0;
+        padding: 0.7rem 0.8rem;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        font-size: 0.9rem;
+      }
+
+      .message-error {
+        border-color: #f9b4b4;
+        background: #fff1f1;
+        color: var(--status-error);
+      }
+
+      .message-info {
+        border-color: #9ac6ff;
+        background: #eef5ff;
+        color: #00468c;
+      }
+
+      .link-line {
+        margin: 1.2rem 0 0;
+        color: var(--text-muted);
+        font-size: 0.92rem;
+      }
+
+      .link-line a {
+        color: #0057b7;
+        font-weight: 700;
+      }
+
+      @media (min-width: 900px) {
+        .auth-layout {
+          grid-template-columns: minmax(330px, 1fr) minmax(370px, 1fr);
+          align-items: stretch;
+        }
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPageComponent {
