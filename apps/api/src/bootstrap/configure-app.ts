@@ -8,6 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import { json, urlencoded } from 'express';
 import type { AppConfig } from '../config/app.config';
 
 export function resolveLoggerLevels(nodeEnv: string | undefined): LogLevel[] {
@@ -21,6 +22,9 @@ export function resolveLoggerLevels(nodeEnv: string | undefined): LogLevel[] {
 export function configureApp(app: INestApplication): void {
   const configService = app.get(ConfigService);
   const appConfig = configService.getOrThrow<AppConfig>('app');
+
+  app.use(json({ limit: '10mb' }));
+  app.use(urlencoded({ extended: true, limit: '10mb' }));
 
   app.use(
     helmet({

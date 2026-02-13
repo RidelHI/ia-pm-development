@@ -21,6 +21,8 @@ import { ProductsGridComponent } from '../components/products-grid.component';
 import { ProductsSearchFormComponent } from '../components/products-search-form.component';
 
 type EditorMode = 'create' | 'edit' | 'detail' | null;
+const MAX_IMAGE_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
 
 @Component({
   selector: 'app-products-page',
@@ -295,6 +297,9 @@ type EditorMode = 'create' | 'edit' | 'detail' | null;
                   <p class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">
                     Cargar imagen
                   </p>
+                  <p class="text-xs text-slate-500">
+                    Formatos soportados: imagen desde tu equipo (máx. 5 MB) o URL externa.
+                  </p>
                   <input
                     (change)="onImageFileSelected($event)"
                     accept="image/*"
@@ -448,7 +453,7 @@ export class ProductsPageComponent {
     imageUrl: new FormControl('', {
       nonNullable: true,
       validators: [
-        Validators.maxLength(4096),
+        Validators.maxLength(MAX_IMAGE_DATA_URL_LENGTH),
         Validators.pattern(/^$|^(https?:\/\/|data:image\/).*/i),
       ],
     }),
@@ -518,7 +523,7 @@ export class ProductsPageComponent {
 
     if (this.productForm.invalid) {
       this.productForm.markAllAsTouched();
-      this.formErrorMessage.set('Completa correctamente los campos obligatorios.');
+      this.formErrorMessage.set(this.resolveProductFormErrorMessage());
       return;
     }
 
@@ -639,6 +644,8 @@ export class ProductsPageComponent {
   }
 
   onImageFileSelected(event: Event): void {
+    this.formErrorMessage.set(null);
+
     const target = event.target;
 
     if (!(target instanceof HTMLInputElement)) {
@@ -648,6 +655,15 @@ export class ProductsPageComponent {
     const [file] = target.files ?? [];
 
     if (!file) {
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_FILE_SIZE_BYTES) {
+      this.productForm.controls.imageUrl.setValue('');
+      this.productForm.controls.imageUrl.markAsTouched();
+      this.formErrorMessage.set(
+        'La imagen es demasiado grande. Usa una imagen menor a 5 MB o una URL externa.',
+      );
       return;
     }
 
@@ -761,6 +777,20 @@ export class ProductsPageComponent {
       location: raw.location,
       notes: raw.notes,
     };
+  }
+
+  private resolveProductFormErrorMessage(): string {
+    const imageControl = this.productForm.controls.imageUrl;
+
+    if (imageControl.hasError('maxlength')) {
+      return 'La imagen es demasiado grande. Usa una imagen menor a 5 MB o una URL externa.';
+    }
+
+    if (imageControl.hasError('pattern')) {
+      return 'La imagen debe ser una URL http(s) válida o una imagen cargada desde archivo.';
+    }
+
+    return 'Completa correctamente los campos obligatorios.';
   }
 
   private resolveActionErrorMessage(error: unknown, fallback: string): string {

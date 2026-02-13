@@ -90,4 +90,142 @@ describe('SupabaseProductsRepository', () => {
     expect(query.gte).toHaveBeenCalledWith('unitPriceCents', 100);
     expect(query.lte).toHaveBeenCalledWith('unitPriceCents', 900);
   });
+
+  it('retries findAll without missing optional columns when schema is outdated', async () => {
+    type FindAllResult = {
+      data: never[] | null;
+      count: number | null;
+      error: { message: string } | null;
+    };
+
+    const firstResult: Promise<FindAllResult> = Promise.resolve({
+      data: null,
+      count: null,
+      error: { message: 'column products.barcode does not exist' },
+    });
+    const secondResult: Promise<FindAllResult> = Promise.resolve({
+      data: [],
+      count: 0,
+      error: null,
+    });
+    const firstThen: PromiseLike<FindAllResult>['then'] = (
+      onfulfilled,
+      onrejected,
+    ) => firstResult.then(onfulfilled, onrejected);
+    const secondThen: PromiseLike<FindAllResult>['then'] = (
+      onfulfilled,
+      onrejected,
+    ) => secondResult.then(onfulfilled, onrejected);
+
+    const firstQuery = {
+      eq: jest.fn().mockReturnThis(),
+      or: jest.fn().mockReturnThis(),
+      ilike: jest.fn().mockReturnThis(),
+      gte: jest.fn().mockReturnThis(),
+      lte: jest.fn().mockReturnThis(),
+      range: jest.fn().mockReturnThis(),
+      then: firstThen,
+    };
+    const secondQuery = {
+      eq: jest.fn().mockReturnThis(),
+      or: jest.fn().mockReturnThis(),
+      ilike: jest.fn().mockReturnThis(),
+      gte: jest.fn().mockReturnThis(),
+      lte: jest.fn().mockReturnThis(),
+      range: jest.fn().mockReturnThis(),
+      then: secondThen,
+    };
+
+    const from = {
+      select: jest
+        .fn()
+        .mockReturnValueOnce(firstQuery)
+        .mockReturnValueOnce(secondQuery),
+    };
+    const client = {
+      from: jest.fn().mockReturnValue(from),
+    };
+    const supabaseService = {
+      getClient: () => client,
+      getProductsTable: () => 'products',
+    } as unknown as SupabaseService;
+
+    const repository = new SupabaseProductsRepository(supabaseService);
+
+    const result = await repository.findAll({
+      q: 'milk',
+      page: 1,
+      limit: 20,
+    });
+
+    expect(result.data).toEqual([]);
+    expect(result.meta.total).toBe(0);
+    expect(firstQuery.or).toHaveBeenCalledWith(
+      'name.ilike.%milk%,sku.ilike.%milk%,barcode.ilike.%milk%,category.ilike.%milk%,brand.ilike.%milk%',
+    );
+    expect(secondQuery.or).toHaveBeenCalledWith(
+      'name.ilike.%milk%,sku.ilike.%milk%,category.ilike.%milk%,brand.ilike.%milk%',
+    );
+  });
+
+  it('retries create after dropping unsupported optional field', async () => {
+    const insertPayloads: Record<string, unknown>[] = [];
+    const query = {
+      single: jest
+        .fn()
+        .mockResolvedValueOnce({
+          data: null,
+          error: { message: 'column products.imageUrl does not exist' },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            id: 'prod-123',
+            sku: 'SKU-123',
+            name: 'Product',
+            quantity: 10,
+            unitPriceCents: 500,
+            status: 'active',
+            location: 'A-01',
+            createdAt: '2026-02-01T00:00:00.000Z',
+            updatedAt: '2026-02-01T00:00:00.000Z',
+          },
+          error: null,
+        }),
+    };
+    const from = {
+      insert: jest.fn((payload: Record<string, unknown>) => {
+        insertPayloads.push({ ...payload });
+        return {
+          select: jest.fn().mockReturnValue(query),
+        };
+      }),
+    };
+    const client = {
+      from: jest.fn().mockReturnValue(from),
+    };
+    const supabaseService = {
+      getClient: () => client,
+      getProductsTable: () => 'products',
+    } as unknown as SupabaseService;
+
+    const repository = new SupabaseProductsRepository(supabaseService);
+
+    const created = await repository.create({
+      id: 'prod-123',
+      sku: 'SKU-123',
+      name: 'Product',
+      quantity: 10,
+      unitPriceCents: 500,
+      status: 'active',
+      imageUrl: 'data:image/png;base64,AAAA',
+      location: 'A-01',
+      createdAt: '2026-02-01T00:00:00.000Z',
+      updatedAt: '2026-02-01T00:00:00.000Z',
+    });
+
+    expect(created).toBeTruthy();
+    expect(insertPayloads).toHaveLength(2);
+    expect(insertPayloads[0]?.imageUrl).toBe('data:image/png;base64,AAAA');
+    expect(insertPayloads[1]?.imageUrl).toBeUndefined();
+  });
 });

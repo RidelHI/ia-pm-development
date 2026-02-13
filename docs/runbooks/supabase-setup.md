@@ -21,11 +21,16 @@ Regla de seguridad:
 - No pegar keys en issues o PRs.
 
 ## 2) Crear tabla `products`
-SQL versionado en repo:
+SQL versionado en repo (ejecutar en orden):
 - `db/migrations/0001_create_products.sql`
 - `db/migrations/0002_create_users.sql`
+- `db/migrations/0003_extend_products_for_warehouse_crud.sql`
 
-En `SQL Editor`, ejecutar el contenido de ese archivo:
+En `SQL Editor`, ejecutar cada archivo completo en el orden indicado.
+Los dos primeros crean tablas base; el tercero agrega columnas de CRUD extendido
+(`barcode`, `category`, `brand`, `minimumStock`, `imageUrl`, `notes`) e índices.
+
+Contenido base de referencia:
 
 ```sql
 create table if not exists public.products (
@@ -53,6 +58,23 @@ create table if not exists public.users (
 );
 
 create index if not exists users_role_idx on public.users (role);
+```
+
+Extensión de productos (0003):
+```sql
+alter table public.products
+  add column if not exists barcode text,
+  add column if not exists category text,
+  add column if not exists brand text,
+  add column if not exists "minimumStock" integer check ("minimumStock" >= 0),
+  add column if not exists "imageUrl" text,
+  add column if not exists notes text;
+
+create index if not exists products_category_idx on public.products (category);
+create index if not exists products_brand_idx on public.products (brand);
+create unique index if not exists products_barcode_unique_idx
+  on public.products (barcode)
+  where barcode is not null;
 ```
 
 ## 3) Configurar variables de entorno para desarrollo local
@@ -124,6 +146,16 @@ Si el producto sigue presente, la persistencia en Supabase esta funcionando.
   - Revisar politicas RLS de la tabla `products`.
 - Error `relation "products" does not exist`:
   - Ejecutar el SQL de creacion de tabla.
+- Error `column products.<campo> does not exist` (ejemplo: `barcode`):
+  - Falta aplicar `db/migrations/0003_extend_products_for_warehouse_crud.sql`.
+
+## Imagen de producto
+- El sistema guarda la imagen en la columna `products.imageUrl`.
+- El frontend permite:
+  - pegar URL `http(s)://...`, o
+  - subir archivo; se convierte a `data:image/...` y se persiste como texto en `imageUrl`.
+- Recomendación operativa: usar imágenes de hasta 5 MB para evitar payloads excesivos.
+- No hay bucket de Supabase Storage en esta versión; la persistencia de imagen depende de que `imageUrl` exista en la tabla.
 
 ## Nota de compatibilidad
 La API mantiene fallback temporal para keys legacy (`SUPABASE_SERVICE_ROLE_KEY` y `SUPABASE_ANON_KEY`) para no romper entornos existentes. La configuracion recomendada para BE-14 es `SUPABASE_SECRET_KEY`.

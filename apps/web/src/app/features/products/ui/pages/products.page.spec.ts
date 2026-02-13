@@ -190,6 +190,31 @@ describe('ProductsPageComponent', () => {
     expect(loadProductsCalls).toEqual(['', '']);
   });
 
+  it('shows specific message when image payload is too large', async () => {
+    const fixture = TestBed.createComponent(ProductsPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component.startCreate();
+    component.productForm.patchValue({
+      sku: 'SKU-IMG-01',
+      name: 'Producto con imagen',
+      quantity: 2,
+      unitPriceCents: 999,
+      status: 'active',
+      imageUrl: `data:image/png;base64,${'A'.repeat(8_100_000)}`,
+    });
+
+    component.saveProduct(new Event('submit'));
+    await fixture.whenStable();
+
+    expect(createCalls).toBe(0);
+    expect(component.formErrorMessage()).toBe(
+      'La imagen es demasiado grande. Usa una imagen menor a 5 MB o una URL externa.',
+    );
+  });
+
   it('deletes product when user confirms action', async () => {
     productsSignal.set([baseProduct]);
     const fixture = TestBed.createComponent(ProductsPageComponent);

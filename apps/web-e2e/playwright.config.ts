@@ -25,7 +25,7 @@ export default defineConfig({
     {
       command: 'pnpm --filter api start',
       url: 'http://127.0.0.1:3000/v1/health/live',
-      reuseExistingServer: !isCI,
+      reuseExistingServer: false,
       timeout: 120_000,
       env: {
         ...process.env,
@@ -35,7 +35,7 @@ export default defineConfig({
     {
       command: 'pnpm --filter web exec ng serve --host 127.0.0.1 --port 4200',
       url: 'http://127.0.0.1:4200/login',
-      reuseExistingServer: !isCI,
+      reuseExistingServer: false,
       timeout: 120_000,
     },
   ],
