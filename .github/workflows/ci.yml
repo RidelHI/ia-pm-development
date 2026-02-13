@@ -129,84 +129,106 @@ jobs:
               return;
             }
 
-            async function getProjectItemStatus(issueNumber) {
+            const PROJECT_ITEMS_QUERY_USER = `
+              query ($owner: String!, $projectNumber: Int!, $after: String) {
+                user(login: $owner) {
+                  projectV2(number: $projectNumber) {
+                    items(first: 100, after: $after) {
+                      nodes {
+                        content {
+                          __typename
+                          ... on Issue {
+                            number
+                          }
+                        }
+                        fieldValues(first: 20) {
+                          nodes {
+                            ... on ProjectV2ItemFieldSingleSelectValue {
+                              name
+                              field {
+                                ... on ProjectV2SingleSelectField {
+                                  name
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                      pageInfo {
+                        hasNextPage
+                        endCursor
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const PROJECT_ITEMS_QUERY_ORG = `
+              query ($owner: String!, $projectNumber: Int!, $after: String) {
+                organization(login: $owner) {
+                  projectV2(number: $projectNumber) {
+                    items(first: 100, after: $after) {
+                      nodes {
+                        content {
+                          __typename
+                          ... on Issue {
+                            number
+                          }
+                        }
+                        fieldValues(first: 20) {
+                          nodes {
+                            ... on ProjectV2ItemFieldSingleSelectValue {
+                              name
+                              field {
+                                ... on ProjectV2SingleSelectField {
+                                  name
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                      pageInfo {
+                        hasNextPage
+                        endCursor
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            async function resolveProjectScope(owner) {
+              try {
+                const { data } = await github.rest.users.getByUsername({
+                  username: owner,
+                });
+                return data?.type === 'Organization' ? 'organization' : 'user';
+              } catch (error) {
+                core.setFailed(
+                  `Unable to resolve owner type for "${owner}": ${error.message}`,
+                );
+                return null;
+              }
+            }
+
+            async function getProjectItemStatus(issueNumber, projectScope) {
               let after = null;
               do {
                 const response = await github.graphql(
-                  `
-                    query ($owner: String!, $projectNumber: Int!, $after: String) {
-                      user(login: $owner) {
-                        projectV2(number: $projectNumber) {
-                          items(first: 100, after: $after) {
-                            nodes {
-                              content {
-                                __typename
-                                ... on Issue {
-                                  number
-                                }
-                              }
-                              fieldValues(first: 20) {
-                                nodes {
-                                  ... on ProjectV2ItemFieldSingleSelectValue {
-                                    name
-                                    field {
-                                      ... on ProjectV2SingleSelectField {
-                                        name
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                            pageInfo {
-                              hasNextPage
-                              endCursor
-                            }
-                          }
-                        }
-                      }
-                      organization(login: $owner) {
-                        projectV2(number: $projectNumber) {
-                          items(first: 100, after: $after) {
-                            nodes {
-                              content {
-                                __typename
-                                ... on Issue {
-                                  number
-                                }
-                              }
-                              fieldValues(first: 20) {
-                                nodes {
-                                  ... on ProjectV2ItemFieldSingleSelectValue {
-                                    name
-                                    field {
-                                      ... on ProjectV2SingleSelectField {
-                                        name
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                            pageInfo {
-                              hasNextPage
-                              endCursor
-                            }
-                          }
-                        }
-                      }
-                    }
-                  `,
-                  {
-                    owner: projectOwner,
-                    projectNumber,
-                    after,
-                  },
+                  projectScope === 'organization'
+                    ? PROJECT_ITEMS_QUERY_ORG
+                    : PROJECT_ITEMS_QUERY_USER,
+                  { owner: projectOwner, projectNumber, after },
                 );
 
-                const project = response?.user?.projectV2 ?? response?.organization?.projectV2;
+                const project =
+                  projectScope === 'organization'
+                    ? response?.organization?.projectV2
+                    : response?.user?.projectV2;
                 if (!project) {
-                  return null;
+                  return undefined;
                 }
 
                 const items = project.items.nodes ?? [];
@@ -235,6 +257,11 @@ jobs:
               return undefined;
             }
 
+            const projectScope = await resolveProjectScope(projectOwner);
+            if (!projectScope) {
+              return;
+            }
+
             for (const issue_number of issueNumbers) {
               const { data: issue } = await github.rest.issues.get({
                 owner: context.repo.owner,
@@ -257,7 +284,7 @@ jobs:
                 core.setFailed(`Issue #${issue_number} must be open while PR is in review.`);
               }
 
-              const projectStatus = await getProjectItemStatus(issue_number);
+              const projectStatus = await getProjectItemStatus(issue_number, projectScope);
               if (projectStatus === undefined) {
                 core.setFailed(
                   `Issue #${issue_number} must be added to project #${projectNumber} (${projectOwner}).`,
