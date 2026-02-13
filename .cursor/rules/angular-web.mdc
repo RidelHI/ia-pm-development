@@ -1,0 +1,40 @@
+---
+description: Angular 21 delivery rules for ia-pm-development
+globs:
+  - "apps/web/src/app/**/*.ts"
+  - "apps/web/src/app/**/*.html"
+alwaysApply: false
+---
+
+# Angular web rule
+
+## Architecture
+- Use feature-first folders and layer boundaries:
+  - `domain`, `data-access`, `state`, `ui`
+- No API calls in UI components.
+- Keep presentational components store-agnostic.
+
+## State
+- Standardize stores with `@ngrx/signals`.
+- Use `signalStore`, `withState`, `withComputed`, `withMethods`.
+- Use `rxMethod` for side effects.
+- Keep state transitions explicit for loading/error/data.
+
+## Angular conventions
+- Standalone components and `ChangeDetectionStrategy.OnPush`.
+- `input()` and `output()` APIs for component contracts.
+- Native control flow (`@if`, `@for`, `@switch`).
+- Avoid `any`; prefer strict, explicit typing.
+
+## UX and accessibility
+- Handle loading/empty/error/success states in feature pages.
+- Keep form feedback and focus behavior accessible.
+- Use semantic markup and ARIA attributes only where needed.
+
+## Delivery
+- Stay within issue scope.
+- Preserve `1 issue = 1 branch = 1 PR`.
+- Final validation must include:
+  - `pnpm lint`
+  - `pnpm test`
+  - `pnpm build`
