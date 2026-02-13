@@ -24,6 +24,9 @@
 4. Toda implementacion entra por PR enlazado (`Closes #N`).
 5. No se trabaja fuera de issue activa en el tablero.
 6. La issue se mueve a `In Review` al abrir PR y a `Done` al merge.
+7. Rama obligatoria con issue id: `feature|fix|chore/<issue_number>-<slug>`.
+8. Preflight obligatorio antes de codificar:
+   - `pnpm agent:preflight -- --issue <issue_number> --agent <agent:role>`
 
 ## Asignacion sugerida por tipo
 - `type:backend` -> `agent:backend`
