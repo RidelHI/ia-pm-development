@@ -50,3 +50,29 @@ Si la rama no cumple, CI falla y bloquea merge por el check requerido `quality`.
 gh repo view <owner>/<repo> --json defaultBranchRef,deleteBranchOnMerge,mergeCommitAllowed,rebaseMergeAllowed,squashMergeAllowed
 gh api repos/<owner>/<repo>/branches/main/protection
 ```
+
+## 5) Guardrails CI para Angular + IA
+El job `quality` en `.github/workflows/ci.yml` valida adicionalmente:
+- PR body con `Closes #<issue_number>` exacto.
+- Exactamente 1 issue de cierre por PR.
+- Issue de cierre abierta y con exactamente 1 label `agent:*`.
+- Convencion de ramas (`feature/*`, `fix/*`, `chore/*`).
+- Estructura frontend feature-first por capas (`domain`, `data-access`, `state`, `ui`).
+- Presencia de archivos de contexto IA requeridos:
+  - `AGENTS.md`
+  - `llms.txt`
+  - `.github/copilot-instructions.md`
+  - `.instructions.md`
+  - `.cursor/rules/angular-web.mdc`
+  - `docs/ai/angular-ai-professional-playbook.md`
+  - `docs/runbooks/angular-mcp-setup.md`
+
+## 6) Troubleshooting rapido
+- Falla por `Closes #<issue_number>`:
+  - Agregar la linea exacta en el cuerpo del PR y re-ejecutar checks.
+- Falla por ownership `agent:*`:
+  - Ajustar labels de la issue para dejar exactamente un `agent:*`.
+- Falla por estructura feature-first:
+  - Revisar `apps/web/src/app/features/<feature>` y crear capas faltantes.
+- Falla por archivos IA faltantes:
+  - Restaurar los archivos requeridos o ajustar PR si hubo borrado accidental.

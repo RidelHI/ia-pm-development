@@ -33,15 +33,21 @@ jobs:
         with:
           script: |
             const body = context.payload.pull_request.body || '';
-            const regex = /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/ig;
+            const regex = /closes\s+#(\d+)/ig;
             const matches = [...body.matchAll(regex)];
 
             if (matches.length === 0) {
-              core.setFailed('PR must include "Closes #<issue_number>" (or Fixes/Resolves).');
+              core.setFailed('PR must include "Closes #<issue_number>" exactly.');
               return;
             }
 
             const issueNumbers = [...new Set(matches.map((match) => Number(match[1])))];
+            if (issueNumbers.length !== 1) {
+              core.setFailed(
+                `PR must reference exactly 1 closing issue. Found: ${issueNumbers.join(', ')}.`,
+              );
+              return;
+            }
 
             for (const issue_number of issueNumbers) {
               const { data: issue } = await github.rest.issues.get({
@@ -60,7 +66,82 @@ jobs:
                   `Issue #${issue_number} must have exactly 1 agent:* label. Found: ${agentLabels.join(', ') || 'none'}.`,
                 );
               }
+
+              if (issue.state !== 'open') {
+                core.setFailed(`Issue #${issue_number} must be open while PR is in review.`);
+              }
             }
+
+      - name: Validate Angular feature-first layer structure
+        run: |
+          FEATURES_ROOT="apps/web/src/app/features"
+
+          if [[ ! -d "$FEATURES_ROOT" ]]; then
+            echo "::error::Missing required directory: $FEATURES_ROOT"
+            exit 1
+          fi
+
+          missing=0
+          found_feature=0
+
+          for feature_path in "$FEATURES_ROOT"/*; do
+            if [[ ! -d "$feature_path" ]]; then
+              continue
+            fi
+
+            found_feature=1
+            for layer in domain data-access state ui; do
+              if [[ ! -d "$feature_path/$layer" ]]; then
+                echo "::error::Feature $(basename "$feature_path") is missing layer '$layer'."
+                missing=1
+              fi
+            done
+          done
+
+          if [[ "$found_feature" -eq 0 ]]; then
+            echo "::error::No feature folders found under $FEATURES_ROOT"
+            exit 1
+          fi
+
+          if [[ "$missing" -ne 0 ]]; then
+            exit 1
+          fi
+
+      - name: Validate required AI context files
+        run: |
+          required_files=(
+            "AGENTS.md"
+            "llms.txt"
+            ".github/copilot-instructions.md"
+            ".instructions.md"
+            ".cursor/rules/angular-web.mdc"
+            "docs/ai/angular-ai-professional-playbook.md"
+            "docs/runbooks/angular-mcp-setup.md"
+          )
+
+          missing=0
+          for file in "${required_files[@]}"; do
+            if [[ ! -f "$file" ]]; then
+              echo "::error file=$file::Missing required AI context file."
+              missing=1
+            fi
+          done
+
+          if [[ "$missing" -ne 0 ]]; then
+            exit 1
+          fi
+
+      - name: Validate AGENTS references Angular AI docs
+        run: |
+          grep -q "docs/ai/angular-ai-professional-playbook.md" AGENTS.md || {
+            echo "::error::AGENTS.md must reference docs/ai/angular-ai-professional-playbook.md"
+            exit 1
+          }
+
+          grep -q "docs/runbooks/angular-mcp-setup.md" AGENTS.md || {
+            echo "::error::AGENTS.md must reference docs/runbooks/angular-mcp-setup.md"
+            exit 1
+          }
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

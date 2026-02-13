@@ -1,5 +1,6 @@
 ## Linked Issue
 - [ ] PR description includes `Closes #<issue_number>`
+- [ ] PR links exactly one closing issue
 - [ ] Linked issue has exactly one `agent:*` label
 
 ## Scope
