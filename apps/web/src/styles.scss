@@ -1,34 +1,64 @@
-@use 'tailwindcss';
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$warehouse-theme: mat.define-theme(
+  (
+    color: (
+      theme-type: light,
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    density: (
+      scale: -1,
+    ),
+    typography: (
+      plain-family: 'Manrope, "Segoe UI Variable", "Segoe UI", sans-serif',
+      brand-family: '"Space Grotesk", "Segoe UI Variable", "Segoe UI", sans-serif',
+    ),
+  )
+);
 
 :root {
-  --bg-shell: radial-gradient(
-      120% 120% at 0% 0%,
-      #f9f6ef 0%,
-      #eef7f4 45%,
-      #e6eff8 100%
-    )
+  @include mat.all-component-themes($warehouse-theme);
+
+  --shell-background:
+    radial-gradient(120% 120% at 5% 5%, #fef6e8 0%, #eef8ff 45%, #e9f2ff 100%)
     fixed;
-  --text-body: #0f172a;
-  --font-primary:
-    'Manrope', 'Avenir Next', 'Segoe UI Variable', 'Segoe UI', sans-serif;
+  --panel-background: #ffffffee;
+  --border-soft: #dce7ff;
+  --text-primary: #1c2435;
+  --text-muted: #5f6c87;
+  --status-success: #1a7f37;
+  --status-error: #b42318;
 }
 
-@layer base {
-  html,
-  body {
-    min-height: 100%;
-  }
-
-  body {
-    margin: 0;
-    color: var(--text-body);
-    font-family: var(--font-primary);
-    background: var(--bg-shell);
-  }
+* {
+  box-sizing: border-box;
 }
 
-@layer utilities {
-  .bg-shell {
-    background: var(--bg-shell);
-  }
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: 'Manrope', 'Segoe UI Variable', 'Segoe UI', sans-serif;
+  background: var(--shell-background);
+}
+
+h1,
+h2,
+h3,
+.mat-toolbar {
+  font-family: 'Space Grotesk', 'Manrope', 'Segoe UI Variable', 'Segoe UI', sans-serif;
+}
+
+code {
+  border-radius: 6px;
+  padding: 2px 6px;
+  background: #eef3ff;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
 }

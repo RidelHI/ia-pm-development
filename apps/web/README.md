@@ -26,8 +26,9 @@ Estructura base feature-first en `apps/web/src/app`:
 
 ## Estilos
 
-- Tailwind CSS habilitado con `@tailwindcss/postcss`.
-- Entrada global en `src/styles.scss` con variables y utilidades base (`bg-shell`).
+- Angular Material 21 habilitado con tema global en `src/styles.scss`.
+- Tokens visuales y layout del dashboard definidos con SCSS + componentes Material standalone.
+- Animaciones activadas con `provideAnimationsAsync()` en `app.config.ts`.
 
 ## Runtime API config
 

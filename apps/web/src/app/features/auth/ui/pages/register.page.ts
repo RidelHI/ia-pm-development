@@ -1,86 +1,192 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { firstValueFrom } from 'rxjs';
 import { AuthApiService } from '../../data-access/auth-api.service';
 
 @Component({
   selector: 'app-register-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    MatButtonModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressSpinnerModule,
+  ],
   template: `
-    <main class="min-h-screen bg-shell p-6 md:p-10">
-      <section class="mx-auto max-w-2xl rounded-3xl border border-stone-200 bg-white p-8 shadow-2xl shadow-sky-950/10 md:p-10">
-        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-700">
-          Registro
-        </p>
-        <h1 class="mt-3 text-3xl font-semibold text-slate-900">Crear usuario</h1>
-        <p class="mt-2 text-sm text-slate-600">
+    <main class="register-page">
+      <mat-card class="register-card" appearance="outlined">
+        <p class="eyebrow">Nuevo acceso</p>
+        <h1>Crear usuario</h1>
+        <p class="subtitle">
           Endpoint backend: <code>/v1/auth/register</code>
         </p>
 
-        <form [formGroup]="form" (ngSubmit)="submit()" class="mt-6 space-y-4" novalidate>
-          <label class="block space-y-1">
-            <span class="text-sm font-semibold text-slate-700">Usuario</span>
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <mat-form-field appearance="outline">
+            <mat-label>Usuario</mat-label>
             <input
+              matInput
               formControlName="username"
               [attr.aria-invalid]="form.controls.username.invalid && form.controls.username.touched"
               autocomplete="username"
-              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:ring-2"
               placeholder="warehouse.user"
               type="text"
             />
-          </label>
+          </mat-form-field>
 
-          <label class="block space-y-1">
-            <span class="text-sm font-semibold text-slate-700">Password</span>
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
             <input
+              matInput
               formControlName="password"
               [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
               autocomplete="new-password"
-              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:ring-2"
               placeholder="StrongPassword123!"
               type="password"
             />
-          </label>
+          </mat-form-field>
 
           @if (errorMessage()) {
-            <p
-              aria-live="assertive"
-              class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"
-              role="alert"
-            >
+            <p aria-live="assertive" class="message message-error" role="alert">
               {{ errorMessage() }}
             </p>
           }
 
           @if (successMessage()) {
-            <p
-              aria-live="polite"
-              class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
-              role="status"
-            >
+            <p aria-live="polite" class="message message-success" role="status">
               {{ successMessage() }}
             </p>
           }
 
           <button
+            mat-flat-button
+            color="primary"
             [attr.aria-busy]="isSubmitting()"
             [disabled]="isSubmitting()"
-            class="w-full rounded-xl bg-cyan-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
             type="submit"
           >
-            @if (isSubmitting()) { Registrando... } @else { Registrar usuario }
+            @if (isSubmitting()) {
+              <mat-progress-spinner
+                class="button-spinner"
+                diameter="18"
+                mode="indeterminate"
+              ></mat-progress-spinner>
+              Registrando...
+            } @else {
+              Registrar usuario
+            }
           </button>
         </form>
 
-        <p class="mt-5 text-sm text-slate-600">
+        <p class="link-line">
           ¿Ya tienes cuenta?
-          <a routerLink="/login" class="font-semibold text-cyan-700 underline">Ir a login</a>
+          <a routerLink="/login">Ir a login</a>
         </p>
-      </section>
+      </mat-card>
     </main>
   `,
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+
+      .register-page {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: clamp(1rem, 3vw, 2.5rem);
+      }
+
+      .register-card {
+        width: min(560px, 100%);
+        border-color: color-mix(in srgb, var(--border-soft) 65%, white);
+        background: var(--panel-background);
+        backdrop-filter: blur(8px);
+      }
+
+      .eyebrow {
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #0f4b8b;
+      }
+
+      h1 {
+        margin: 0.5rem 0 0;
+        font-size: clamp(1.7rem, 4vw, 2.2rem);
+      }
+
+      .subtitle {
+        margin: 0.4rem 0 1.1rem;
+        color: var(--text-muted);
+      }
+
+      form {
+        display: grid;
+        gap: 0.55rem;
+      }
+
+      mat-form-field,
+      button[type='submit'] {
+        width: 100%;
+      }
+
+      button[type='submit'] {
+        min-height: 46px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .button-spinner {
+        --mdc-circular-progress-active-indicator-color: currentColor;
+      }
+
+      .message {
+        margin: 0;
+        padding: 0.7rem 0.8rem;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        font-size: 0.9rem;
+      }
+
+      .message-error {
+        border-color: #f9b4b4;
+        background: #fff1f1;
+        color: var(--status-error);
+      }
+
+      .message-success {
+        border-color: #8fd3a8;
+        background: #ecf8f0;
+        color: var(--status-success);
+      }
+
+      .link-line {
+        margin: 1.2rem 0 0;
+        color: var(--text-muted);
+        font-size: 0.92rem;
+      }
+
+      .link-line a {
+        color: #0057b7;
+        font-weight: 700;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterPageComponent {
