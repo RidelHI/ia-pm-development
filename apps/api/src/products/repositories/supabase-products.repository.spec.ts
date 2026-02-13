@@ -56,10 +56,15 @@ describe('SupabaseProductsRepository', () => {
     const result = await repository.findAll({
       q: 'milk,50%_()',
       sku: 'SKU-1',
+      barcode: '7501',
       name: 'milk',
+      category: 'lacteos',
+      brand: 'campo',
       location: 'A-01',
       quantityMin: 2,
       quantityMax: 9,
+      minimumStockMin: 1,
+      minimumStockMax: 12,
       unitPriceMin: 100,
       unitPriceMax: 900,
       page: 2,
@@ -70,13 +75,18 @@ describe('SupabaseProductsRepository', () => {
     expect(result.meta.limit).toBe(5);
     expect(query.range).toHaveBeenCalledWith(5, 9);
     expect(query.or).toHaveBeenCalledWith(
-      'name.ilike.%milk\\,50\\%\\_\\(\\)%,sku.ilike.%milk\\,50\\%\\_\\(\\)%',
+      'name.ilike.%milk\\,50\\%\\_\\(\\)%,sku.ilike.%milk\\,50\\%\\_\\(\\)%,barcode.ilike.%milk\\,50\\%\\_\\(\\)%,category.ilike.%milk\\,50\\%\\_\\(\\)%,brand.ilike.%milk\\,50\\%\\_\\(\\)%',
     );
     expect(query.ilike).toHaveBeenCalledWith('sku', '%SKU-1%');
+    expect(query.ilike).toHaveBeenCalledWith('barcode', '%7501%');
     expect(query.ilike).toHaveBeenCalledWith('name', '%milk%');
+    expect(query.ilike).toHaveBeenCalledWith('category', '%lacteos%');
+    expect(query.ilike).toHaveBeenCalledWith('brand', '%campo%');
     expect(query.ilike).toHaveBeenCalledWith('location', '%A-01%');
     expect(query.gte).toHaveBeenCalledWith('quantity', 2);
     expect(query.lte).toHaveBeenCalledWith('quantity', 9);
+    expect(query.gte).toHaveBeenCalledWith('minimumStock', 1);
+    expect(query.lte).toHaveBeenCalledWith('minimumStock', 12);
     expect(query.gte).toHaveBeenCalledWith('unitPriceCents', 100);
     expect(query.lte).toHaveBeenCalledWith('unitPriceCents', 900);
   });

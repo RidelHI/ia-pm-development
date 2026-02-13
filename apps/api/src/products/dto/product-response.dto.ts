@@ -11,17 +11,39 @@ export class ProductResponseDto {
   @Expose()
   sku!: string;
 
+  @ApiPropertyOptional({ example: '7501234567890' })
+  @Expose()
+  barcode?: string;
+
   @ApiProperty({ example: 'Apple Box' })
   @Expose()
   name!: string;
+
+  @ApiPropertyOptional({ example: 'Bebidas' })
+  @Expose()
+  category?: string;
+
+  @ApiPropertyOptional({ example: 'Marca Norte' })
+  @Expose()
+  brand?: string;
 
   @ApiProperty({ example: 40 })
   @Expose()
   quantity!: number;
 
+  @ApiPropertyOptional({ example: 10 })
+  @Expose()
+  minimumStock?: number;
+
   @ApiProperty({ example: 599 })
   @Expose()
   unitPriceCents!: number;
+
+  @ApiPropertyOptional({
+    example: 'https://images.example.com/products/apple-box.jpg',
+  })
+  @Expose()
+  imageUrl?: string;
 
   @ApiProperty({ example: 'active' })
   @Expose()
@@ -30,6 +52,10 @@ export class ProductResponseDto {
   @ApiPropertyOptional({ example: 'A-01' })
   @Expose()
   location?: string;
+
+  @ApiPropertyOptional({ example: 'Mantener alejado del calor.' })
+  @Expose()
+  notes?: string;
 
   @ApiProperty({ example: '2026-02-01T10:00:00.000Z' })
   @Expose()

@@ -42,11 +42,17 @@ export class ProductsService {
     const product: Product = {
       id: crypto.randomUUID(),
       sku: input.sku,
+      barcode: input.barcode,
       name: input.name,
+      category: input.category,
+      brand: input.brand,
       quantity: input.quantity,
+      minimumStock: input.minimumStock,
       unitPriceCents: input.unitPriceCents,
+      imageUrl: input.imageUrl,
       status: input.status ?? 'active',
       location: input.location,
+      notes: input.notes,
       createdAt: now,
       updatedAt: now,
     };

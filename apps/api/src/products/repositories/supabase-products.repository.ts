@@ -51,7 +51,9 @@ export class SupabaseProductsRepository implements ProductsRepository {
 
     if (filters.q?.trim()) {
       const q = this.escapeLike(filters.q.trim());
-      query = query.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
+      query = query.or(
+        `name.ilike.%${q}%,sku.ilike.%${q}%,barcode.ilike.%${q}%,category.ilike.%${q}%,brand.ilike.%${q}%`,
+      );
     }
 
     if (filters.sku?.trim()) {
@@ -59,9 +61,24 @@ export class SupabaseProductsRepository implements ProductsRepository {
       query = query.ilike('sku', `%${sku}%`);
     }
 
+    if (filters.barcode?.trim()) {
+      const barcode = this.escapeLike(filters.barcode.trim());
+      query = query.ilike('barcode', `%${barcode}%`);
+    }
+
     if (filters.name?.trim()) {
       const name = this.escapeLike(filters.name.trim());
       query = query.ilike('name', `%${name}%`);
+    }
+
+    if (filters.category?.trim()) {
+      const category = this.escapeLike(filters.category.trim());
+      query = query.ilike('category', `%${category}%`);
+    }
+
+    if (filters.brand?.trim()) {
+      const brand = this.escapeLike(filters.brand.trim());
+      query = query.ilike('brand', `%${brand}%`);
     }
 
     if (filters.location?.trim()) {
@@ -75,6 +92,14 @@ export class SupabaseProductsRepository implements ProductsRepository {
 
     if (filters.quantityMax !== undefined) {
       query = query.lte('quantity', filters.quantityMax);
+    }
+
+    if (filters.minimumStockMin !== undefined) {
+      query = query.gte('minimumStock', filters.minimumStockMin);
+    }
+
+    if (filters.minimumStockMax !== undefined) {
+      query = query.lte('minimumStock', filters.minimumStockMax);
     }
 
     if (filters.unitPriceMin !== undefined) {

@@ -7,7 +7,9 @@ describe('ProductsQueryDto', () => {
     const dto = plainToInstance(ProductsQueryDto, {
       q: '  apple  ',
       sku: ' SKU-APPLE-001 ',
+      category: '  Frutas  ',
       quantityMin: '1',
+      minimumStockMax: '4',
       unitPriceMax: '500',
     });
     const errors = validateSync(dto);
@@ -15,7 +17,9 @@ describe('ProductsQueryDto', () => {
     expect(errors).toHaveLength(0);
     expect(dto.q).toBe('apple');
     expect(dto.sku).toBe('SKU-APPLE-001');
+    expect(dto.category).toBe('Frutas');
     expect(dto.quantityMin).toBe(1);
+    expect(dto.minimumStockMax).toBe(4);
     expect(dto.unitPriceMax).toBe(500);
   });
 
@@ -23,6 +27,8 @@ describe('ProductsQueryDto', () => {
     const dto = plainToInstance(ProductsQueryDto, {
       quantityMin: 10,
       quantityMax: 5,
+      minimumStockMin: 7,
+      minimumStockMax: 3,
       unitPriceMin: 700,
       unitPriceMax: 500,
     });
@@ -36,6 +42,9 @@ describe('ProductsQueryDto', () => {
       'quantityMax must be greater than or equal to quantityMin',
     );
     expect(constraints).toContain(
+      'minimumStockMax must be greater than or equal to minimumStockMin',
+    );
+    expect(constraints).toContain(
       'unitPriceMax must be greater than or equal to unitPriceMin',
     );
   });
@@ -43,6 +52,7 @@ describe('ProductsQueryDto', () => {
   it('fails when numeric filters are negative', () => {
     const dto = plainToInstance(ProductsQueryDto, {
       quantityMin: -1,
+      minimumStockMin: -1,
       unitPriceMin: -10,
     });
     const errors = validateSync(dto);

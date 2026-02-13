@@ -72,7 +72,7 @@ export class ProductsController {
   }
 
   @Post()
-  @Roles('admin')
+  @Roles('admin', 'user')
   @ApiOperation({ summary: 'Create product' })
   @ApiCreatedResponse({ type: ProductResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid request body' })
@@ -84,7 +84,7 @@ export class ProductsController {
   }
 
   @Patch(':id')
-  @Roles('admin')
+  @Roles('admin', 'user')
   @ApiOperation({ summary: 'Update product' })
   @ApiOkResponse({ type: ProductResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid request body' })
@@ -100,7 +100,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  @Roles('admin')
+  @Roles('admin', 'user')
   @ApiOperation({ summary: 'Delete product' })
   @ApiNoContentResponse({ description: 'Product deleted' })
   @ApiUnauthorizedResponse({ description: 'Invalid or expired token' })
