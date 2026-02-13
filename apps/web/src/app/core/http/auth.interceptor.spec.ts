@@ -1,7 +1,7 @@
 import { HttpRequest, HttpResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { AuthStore } from '../auth/auth.store';
+import { AuthStore } from '../../features/auth/state/auth.store';
 import { authInterceptor } from './auth.interceptor';
 
 describe('authInterceptor', () => {

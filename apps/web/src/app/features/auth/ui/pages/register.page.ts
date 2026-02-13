@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { AuthApiService } from '../../../core/auth/auth-api.service';
+import { AuthApiService } from '../../data-access/auth-api.service';
 
 @Component({
   selector: 'app-register-page',

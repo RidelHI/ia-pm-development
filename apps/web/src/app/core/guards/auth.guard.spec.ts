@@ -6,7 +6,7 @@ import {
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
-import { AuthStore } from '../auth/auth.store';
+import { AuthStore } from '../../features/auth/state/auth.store';
 import { authGuard } from './auth.guard';
 
 describe('authGuard', () => {

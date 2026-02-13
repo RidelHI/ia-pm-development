@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../core/config/api-base-url.token';
-import type { PaginatedProductsResponse } from './products.models';
+import type { PaginatedProductsResponse } from '../domain/products.models';
 
 @Injectable({
   providedIn: 'root',

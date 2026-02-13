@@ -1,5 +1,5 @@
 import { computed, effect, Injectable, signal } from '@angular/core';
-import type { AuthSession } from './auth.models';
+import type { AuthSession } from '../domain/auth.models';
 
 export const AUTH_SESSION_STORAGE_KEY = 'warehouse.auth.session';
 
