@@ -5,9 +5,9 @@ import {
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
-import { API_BASE_URL } from '../config/api-base-url.token';
+import { API_BASE_URL } from '../../../core/config/api-base-url.token';
 import { AuthApiService } from './auth-api.service';
-import { AuthStore } from './auth.store';
+import { AuthStore } from '../state/auth.store';
 
 describe('AuthApiService', () => {
   let service: AuthApiService;

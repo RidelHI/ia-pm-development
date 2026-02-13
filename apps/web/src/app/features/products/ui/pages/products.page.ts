@@ -4,9 +4,9 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { AuthStore } from '../../../core/auth/auth.store';
-import { ProductsApiService } from '../data/products-api.service';
-import type { Product } from '../data/products.models';
+import { AuthStore } from '../../../auth/state/auth.store';
+import { ProductsApiService } from '../../data-access/products-api.service';
+import type { Product } from '../../domain/products.models';
 
 @Component({
   selector: 'app-products-page',

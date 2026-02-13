@@ -2,14 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { AuthStore } from './auth.store';
-import { API_BASE_URL } from '../config/api-base-url.token';
+import { AuthStore } from '../state/auth.store';
+import { API_BASE_URL } from '../../../core/config/api-base-url.token';
 import type {
   AccessTokenResponse,
   LoginRequest,
   RegisterUserRequest,
   RegisteredUserResponse,
-} from './auth.models';
+} from '../domain/auth.models';
 
 @Injectable({
   providedIn: 'root',

@@ -2,10 +2,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
-import { AuthStore } from '../../../core/auth/auth.store';
-import { ProductsApiService } from '../data/products-api.service';
+import { AuthStore } from '../../../auth/state/auth.store';
+import { ProductsApiService } from '../../data-access/products-api.service';
 import { ProductsPageComponent } from './products.page';
-import type { PaginatedProductsResponse } from '../data/products.models';
+import type { PaginatedProductsResponse } from '../../domain/products.models';
 
 describe('ProductsPageComponent', () => {
   let listProductsImplementation: (

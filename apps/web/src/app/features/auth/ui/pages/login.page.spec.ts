@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
-import { AuthApiService } from '../../../core/auth/auth-api.service';
+import { AuthApiService } from '../../data-access/auth-api.service';
 import { LoginPageComponent } from './login.page';
 
 describe('LoginPageComponent', () => {
