@@ -49,6 +49,12 @@ pnpm test
 pnpm build
 ```
 
+## E2E Web (Playwright)
+```bash
+pnpm exec playwright install chromium
+pnpm test:e2e:web
+```
+
 ## Deploy Web (GitHub Pages)
 1. El workflow intenta habilitar Pages automaticamente en el primer despliegue.
 2. Si falla por permisos, habilitar Pages en el repo (source: GitHub Actions).
@@ -82,6 +88,7 @@ Notas operativas:
 - Prompt templates reutilizables: ver `docs/ai/prompts/`.
 - Playbook Angular + IA: ver `docs/ai/angular-ai-professional-playbook.md`.
 - Setup MCP Angular CLI: ver `docs/runbooks/angular-mcp-setup.md`.
+- E2E navegador real (Playwright): ver `docs/runbooks/playwright-web-e2e.md`.
 - Setup de Supabase para BE-14: ver `docs/runbooks/supabase-setup.md`.
 - Decision tecnica local-first (GitHub Projects + Codex): ver `docs/adr/0003-github-project-local-first.md`.
 

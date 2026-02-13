@@ -11,7 +11,11 @@
     "dev:api": "pnpm --filter api start:dev",
     "lint": "pnpm -r --if-present lint",
     "test": "pnpm -r --if-present test",
+    "test:e2e:web": "playwright test --config apps/web-e2e/playwright.config.ts",
     "build": "pnpm -r --if-present build",
     "format": "pnpm -r --if-present format"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
   }
 }
