@@ -1,12 +1,9 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import { AuthStore } from '../../../auth/state/auth.store';
-import { ProductsApiService } from '../../data-access/products-api.service';
-import type { Product } from '../../domain/products.models';
+import { ProductsStore } from '../../state/products.store';
 
 @Component({
   selector: 'app-products-page',
@@ -98,52 +95,32 @@ import type { Product } from '../../domain/products.models';
 export class ProductsPageComponent {
   private readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
-  private readonly productsApiService = inject(ProductsApiService);
-  private readonly productsState = signal<Product[]>([]);
+  private readonly productsStore = inject(ProductsStore);
 
-  readonly products = computed(() => this.productsState());
-  readonly isLoading = signal(false);
-  readonly errorMessage = signal<string | null>(null);
+  readonly products = this.productsStore.products;
+  readonly isLoading = this.productsStore.loading;
+  readonly errorMessage = this.productsStore.error;
   query = '';
 
   constructor() {
-    void this.loadProducts();
+    this.productsStore.loadProducts(this.query);
+    effect(() => {
+      if (this.productsStore.errorCode() !== 401) {
+        return;
+      }
+
+      this.authStore.clearSession();
+      this.productsStore.clearError();
+      void this.router.navigate(['/login']);
+    });
   }
 
-  async loadProducts(): Promise<void> {
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
-
-    try {
-      const response = await firstValueFrom(
-        this.productsApiService.listProducts(this.query),
-      );
-      this.productsState.set(response.data);
-    } catch (error) {
-      this.errorMessage.set(this.resolveProductsError(error));
-    } finally {
-      this.isLoading.set(false);
-    }
+  loadProducts(): void {
+    this.productsStore.loadProducts(this.query);
   }
 
   logout(): void {
     this.authStore.clearSession();
     void this.router.navigate(['/login']);
-  }
-
-  private resolveProductsError(error: unknown): string {
-    if (error instanceof HttpErrorResponse) {
-      if (error.status === 401) {
-        this.authStore.clearSession();
-        void this.router.navigate(['/login']);
-        return 'Tu sesión expiró. Vuelve a iniciar sesión.';
-      }
-
-      if (error.status === 403) {
-        return 'No tienes permisos para consultar productos.';
-      }
-    }
-
-    return 'No se pudo cargar la lista de productos.';
   }
 }

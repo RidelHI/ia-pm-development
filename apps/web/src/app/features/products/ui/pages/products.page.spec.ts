@@ -1,23 +1,43 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
-import { Observable, of, throwError } from 'rxjs';
 import { AuthStore } from '../../../auth/state/auth.store';
-import { ProductsApiService } from '../../data-access/products-api.service';
+import { ProductsStore } from '../../state/products.store';
 import { ProductsPageComponent } from './products.page';
-import type { PaginatedProductsResponse } from '../../domain/products.models';
 
 describe('ProductsPageComponent', () => {
-  let listProductsImplementation: (
-    query?: string,
-  ) => Observable<PaginatedProductsResponse>;
-  let listProductsQueries: string[];
+  const productsSignal = signal<
+    {
+      id: string;
+      sku: string;
+      name: string;
+      quantity: number;
+      unitPriceCents: number;
+      status: 'active' | 'inactive';
+      location: string | null;
+      createdAt: string;
+      updatedAt: string;
+    }[]
+  >([]);
+  const loadingSignal = signal(false);
+  const errorSignal = signal<string | null>(null);
+  const errorCodeSignal = signal<number | null>(null);
+  let loadProductsCalls: string[];
+  let clearErrorCalls: number;
   let clearSessionCalls: number;
 
-  const productsApiServiceMock = {
-    listProducts(query = '') {
-      listProductsQueries.push(query);
-      return listProductsImplementation(query);
+  const productsStoreMock = {
+    products: productsSignal,
+    loading: loadingSignal,
+    error: errorSignal,
+    errorCode: errorCodeSignal,
+    loadProducts(query: string) {
+      loadProductsCalls.push(query);
+    },
+    clearError() {
+      clearErrorCalls += 1;
+      errorSignal.set(null);
+      errorCodeSignal.set(null);
     },
   };
   const authStoreMock = {
@@ -27,25 +47,20 @@ describe('ProductsPageComponent', () => {
   };
 
   beforeEach(async () => {
-    listProductsQueries = [];
+    loadProductsCalls = [];
+    clearErrorCalls = 0;
     clearSessionCalls = 0;
-    listProductsImplementation = () =>
-      of({
-        data: [],
-        meta: {
-          page: 1,
-          limit: 20,
-          total: 0,
-          totalPages: 0,
-        },
-      });
+    productsSignal.set([]);
+    loadingSignal.set(false);
+    errorSignal.set(null);
+    errorCodeSignal.set(null);
     await TestBed.configureTestingModule({
       imports: [ProductsPageComponent],
       providers: [
         provideRouter([]),
         {
-          provide: ProductsApiService,
-          useValue: productsApiServiceMock,
+          provide: ProductsStore,
+          useValue: productsStoreMock,
         },
         {
           provide: AuthStore,
@@ -55,43 +70,32 @@ describe('ProductsPageComponent', () => {
     }).compileComponents();
   });
 
-  it('loads products from API on init', async () => {
-    listProductsImplementation = () =>
-      of({
-        data: [
-          {
-            id: 'prod-01',
-            sku: 'SKU-01',
-            name: 'Product 01',
-            quantity: 2,
-            unitPriceCents: 1500,
-            status: 'active',
-            location: 'A-01',
-            createdAt: '2026-02-12T00:00:00.000Z',
-            updatedAt: '2026-02-12T00:00:00.000Z',
-          },
-        ],
-        meta: {
-          page: 1,
-          limit: 20,
-          total: 1,
-          totalPages: 1,
-        },
-      });
+  it('loads products from store on init', async () => {
+    productsSignal.set([
+      {
+        id: 'prod-01',
+        sku: 'SKU-01',
+        name: 'Product 01',
+        quantity: 2,
+        unitPriceCents: 1500,
+        status: 'active',
+        location: 'A-01',
+        createdAt: '2026-02-12T00:00:00.000Z',
+        updatedAt: '2026-02-12T00:00:00.000Z',
+      },
+    ]);
     const fixture = TestBed.createComponent(ProductsPageComponent);
 
     fixture.detectChanges();
     await fixture.whenStable();
 
     const component = fixture.componentInstance;
-    expect(listProductsQueries).toEqual(['']);
+    expect(loadProductsCalls).toEqual(['']);
     expect(component.products().length).toBe(1);
     expect(component.errorMessage()).toBeNull();
   });
 
-  it('clears session and redirects on 401 list error', async () => {
-    listProductsImplementation = () =>
-      throwError(() => new HttpErrorResponse({ status: 401 }));
+  it('clears session and redirects when store reports 401', async () => {
     const fixture = TestBed.createComponent(ProductsPageComponent);
     const router = TestBed.inject(Router);
     const navigateCalls: unknown[] = [];
@@ -100,12 +104,12 @@ describe('ProductsPageComponent', () => {
       return Promise.resolve(true);
     }) as Router['navigate'];
 
+    errorCodeSignal.set(401);
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const component = fixture.componentInstance;
     expect(clearSessionCalls).toBe(1);
+    expect(clearErrorCalls).toBe(1);
     expect(navigateCalls).toEqual([[['/login']]]);
-    expect(component.errorMessage()).toContain('sesión expiró');
   });
 });

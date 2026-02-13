@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { AuthStore } from './auth.store';
 
+type AuthStoreInstance = InstanceType<typeof AuthStore>;
+
 describe('AuthStore', () => {
-  let store: AuthStore;
+  let store: AuthStoreInstance;
 
   beforeEach(() => {
     localStorage.clear();

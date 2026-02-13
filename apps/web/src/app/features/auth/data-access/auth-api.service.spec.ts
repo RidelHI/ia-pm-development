@@ -9,10 +9,12 @@ import { API_BASE_URL } from '../../../core/config/api-base-url.token';
 import { AuthApiService } from './auth-api.service';
 import { AuthStore } from '../state/auth.store';
 
+type AuthStoreInstance = InstanceType<typeof AuthStore>;
+
 describe('AuthApiService', () => {
   let service: AuthApiService;
   let httpController: HttpTestingController;
-  let authStore: AuthStore;
+  let authStore: AuthStoreInstance;
 
   beforeEach(() => {
     TestBed.configureTestingModule({

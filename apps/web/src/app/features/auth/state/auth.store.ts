@@ -1,65 +1,79 @@
-import { computed, effect, Injectable, signal } from '@angular/core';
+import { computed, effect } from '@angular/core';
+import {
+  patchState,
+  signalStore,
+  withComputed,
+  withHooks,
+  withMethods,
+  withState,
+} from '@ngrx/signals';
 import type { AuthSession } from '../domain/auth.models';
 
 export const AUTH_SESSION_STORAGE_KEY = 'warehouse.auth.session';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class AuthStore {
-  private readonly sessionState = signal<AuthSession | null>(
-    this.readInitialSession(),
-  );
+interface AuthState {
+  session: AuthSession | null;
+}
 
-  readonly session = computed(() => this.sessionState());
-  readonly accessToken = computed(() => this.sessionState()?.accessToken ?? null);
-  readonly isAuthenticated = computed(() => this.accessToken() !== null);
+function isStorageAvailable(): boolean {
+  return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+}
 
-  constructor() {
-    effect(() => {
-      if (!this.isStorageAvailable()) {
-        return;
-      }
-
-      const session = this.sessionState();
-
-      if (!session) {
-        localStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
-        return;
-      }
-
-      localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(session));
-    });
+function readInitialSession(): AuthSession | null {
+  if (!isStorageAvailable()) {
+    return null;
   }
 
-  setSession(session: AuthSession): void {
-    this.sessionState.set(session);
+  const rawValue = localStorage.getItem(AUTH_SESSION_STORAGE_KEY);
+
+  if (!rawValue) {
+    return null;
   }
 
-  clearSession(): void {
-    this.sessionState.set(null);
-  }
-
-  private readInitialSession(): AuthSession | null {
-    if (!this.isStorageAvailable()) {
-      return null;
-    }
-
-    const rawValue = localStorage.getItem(AUTH_SESSION_STORAGE_KEY);
-
-    if (!rawValue) {
-      return null;
-    }
-
-    try {
-      return JSON.parse(rawValue) as AuthSession;
-    } catch {
-      localStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
-      return null;
-    }
-  }
-
-  private isStorageAvailable(): boolean {
-    return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+  try {
+    return JSON.parse(rawValue) as AuthSession;
+  } catch {
+    localStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
+    return null;
   }
 }
+
+export const AuthStore = signalStore(
+  { providedIn: 'root' },
+  withState<AuthState>({
+    session: readInitialSession(),
+  }),
+  withComputed(({ session }) => {
+    const accessToken = computed(() => session()?.accessToken ?? null);
+
+    return {
+      accessToken,
+      isAuthenticated: computed(() => accessToken() !== null),
+    };
+  }),
+  withMethods((store) => ({
+    setSession(session: AuthSession): void {
+      patchState(store, { session });
+    },
+    clearSession(): void {
+      patchState(store, { session: null });
+    },
+  })),
+  withHooks({
+    onInit(store) {
+      effect(() => {
+        if (!isStorageAvailable()) {
+          return;
+        }
+
+        const session = store.session();
+        if (!session) {
+          localStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
+          return;
+        }
+
+        localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(session));
+      });
+    },
+  }),
+);

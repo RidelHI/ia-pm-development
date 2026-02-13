@@ -51,3 +51,10 @@ apps/web/src/app
 
 - FE-05 focuses on structural refactor without behavior changes.
 - FE-06 standardizes stores with `@ngrx/signals` on top of this structure.
+
+## Store Standard
+
+- One store per feature in `features/<feature>/state`.
+- Use `signalStore` with `withState`, `withComputed`, `withMethods`.
+- Use `rxMethod` for side effects and API calls.
+- Keep error/loading/data state explicit inside store state.
