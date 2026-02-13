@@ -14,6 +14,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PRODUCT_STATUSES, type ProductStatus } from '../product.types';
 import { trimOptionalString, trimString } from './transforms';
 
+const MAX_IMAGE_URL_LENGTH = 8_000_000;
+
 export class CreateProductDto {
   @ApiProperty({ minLength: 3, maxLength: 64, example: 'SKU-APPLE-001' })
   @Transform(trimString)
@@ -77,13 +79,13 @@ export class CreateProductDto {
   unitPriceCents!: number;
 
   @ApiPropertyOptional({
-    maxLength: 4096,
+    maxLength: MAX_IMAGE_URL_LENGTH,
     example: 'https://images.example.com/products/apple-box.jpg',
   })
   @Transform(trimOptionalString)
   @IsOptional()
   @IsString()
-  @MaxLength(4096)
+  @MaxLength(MAX_IMAGE_URL_LENGTH)
   @Matches(/^(https?:\/\/|data:image\/)/i, {
     message: 'imageUrl must start with http(s):// or data:image/',
   })
