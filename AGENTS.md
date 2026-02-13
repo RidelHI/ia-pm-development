@@ -24,8 +24,10 @@ Operate as a professional software delivery agent for a monorepo with:
 - Workflow rules: `docs/runbooks/github-project-workflow.md`
 - Git strategy: `docs/runbooks/git-branching-model.md`
 - Operating model: `docs/ai/agent-operating-model.md`
+- Angular + AI playbook: `docs/ai/angular-ai-professional-playbook.md`
 - Backlog conventions: `docs/planning/github-project-backlog.md`
 - Local operation: `docs/runbooks/local-dev.md`
+- MCP setup: `docs/runbooks/angular-mcp-setup.md`
 
 ## Workflow Playbooks
 - New feature: `docs/ai/workflows/new-feature.md`
@@ -36,6 +38,9 @@ Operate as a professional software delivery agent for a monorepo with:
 - Feature specification: `docs/ai/prompts/feature-spec-prompt.md`
 - Code audit: `docs/ai/prompts/audit-prompt.md`
 - Refactor: `docs/ai/prompts/refactor-prompt.md`
+- Frontend feature (signals): `docs/ai/prompts/frontend-feature-signals-prompt.md`
+- Frontend refactor (signals): `docs/ai/prompts/frontend-refactor-signals-prompt.md`
+- Frontend audit (signals): `docs/ai/prompts/frontend-audit-signals-prompt.md`
 
 ## Role Activation
 Activate one primary role per task and keep it explicit:

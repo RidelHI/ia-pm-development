@@ -69,3 +69,12 @@ apps/web/src/app
   - error (`role="alert"` for blocking errors)
   - empty
   - success/status (`aria-live="polite"` where appropriate)
+
+## AI Alignment
+
+- Primary AI architecture guide: `docs/ai/angular-ai-professional-playbook.md`.
+- MCP setup and safety defaults: `docs/runbooks/angular-mcp-setup.md`.
+- Prompt templates for frontend work:
+  - `docs/ai/prompts/frontend-feature-signals-prompt.md`
+  - `docs/ai/prompts/frontend-refactor-signals-prompt.md`
+  - `docs/ai/prompts/frontend-audit-signals-prompt.md`

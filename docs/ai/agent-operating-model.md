@@ -85,10 +85,25 @@ Usar estos artefactos para repetir procesos con consistencia:
   - `docs/ai/workflows/deploy.md`
 - Git strategy:
   - `docs/runbooks/git-branching-model.md`
+- Angular + AI:
+  - `docs/ai/angular-ai-professional-playbook.md`
+  - `docs/runbooks/angular-frontend-architecture.md`
+  - `docs/runbooks/angular-mcp-setup.md`
 - Prompt templates:
   - `docs/ai/prompts/feature-spec-prompt.md`
   - `docs/ai/prompts/audit-prompt.md`
   - `docs/ai/prompts/refactor-prompt.md`
+  - `docs/ai/prompts/frontend-feature-signals-prompt.md`
+  - `docs/ai/prompts/frontend-refactor-signals-prompt.md`
+  - `docs/ai/prompts/frontend-audit-signals-prompt.md`
+
+## Context files para asistentes IA
+Archivos versionados para mantener consistencia entre herramientas:
+- `AGENTS.md`
+- `.github/copilot-instructions.md`
+- `.instructions.md`
+- `.cursor/rules/angular-web.mdc`
+- `llms.txt`
 
 ## Operacion con GitHub CLI
 ```bash

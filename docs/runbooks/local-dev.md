@@ -80,6 +80,8 @@ Notas operativas:
 - Modelo operativo de agentes: ver `docs/ai/agent-operating-model.md`.
 - Workflows repetibles del agente: ver `docs/ai/workflows/`.
 - Prompt templates reutilizables: ver `docs/ai/prompts/`.
+- Playbook Angular + IA: ver `docs/ai/angular-ai-professional-playbook.md`.
+- Setup MCP Angular CLI: ver `docs/runbooks/angular-mcp-setup.md`.
 - Setup de Supabase para BE-14: ver `docs/runbooks/supabase-setup.md`.
 - Decision tecnica local-first (GitHub Projects + Codex): ver `docs/adr/0003-github-project-local-first.md`.
 
