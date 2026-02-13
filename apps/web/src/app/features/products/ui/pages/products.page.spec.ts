@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
 import { AuthStore } from '../../../auth/state/auth.store';
 import { ProductsStore } from '../../state/products.store';
+import { ProductsSearchFormComponent } from '../components/products-search-form.component';
 import { ProductsPageComponent } from './products.page';
 
 describe('ProductsPageComponent', () => {
@@ -129,5 +131,23 @@ describe('ProductsPageComponent', () => {
 
     const html = fixture.nativeElement as HTMLElement;
     expect(html.textContent).toContain('No hay productos');
+  });
+
+  it('requests products with current query when search form emits submit', async () => {
+    const fixture = TestBed.createComponent(ProductsPageComponent);
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const searchFormDebug = fixture.debugElement.query(
+      By.directive(ProductsSearchFormComponent),
+    );
+    const searchForm = searchFormDebug.componentInstance as ProductsSearchFormComponent;
+
+    searchForm.queryChange.emit('lllll');
+    searchForm.searchRequested.emit();
+    fixture.detectChanges();
+
+    expect(loadProductsCalls).toEqual(['', 'lllll']);
   });
 });

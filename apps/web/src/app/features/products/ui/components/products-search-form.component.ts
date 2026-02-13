@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 @Component({
   selector: 'app-products-search-form',
   template: `
-    <form class="flex flex-wrap gap-3" (ngSubmit)="submitSearch()" novalidate>
+    <form class="flex flex-wrap gap-3" (submit)="onSubmit($event)" novalidate>
       <label class="sr-only" for="products-query">Buscar productos</label>
       <input
         id="products-query"
@@ -42,7 +42,8 @@ export class ProductsSearchFormComponent {
     this.queryChange.emit(target.value);
   }
 
-  submitSearch(): void {
+  onSubmit(event: Event): void {
+    event.preventDefault();
     this.searchRequested.emit();
   }
 }
