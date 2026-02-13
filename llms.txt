@@ -12,6 +12,7 @@
 - docs/runbooks/angular-frontend-architecture.md
 - docs/ai/angular-ai-professional-playbook.md
 - docs/runbooks/angular-mcp-setup.md
+- docs/runbooks/playwright-web-e2e.md
 
 ## Prompt templates
 - docs/ai/prompts/feature-spec-prompt.md

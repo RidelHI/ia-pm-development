@@ -116,6 +116,14 @@ apps/web/src/app
    - `pnpm test`
    - `pnpm build`
 
+## Testing baseline
+- Unit/component: Angular unit tests and store tests in feature scope.
+- API contract: backend unit/e2e tests (NestJS).
+- Browser E2E: Playwright for critical user journeys in real browser runtime.
+- Minimum E2E for auth/products:
+  - login and protected-route access
+  - search behavior and empty-state feedback
+
 ## References
 - Angular AI docs: https://angular.dev/ai
 - Develop with AI: https://angular.dev/ai/develop-with-ai

@@ -74,6 +74,7 @@ apps/web/src/app
 
 - Primary AI architecture guide: `docs/ai/angular-ai-professional-playbook.md`.
 - MCP setup and safety defaults: `docs/runbooks/angular-mcp-setup.md`.
+- Browser E2E strategy: `docs/runbooks/playwright-web-e2e.md`.
 - Prompt templates for frontend work:
   - `docs/ai/prompts/frontend-feature-signals-prompt.md`
   - `docs/ai/prompts/frontend-refactor-signals-prompt.md`

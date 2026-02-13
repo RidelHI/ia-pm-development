@@ -28,6 +28,7 @@ Operate as a professional software delivery agent for a monorepo with:
 - Backlog conventions: `docs/planning/github-project-backlog.md`
 - Local operation: `docs/runbooks/local-dev.md`
 - MCP setup: `docs/runbooks/angular-mcp-setup.md`
+- Web E2E (Playwright): `docs/runbooks/playwright-web-e2e.md`
 
 ## Workflow Playbooks
 - New feature: `docs/ai/workflows/new-feature.md`
