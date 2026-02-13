@@ -56,6 +56,9 @@ El job `quality` en `.github/workflows/ci.yml` valida adicionalmente:
 - PR body con `Closes #<issue_number>` exacto.
 - Exactamente 1 issue de cierre por PR.
 - Issue de cierre abierta y con exactamente 1 label `agent:*`.
+- Seccion `AI Self-Review Gate` presente en PR body.
+- Framework marcado en self-review (`Angular way` o `NestJS way`).
+- Decision de self-review (`Compliant` o `Needs Changes`).
 - Convencion de ramas (`feature/*`, `fix/*`, `chore/*`).
 - Estructura frontend feature-first por capas (`domain`, `data-access`, `state`, `ui`).
 - Presencia de archivos de contexto IA requeridos:
@@ -65,6 +68,7 @@ El job `quality` en `.github/workflows/ci.yml` valida adicionalmente:
   - `.instructions.md`
   - `.cursor/rules/angular-web.mdc`
   - `docs/ai/angular-ai-professional-playbook.md`
+  - `docs/ai/checklists/ai-self-review-gate.md`
   - `docs/runbooks/angular-mcp-setup.md`
 
 ## 6) Troubleshooting rapido
@@ -72,6 +76,9 @@ El job `quality` en `.github/workflows/ci.yml` valida adicionalmente:
   - Agregar la linea exacta en el cuerpo del PR y re-ejecutar checks.
 - Falla por ownership `agent:*`:
   - Ajustar labels de la issue para dejar exactamente un `agent:*`.
+- Falla por `AI Self-Review Gate`:
+  - Completar seccion del PR template usando `docs/ai/checklists/ai-self-review-gate.md`.
+  - Marcar framework aplicable y definir `Decision: Compliant` o `Decision: Needs Changes`.
 - Falla por estructura feature-first:
   - Revisar `apps/web/src/app/features/<feature>` y crear capas faltantes.
 - Falla por archivos IA faltantes:

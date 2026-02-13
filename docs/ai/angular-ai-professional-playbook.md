@@ -115,6 +115,16 @@ apps/web/src/app
    - `pnpm lint`
    - `pnpm test`
    - `pnpm build`
+5. PR includes completed `AI Self-Review Gate` section.
+
+## Mandatory AI self-review gate
+- Final technical step before opening PR or moving issue to `In Review`.
+- Use `docs/ai/checklists/ai-self-review-gate.md`.
+- Mark framework reviewed (`Angular way` and/or `NestJS way`).
+- Record decision in PR body:
+  - `Compliant`
+  - `Needs Changes`
+- If decision is `Needs Changes`, fix first and only then request review.
 
 ## Testing baseline
 - Unit/component: Angular unit tests and store tests in feature scope.

@@ -13,6 +13,7 @@ description: Execute release and deploy checks for web and API with evidence and
 1. Confirm linked issue scope and acceptance criteria.
 2. Confirm CI green on target branch.
 3. Confirm required environment variables are defined for target service.
+4. Confirm PR has completed `AI Self-Review Gate` with applicable framework.
 
 ## Step 2: Pre-deploy Verification
 1. Run local gates:

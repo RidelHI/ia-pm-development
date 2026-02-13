@@ -34,6 +34,7 @@ alwaysApply: false
 ## Delivery
 - Stay within issue scope.
 - Preserve `1 issue = 1 branch = 1 PR`.
+- Complete `AI Self-Review Gate` before PR review (`docs/ai/checklists/ai-self-review-gate.md`).
 - Final validation must include:
   - `pnpm lint`
   - `pnpm test`

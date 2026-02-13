@@ -40,10 +40,14 @@ description: Deliver a new feature using the agent-first model with issue-to-PR 
    - `pnpm test`
    - `pnpm build`
 2. If failures appear, fix before opening PR.
+3. Execute final self-review gate:
+   - Use `docs/ai/checklists/ai-self-review-gate.md`.
+   - Validate `Angular way` and/or `NestJS way` according to changed scope.
 
 ## Step 5: Deliver
 1. Open PR with:
    - `Closes #<issue_number>`
+   - `AI Self-Review Gate` section completed with framework and decision
    - Summary of what changed
    - Validation evidence
    - Residual risks

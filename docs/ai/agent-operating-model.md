@@ -41,9 +41,10 @@ Los labels `agent:*` siguen siendo obligatorios para ownership y trazabilidad, a
 2. PM mueve card a `Todo`.
 3. Agente owner mueve card a `In Progress`, crea rama y ejecuta implementacion.
 4. Agente owner valida `pnpm lint`, `pnpm test`, `pnpm build`.
-5. Agente owner abre PR con `Closes #<issue_number>` y mueve issue a `In Review`.
-6. Reviewer/QA valida cumplimiento funcional y calidad.
-7. Con merge a `main`, issue pasa a `Done`.
+5. Agente owner ejecuta self-review final con `docs/ai/checklists/ai-self-review-gate.md`.
+6. Agente owner abre PR con `Closes #<issue_number>` y seccion `AI Self-Review Gate`; luego mueve issue a `In Review`.
+7. Reviewer/QA valida cumplimiento funcional y calidad.
+8. Con merge a `main`, issue pasa a `Done`.
 
 ## Definition of done por agente
 ### `agent:pm`

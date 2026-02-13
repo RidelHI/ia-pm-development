@@ -17,6 +17,7 @@ Entrega requerida:
 4) Riesgos por paso.
 5) Pruebas necesarias para asegurar no regresión.
 6) Señales de stop (cuándo pausar y re-planificar).
+7) Checklist de cierre con `AI Self-Review Gate` (`docs/ai/checklists/ai-self-review-gate.md`).
 
 No implementes todo de golpe; propone secuencia segura y verificable.
 ```

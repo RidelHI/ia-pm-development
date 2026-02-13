@@ -31,7 +31,8 @@ Instrucciones:
    - pnpm lint
    - pnpm test
    - pnpm build
-6) Cierra con veredicto:
+6) Verifica que el `AI Self-Review Gate` del PR sea consistente con los cambios.
+7) Cierra con veredicto:
    - approved
    - changes requested
 

@@ -72,6 +72,26 @@ jobs:
               }
             }
 
+            const hasSelfReviewSection = /##\s+AI Self-Review Gate/i.test(body);
+            if (!hasSelfReviewSection) {
+              core.setFailed('PR must include the "AI Self-Review Gate" section.');
+            }
+
+            const angularChecked = /-\s*\[[xX]\]\s*Angular way/i.test(body);
+            const nestChecked = /-\s*\[[xX]\]\s*NestJS way/i.test(body);
+            if (!angularChecked && !nestChecked) {
+              core.setFailed(
+                'AI Self-Review Gate must mark at least one framework: "Angular way" or "NestJS way".',
+              );
+            }
+
+            const hasDecision = /Decision:\s*`?(Compliant|Needs Changes)`?/i.test(body);
+            if (!hasDecision) {
+              core.setFailed(
+                'AI Self-Review Gate must include "Decision: Compliant" or "Decision: Needs Changes".',
+              );
+            }
+
       - name: Validate Angular feature-first layer structure
         run: |
           FEATURES_ROOT="apps/web/src/app/features"
@@ -116,6 +136,7 @@ jobs:
             ".instructions.md"
             ".cursor/rules/angular-web.mdc"
             "docs/ai/angular-ai-professional-playbook.md"
+            "docs/ai/checklists/ai-self-review-gate.md"
             "docs/runbooks/angular-mcp-setup.md"
           )
 
