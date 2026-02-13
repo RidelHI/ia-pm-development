@@ -26,7 +26,7 @@ import { AuthApiService } from '../../data-access/auth-api.service';
       <section class="auth-layout">
         <mat-card class="brand-panel" appearance="outlined">
           <p class="brand-eyebrow">Warehouse Portal</p>
-          <h1>Controla inventario y operaciones desde un solo panel</h1>
+          <h1>Login para ver productos protegidos</h1>
           <p class="brand-copy">
             Flujo autenticado con guard + interceptor y dashboard operativo en Angular Material.
           </p>

@@ -18,7 +18,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { CurrencyPipe } from '@angular/common';
 import { finalize } from 'rxjs';
@@ -49,7 +48,6 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    MatSelectModule,
     MatToolbarModule,
   ],
   template: `
@@ -64,6 +62,8 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
       </mat-toolbar>
 
       <section class="dashboard-content">
+        <h1 class="page-title">Productos</h1>
+
         <section class="kpi-grid">
           <mat-card appearance="outlined" class="kpi-card">
             <p class="kpi-label">Productos visibles</p>
@@ -83,10 +83,10 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
 
         <mat-card appearance="outlined" class="panel-card">
           <mat-card-header>
-            <mat-card-title>Buscar y filtrar</mat-card-title>
-            <mat-card-subtitle>
+            <h2 mat-card-title>Buscar y filtrar</h2>
+            <p mat-card-subtitle>
               Consulta por nombre o SKU y recarga resultados del inventario.
-            </mat-card-subtitle>
+            </p>
           </mat-card-header>
           <mat-card-content>
             <app-products-search-form
@@ -124,8 +124,8 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
         @if (editorMode()) {
           <mat-card appearance="outlined" class="editor-card">
             <mat-card-header>
-              <mat-card-title>{{ editorTitle() }}</mat-card-title>
-              <mat-card-subtitle>{{ editorDescription() }}</mat-card-subtitle>
+              <h2 mat-card-title>{{ editorTitle() }}</h2>
+              <p mat-card-subtitle>{{ editorDescription() }}</p>
               <span class="toolbar-spacer"></span>
               <button mat-stroked-button type="button" (click)="closeEditor()">Cerrar</button>
             </mat-card-header>
@@ -229,10 +229,10 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
 
                   <mat-form-field appearance="outline">
                     <mat-label>Estado *</mat-label>
-                    <mat-select formControlName="status">
-                      <mat-option value="active">active</mat-option>
-                      <mat-option value="inactive">inactive</mat-option>
-                    </mat-select>
+                    <select matNativeControl formControlName="status">
+                      <option value="active">active</option>
+                      <option value="inactive">inactive</option>
+                    </select>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="field-span-2">
@@ -334,6 +334,11 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
         padding: clamp(0.8rem, 2.5vw, 1.8rem);
         display: grid;
         gap: 1rem;
+      }
+
+      .page-title {
+        margin: 0;
+        font-size: clamp(1.45rem, 3vw, 2rem);
       }
 
       .kpi-grid {

@@ -11,53 +11,55 @@ import type { Product } from '../../domain/products.models';
   template: `
     <section class="products-grid">
       @for (product of products(); track product.id) {
-        <mat-card class="product-card" appearance="outlined">
-          <div class="product-image-shell">
-            @if (product.imageUrl) {
-              <img
-                [src]="product.imageUrl"
-                [alt]="'Imagen de ' + product.name"
-                loading="lazy"
-              />
-            } @else {
-              <div class="image-placeholder">Sin imagen</div>
-            }
-          </div>
-
-          <mat-card-content>
-            <p class="sku">{{ product.sku }}</p>
-            <h2>{{ product.name }}</h2>
-            <p class="metadata">{{ product.category || 'Sin categoría' }} · {{ product.brand || 'Sin marca' }}</p>
-
-            <div class="stats-row">
-              <span>Cantidad <strong>{{ product.quantity }}</strong></span>
-              @if (product.minimumStock !== null) {
-                <span>Mínimo <strong>{{ product.minimumStock }}</strong></span>
+        <article>
+          <mat-card class="product-card" appearance="outlined">
+            <div class="product-image-shell">
+              @if (product.imageUrl) {
+                <img
+                  [src]="product.imageUrl"
+                  [alt]="'Imagen de ' + product.name"
+                  loading="lazy"
+                />
+              } @else {
+                <div class="image-placeholder">Sin imagen</div>
               }
             </div>
 
-            <div class="stats-row">
-              <span>Precio <strong>{{ product.unitPriceCents / 100 | currency: 'USD' }}</strong></span>
-              <mat-chip-set>
-                <mat-chip [class]="statusChipClass(product)">
-                  {{ product.status }}
-                </mat-chip>
-              </mat-chip-set>
-            </div>
-          </mat-card-content>
+            <mat-card-content>
+              <p class="sku">{{ product.sku }}</p>
+              <h2>{{ product.name }}</h2>
+              <p class="metadata">{{ product.category || 'Sin categoría' }} · {{ product.brand || 'Sin marca' }}</p>
 
-          <mat-card-actions>
-            <button mat-stroked-button type="button" (click)="viewRequested.emit(product.id)">
-              Ver detalle
-            </button>
-            <button mat-stroked-button color="primary" type="button" (click)="editRequested.emit(product.id)">
-              Editar
-            </button>
-            <button mat-stroked-button color="warn" type="button" (click)="deleteRequested.emit(product.id)">
-              Eliminar
-            </button>
-          </mat-card-actions>
-        </mat-card>
+              <div class="stats-row">
+                <span>Cantidad <strong>{{ product.quantity }}</strong></span>
+                @if (product.minimumStock !== null) {
+                  <span>Mínimo <strong>{{ product.minimumStock }}</strong></span>
+                }
+              </div>
+
+              <div class="stats-row">
+                <span>Precio <strong>{{ product.unitPriceCents / 100 | currency: 'USD' }}</strong></span>
+                <mat-chip-set>
+                  <mat-chip [class]="statusChipClass(product)">
+                    {{ product.status }}
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button mat-stroked-button type="button" (click)="viewRequested.emit(product.id)">
+                Ver detalle
+              </button>
+              <button mat-stroked-button color="primary" type="button" (click)="editRequested.emit(product.id)">
+                Editar
+              </button>
+              <button mat-stroked-button color="warn" type="button" (click)="deleteRequested.emit(product.id)">
+                Eliminar
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </article>
       }
     </section>
   `,
