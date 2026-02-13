@@ -19,11 +19,12 @@ import { AuthApiService } from '../../data-access/auth-api.service';
           Endpoint backend: <code>/v1/auth/register</code>
         </p>
 
-        <form [formGroup]="form" (ngSubmit)="submit()" class="mt-6 space-y-4">
+        <form [formGroup]="form" (ngSubmit)="submit()" class="mt-6 space-y-4" novalidate>
           <label class="block space-y-1">
             <span class="text-sm font-semibold text-slate-700">Usuario</span>
             <input
               formControlName="username"
+              [attr.aria-invalid]="form.controls.username.invalid && form.controls.username.touched"
               autocomplete="username"
               class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:ring-2"
               placeholder="warehouse.user"
@@ -35,6 +36,7 @@ import { AuthApiService } from '../../data-access/auth-api.service';
             <span class="text-sm font-semibold text-slate-700">Password</span>
             <input
               formControlName="password"
+              [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
               autocomplete="new-password"
               class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:ring-2"
               placeholder="StrongPassword123!"
@@ -43,18 +45,27 @@ import { AuthApiService } from '../../data-access/auth-api.service';
           </label>
 
           @if (errorMessage()) {
-            <p class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            <p
+              aria-live="assertive"
+              class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"
+              role="alert"
+            >
               {{ errorMessage() }}
             </p>
           }
 
           @if (successMessage()) {
-            <p class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+            <p
+              aria-live="polite"
+              class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
+              role="status"
+            >
               {{ successMessage() }}
             </p>
           }
 
           <button
+            [attr.aria-busy]="isSubmitting()"
             [disabled]="isSubmitting()"
             class="w-full rounded-xl bg-cyan-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
             type="submit"

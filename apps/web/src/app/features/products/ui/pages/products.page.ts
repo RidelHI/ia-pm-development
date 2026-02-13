@@ -1,13 +1,18 @@
-import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthStore } from '../../../auth/state/auth.store';
 import { ProductsStore } from '../../state/products.store';
+import { ProductsFeedbackComponent } from '../components/products-feedback.component';
+import { ProductsGridComponent } from '../components/products-grid.component';
+import { ProductsSearchFormComponent } from '../components/products-search-form.component';
 
 @Component({
   selector: 'app-products-page',
-  imports: [FormsModule, CurrencyPipe],
+  imports: [
+    ProductsSearchFormComponent,
+    ProductsFeedbackComponent,
+    ProductsGridComponent,
+  ],
   template: `
     <main class="min-h-screen bg-shell p-6 md:p-10">
       <section class="mx-auto max-w-5xl space-y-4">
@@ -31,61 +36,21 @@ import { ProductsStore } from '../../state/products.store';
         </header>
 
         <section class="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
-          <form class="flex flex-wrap gap-3" (ngSubmit)="loadProducts()">
-            <input
-              [(ngModel)]="query"
-              class="min-w-64 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
-              name="query"
-              placeholder="Buscar por nombre o SKU"
-              type="text"
-            />
-            <button
-              [disabled]="isLoading()"
-              class="rounded-lg bg-cyan-700 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
-              type="submit"
-            >
-              @if (isLoading()) { Cargando... } @else { Buscar }
-            </button>
-          </form>
+          <app-products-search-form
+            [loading]="isLoading()"
+            [query]="query()"
+            (queryChange)="query.set($event)"
+            (searchRequested)="loadProducts()"
+          />
         </section>
 
-        @if (errorMessage()) {
-          <section class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            {{ errorMessage() }}
-          </section>
-        }
-
-        @if (!isLoading() && products().length === 0 && !errorMessage()) {
-          <section class="rounded-2xl border border-stone-200 bg-white px-4 py-8 text-center text-sm text-slate-600 shadow-sm">
-            No hay productos para mostrar con los filtros actuales.
-          </section>
-        }
+        <app-products-feedback
+          [errorMessage]="errorMessage()"
+          [isEmpty]="isEmpty()"
+        />
 
         @if (products().length > 0) {
-          <section class="grid gap-3 md:grid-cols-2">
-            @for (product of products(); track product.id) {
-              <article class="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
-                <p class="text-xs font-semibold uppercase tracking-[0.15em] text-cyan-700">
-                  {{ product.sku }}
-                </p>
-                <h2 class="mt-1 text-lg font-semibold text-slate-900">{{ product.name }}</h2>
-                <p class="mt-2 text-sm text-slate-600">
-                  Cantidad:
-                  <span class="font-semibold text-slate-800">{{ product.quantity }}</span>
-                </p>
-                <p class="text-sm text-slate-600">
-                  Precio:
-                  <span class="font-semibold text-slate-800">{{
-                    product.unitPriceCents / 100 | currency: 'USD'
-                  }}</span>
-                </p>
-                <p class="text-sm text-slate-600">
-                  Estado:
-                  <span class="font-semibold text-slate-800">{{ product.status }}</span>
-                </p>
-              </article>
-            }
-          </section>
+          <app-products-grid [products]="products()" />
         }
       </section>
     </main>
@@ -100,10 +65,11 @@ export class ProductsPageComponent {
   readonly products = this.productsStore.products;
   readonly isLoading = this.productsStore.loading;
   readonly errorMessage = this.productsStore.error;
-  query = '';
+  readonly isEmpty = this.productsStore.isEmpty;
+  readonly query = signal('');
 
   constructor() {
-    this.productsStore.loadProducts(this.query);
+    this.productsStore.loadProducts(this.query());
     effect(() => {
       if (this.productsStore.errorCode() !== 401) {
         return;
@@ -116,7 +82,7 @@ export class ProductsPageComponent {
   }
 
   loadProducts(): void {
-    this.productsStore.loadProducts(this.query);
+    this.productsStore.loadProducts(this.query());
   }
 
   logout(): void {
