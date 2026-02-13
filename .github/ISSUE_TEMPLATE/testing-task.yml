@@ -3,6 +3,30 @@ description: Unit, integration, e2e, regression, and test strategy work
 title: "QA-XX: "
 labels: ["type:test", "agent:qa", "priority:p2"]
 body:
+  - type: input
+    id: parent_pm
+    attributes:
+      label: Parent PM
+      description: PM issue that defines this delivery plan.
+      placeholder: "#123"
+    validations:
+      required: true
+  - type: input
+    id: execution_order
+    attributes:
+      label: Execution Order
+      description: Positive integer that defines sequence across sibling tasks.
+      placeholder: "3"
+    validations:
+      required: true
+  - type: input
+    id: depends_on
+    attributes:
+      label: Depends on
+      description: Blocking issues that must be closed first. Use `none` when no blockers exist.
+      placeholder: "#120, #121 or none"
+    validations:
+      required: true
   - type: textarea
     id: objective
     attributes:
@@ -31,5 +55,16 @@ body:
         - [ ] target scenarios covered
         - [ ] flakiness reduced or removed
         - [ ] CI pipeline remains green
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References Consulted
+      description: Record docs, MCP tools, and skills consulted before implementation.
+      placeholder: |
+        - docs/... (quality criteria used)
+        - MCP: ... (if used)
+        - Skills: qa-quality-gate, etc.
     validations:
       required: true

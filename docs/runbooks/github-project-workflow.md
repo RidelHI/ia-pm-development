@@ -20,26 +20,30 @@ Cada issue debe tener exactamente un label `agent:*`:
 Sin ese label, la tarea se considera mal definida y no entra a ejecucion.
 
 ## Flujo estandar por tarea
-1. PM define o refina la issue con alcance y criterios de aceptacion.
-2. PM agrega labels `type:*`, `priority:*` y exactamente un `agent:*`.
-3. PM mueve la card a `Todo` en el Project.
-4. Agente owner crea rama con issue id (`feature/<issue_number>-<slug>`, `fix/<issue_number>-<slug>` o `chore/<issue_number>-<slug>`).
-5. Agente owner toma la issue y la mueve a `In Progress`.
-6. Agente owner ejecuta preflight obligatorio:
+1. PM crea/refina issue padre `agent:pm` con analisis completo y plan de subtareas.
+2. PM crea child issues y agrega labels `type:*`, `priority:*` y exactamente un `agent:*` por issue.
+3. PM completa en cada child issue: `Parent PM`, `Execution Order`, `Depends on`.
+4. PM mueve cards a `Todo` segun secuencia definida.
+5. Agente owner crea rama con issue id (`feature/<issue_number>-<slug>`, `fix/<issue_number>-<slug>` o `chore/<issue_number>-<slug>`).
+6. Agente owner toma la issue habilitada y la mueve a `In Progress`.
+7. Agente owner ejecuta preflight obligatorio:
    - `pnpm agent:preflight -- --issue <issue_number> --agent <agent:role>`
-7. Agente owner ejecuta implementacion acotada al scope.
-8. Agente owner ejecuta calidad local: `pnpm lint`, `pnpm test`, `pnpm build`.
-9. Agente owner ejecuta self-review final con `docs/ai/checklists/ai-self-review-gate.md`.
-10. Agente owner abre PR con `Closes #<issue_number>` y seccion `AI Self-Review Gate`.
-11. Agente owner mueve la issue a `In Review`.
-12. QA/Reviewer valida criterios de aceptacion y evidencia tecnica.
-13. Al merge, la issue pasa a `Done`.
+8. Agente owner ejecuta implementacion acotada al scope.
+9. Agente owner ejecuta calidad local: `pnpm lint`, `pnpm test`, `pnpm build`.
+10. Agente owner ejecuta self-review final con `docs/ai/checklists/ai-self-review-gate.md`.
+11. Agente owner abre PR con `Closes #<issue_number>` y seccion `AI Self-Review Gate`.
+12. Agente owner mueve la issue a `In Review`.
+13. QA/Reviewer valida criterios de aceptacion y evidencia tecnica.
+14. Al merge, la issue pasa a `Done`.
 
 ## Reglas operativas
 - 1 issue = 1 rama = 1 PR.
 - Rama debe incluir issue id y coincidir con `Closes #<issue_number>`.
+- Toda issue de ejecucion debe enlazar una issue padre `agent:pm`.
+- El orden real de ejecucion lo determina `Execution Order` + `Depends on`.
 - PR pequena y trazable.
 - No expandir scope fuera de criterios de aceptacion.
+- Antes de implementar o revisar, consultar la documentacion tecnica relevante, MCP y skills aplicables.
 - CI debe pasar antes de merge.
 - El check `quality` valida convencion de rama, issue enlazada con label `agent:*`, pertenencia al Project y `AI Self-Review Gate` en PR.
 

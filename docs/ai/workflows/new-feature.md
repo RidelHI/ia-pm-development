@@ -12,11 +12,13 @@ description: Deliver a new feature using the agent-first model with issue-to-PR 
 1. Read:
    - `docs/ai/agent-operating-model.md`
    - `docs/runbooks/github-project-workflow.md`
+   - role-specific docs/runbooks + MCP + skills that apply to the task
 2. Confirm the issue has:
    - Objective, scope, acceptance criteria
    - One `type:*`
    - One `priority:*`
    - Exactly one `agent:*`
+   - If non-PM issue: `Parent PM`, `Execution Order`, `Depends on`
 3. Confirm project status is `Todo` or `In Progress`.
 4. Create branch with issue id:
    - `feature/<issue_number>-<slug>` or `fix/<issue_number>-<slug>`
@@ -50,6 +52,9 @@ description: Deliver a new feature using the agent-first model with issue-to-PR 
 1. Open PR with:
    - `Closes #<issue_number>`
    - `AI Self-Review Gate` section completed with framework and decision
+   - Framework alignment by changed scope:
+     - `apps/web` => `Angular way`
+     - `apps/api` => `NestJS way`
    - Summary of what changed
    - Validation evidence
    - Residual risks

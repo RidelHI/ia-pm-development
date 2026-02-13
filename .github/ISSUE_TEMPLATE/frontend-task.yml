@@ -3,6 +3,30 @@ description: Angular UI, UX, state handling, and API integration work
 title: "FE-XX: "
 labels: ["type:frontend", "agent:frontend", "priority:p2"]
 body:
+  - type: input
+    id: parent_pm
+    attributes:
+      label: Parent PM
+      description: PM issue that defines this delivery plan.
+      placeholder: "#123"
+    validations:
+      required: true
+  - type: input
+    id: execution_order
+    attributes:
+      label: Execution Order
+      description: Positive integer that defines sequence across sibling tasks.
+      placeholder: "2"
+    validations:
+      required: true
+  - type: input
+    id: depends_on
+    attributes:
+      label: Depends on
+      description: Blocking issues that must be closed first. Use `none` when no blockers exist.
+      placeholder: "#120, #121 or none"
+    validations:
+      required: true
   - type: textarea
     id: objective
     attributes:
@@ -31,5 +55,16 @@ body:
         - [ ] flow works end to end from UI
         - [ ] form validation and API errors are handled
         - [ ] tests updated and passing
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References Consulted
+      description: Record docs, MCP tools, and skills consulted before implementation.
+      placeholder: |
+        - docs/... (Angular/NestJS criteria used)
+        - MCP: ... (if used)
+        - Skills: frontend-angular-delivery, qa-quality-gate, etc.
     validations:
       required: true

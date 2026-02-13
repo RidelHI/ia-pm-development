@@ -109,13 +109,16 @@ apps/web/src/app
 
 ## Delivery contract per issue
 1. Issue has exactly one `agent:*` label.
-2. Branch is scoped to one issue.
-3. PR includes `Closes #<issue_number>`.
-4. Evidence includes:
+2. Multi-role delivery starts with a parent PM issue (`agent:pm`) and ordered child issues.
+3. Non-PM issues include `Parent PM`, `Execution Order`, `Depends on`.
+4. Branch is scoped to one issue.
+5. PR includes `Closes #<issue_number>`.
+6. Evidence includes:
    - `pnpm lint`
    - `pnpm test`
    - `pnpm build`
-5. PR includes completed `AI Self-Review Gate` section.
+7. PR includes completed `AI Self-Review Gate` section.
+8. Before implementation/review, consult relevant docs, MCP, and skills.
 
 ## Mandatory AI self-review gate
 - Final technical step before opening PR or moving issue to `In Review`.

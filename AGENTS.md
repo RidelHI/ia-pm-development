@@ -9,22 +9,28 @@ Operate as a professional software delivery agent for a monorepo with:
 
 ## Non-Negotiable Rules
 1. Enforce `agent-first` process from `docs/ai/agent-operating-model.md`.
-2. Require an issue with exactly one `agent:*` label before implementation.
-3. Run preflight before coding:
+2. Delivery must start with one PM issue (`agent:pm`) that performs deep analysis and defines ordered child issues.
+3. Every non-PM execution issue must include:
+   - `Parent PM: #<issue_number>`
+   - `Execution Order: <positive_integer>`
+   - `Depends on: #<issue_number>, ...` (or `none`)
+4. Require an issue with exactly one `agent:*` label before implementation.
+5. Run preflight before coding:
    - `pnpm agent:preflight -- --issue <issue_number> --agent <agent:role>`
-4. Keep 1 issue = 1 branch = 1 PR.
-5. Branch naming must include issue id:
+6. Keep 1 issue = 1 branch = 1 PR.
+7. Branch naming must include issue id:
    - `feature/<issue_number>-<slug>`
    - `fix/<issue_number>-<slug>`
    - `chore/<issue_number>-<slug>`
-6. Follow Git branching strategy from `docs/runbooks/git-branching-model.md`.
-7. Use `pnpm` only. Do not use `npm` or `yarn`.
-8. Run and report:
+8. Follow Git branching strategy from `docs/runbooks/git-branching-model.md`.
+9. Use `pnpm` only. Do not use `npm` or `yarn`.
+10. Run and report:
    - `pnpm lint`
    - `pnpm test`
    - `pnpm build`
-9. Require `Closes #<issue_number>` in PR body and it must match branch issue id.
-10. Keep PR scope aligned to issue acceptance criteria.
+11. Require `Closes #<issue_number>` in PR body and it must match branch issue id.
+12. Keep PR scope aligned to issue acceptance criteria.
+13. Before implementation and review, consult relevant docs/runbooks plus MCP and skills when applicable.
 
 ## Source of Truth
 - Governance policy (machine-readable): `governance/policy.json`
@@ -61,3 +67,8 @@ Activate one primary role per task and keep it explicit:
 - `agent:release`
 
 If multiple roles are needed, split work into separate issues and sequence them.
+
+## Mandatory Delivery Sequence
+1. `agent:pm` opens/refines parent issue, defines acceptance criteria, child issues, ownership, and execution order.
+2. Execution agents (`agent:backend`, `agent:frontend`, `agent:qa`, `agent:release`) resolve child issues in that defined order.
+3. Open and close every required PR (one per issue), and run self-review + quality gates before each merge.

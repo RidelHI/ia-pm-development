@@ -52,6 +52,79 @@ jobs:
               return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             }
 
+            function extractIssueField(body, fieldName) {
+              if (typeof body !== 'string' || !body.trim()) {
+                return '';
+              }
+
+              const inlinePattern = new RegExp(
+                `^\\s*${escapeRegex(fieldName)}\\s*:\\s*(.+)$`,
+                'im',
+              );
+              const inlineMatch = inlinePattern.exec(body);
+              if (inlineMatch?.[1]) {
+                return inlineMatch[1].trim();
+              }
+
+              const lines = body.split(/\r?\n/);
+              const headingPattern = new RegExp(
+                `^\\s*#{1,6}\\s*${escapeRegex(fieldName)}\\s*$`,
+                'i',
+              );
+
+              for (let index = 0; index < lines.length; index += 1) {
+                if (!headingPattern.test(lines[index])) {
+                  continue;
+                }
+
+                const valueLines = [];
+                for (let cursor = index + 1; cursor < lines.length; cursor += 1) {
+                  const currentLine = lines[cursor];
+                  if (/^\s*#{1,6}\s+/.test(currentLine)) {
+                    break;
+                  }
+                  valueLines.push(currentLine);
+                }
+
+                return valueLines.join('\n').trim();
+              }
+
+              return '';
+            }
+
+            function parseIssueReferences(value) {
+              if (typeof value !== 'string' || !value.trim()) {
+                return [];
+              }
+
+              const matches = [...value.matchAll(/#(\d+)/g)];
+              return [
+                ...new Set(
+                  matches
+                    .map((match) => Number(match[1]))
+                    .filter((candidate) => Number.isInteger(candidate) && candidate > 0),
+                ),
+              ];
+            }
+
+            function parseExecutionOrder(value) {
+              if (typeof value !== 'string' || !value.trim()) {
+                return null;
+              }
+
+              const match = /^\s*(\d+)\s*$/.exec(value);
+              if (!match) {
+                return null;
+              }
+
+              const parsed = Number(match[1]);
+              if (!Number.isInteger(parsed) || parsed <= 0) {
+                return null;
+              }
+
+              return parsed;
+            }
+
             const branchPrefixes =
               Array.isArray(policy?.branch?.prefixes) && policy.branch.prefixes.length > 0
                 ? policy.branch.prefixes
@@ -101,6 +174,43 @@ jobs:
               policy.pullRequest.decisionOptions.length > 0
                 ? policy.pullRequest.decisionOptions
                 : ['Compliant', 'Needs Changes'];
+            const orchestration = policy?.orchestration ?? {};
+            const executionAgents = Array.isArray(orchestration.executionAgents)
+              ? orchestration.executionAgents
+              : ['agent:backend', 'agent:frontend', 'agent:qa', 'agent:release'];
+            const pmAgentLabel =
+              typeof orchestration.pmAgentLabel === 'string' &&
+              orchestration.pmAgentLabel.trim()
+                ? orchestration.pmAgentLabel.trim()
+                : 'agent:pm';
+            const parentPmField =
+              typeof orchestration.parentPmField === 'string' &&
+              orchestration.parentPmField.trim()
+                ? orchestration.parentPmField.trim()
+                : 'Parent PM';
+            const executionOrderField =
+              typeof orchestration.executionOrderField === 'string' &&
+              orchestration.executionOrderField.trim()
+                ? orchestration.executionOrderField.trim()
+                : 'Execution Order';
+            const dependsOnField =
+              typeof orchestration.dependsOnField === 'string' &&
+              orchestration.dependsOnField.trim()
+                ? orchestration.dependsOnField.trim()
+                : 'Depends on';
+            const noneValue = String(orchestration.noneValue ?? 'none')
+              .trim()
+              .toLowerCase();
+            const requirePmParentForExecutionAgents =
+              orchestration.requirePmParentForExecutionAgents ?? true;
+            const requireExecutionOrderForExecutionAgents =
+              orchestration.requireExecutionOrderForExecutionAgents ?? true;
+            const requireDependsOnFieldForExecutionAgents =
+              orchestration.requireDependsOnFieldForExecutionAgents ?? true;
+            const requireDependencyClosure =
+              orchestration.requireDependencyClosure ?? true;
+            const requireParentToReferenceChildIssue =
+              orchestration.requireParentToReferenceChildIssue ?? true;
 
             const body = context.payload.pull_request.body || '';
             const headRef = context.payload.pull_request.head.ref || '';
@@ -279,17 +389,28 @@ jobs:
               return undefined;
             }
 
+            const issueCache = new Map();
+            async function getIssue(issueNumber) {
+              if (issueCache.has(issueNumber)) {
+                return issueCache.get(issueNumber);
+              }
+
+              const { data: issue } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+              });
+              issueCache.set(issueNumber, issue);
+              return issue;
+            }
+
             const projectScope = await resolveProjectScope(projectOwner);
             if (!projectScope) {
               return;
             }
 
             for (const issue_number of issueNumbers) {
-              const { data: issue } = await github.rest.issues.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number,
-              });
+              const issue = await getIssue(issue_number);
 
               const names = issue.labels
                 .map((label) => (typeof label === 'string' ? label : label.name))
@@ -300,10 +421,127 @@ jobs:
                 core.setFailed(
                   `Issue #${issue_number} must have exactly 1 agent:* label. Found: ${agentLabels.join(', ') || 'none'}.`,
                 );
+                continue;
               }
+              const issueAgentLabel = agentLabels[0];
 
               if (issue.state !== 'open') {
                 core.setFailed(`Issue #${issue_number} must be open while PR is in review.`);
+              }
+
+              const issueBody = issue.body || '';
+              const isExecutionAgent = executionAgents.includes(issueAgentLabel);
+
+              const executionOrderRaw = extractIssueField(
+                issueBody,
+                executionOrderField,
+              );
+              const executionOrder = parseExecutionOrder(executionOrderRaw);
+              if (
+                isExecutionAgent &&
+                requireExecutionOrderForExecutionAgents &&
+                !executionOrder
+              ) {
+                core.setFailed(
+                  `Issue #${issue_number} must define "${executionOrderField}" as a positive integer.`,
+                );
+              }
+
+              const dependsOnRaw = extractIssueField(issueBody, dependsOnField);
+              if (
+                isExecutionAgent &&
+                requireDependsOnFieldForExecutionAgents &&
+                !dependsOnRaw
+              ) {
+                core.setFailed(
+                  `Issue #${issue_number} must include "${dependsOnField}" (use "${noneValue}" when no blockers exist).`,
+                );
+              }
+
+              let dependencyIssueNumbers = [];
+              if (dependsOnRaw && dependsOnRaw.trim().toLowerCase() !== noneValue) {
+                dependencyIssueNumbers = parseIssueReferences(dependsOnRaw).filter(
+                  (dependencyIssueNumber) => dependencyIssueNumber !== issue_number,
+                );
+              }
+
+              if (
+                isExecutionAgent &&
+                requireDependsOnFieldForExecutionAgents &&
+                dependsOnRaw &&
+                dependsOnRaw.trim().toLowerCase() !== noneValue &&
+                dependencyIssueNumbers.length === 0
+              ) {
+                core.setFailed(
+                  `Issue #${issue_number} "${dependsOnField}" must contain issue references like "#123" or "${noneValue}".`,
+                );
+              }
+
+              if (isExecutionAgent && requirePmParentForExecutionAgents) {
+                const parentPmRaw = extractIssueField(issueBody, parentPmField);
+                const parentPmIssueNumbers = parseIssueReferences(parentPmRaw);
+
+                if (parentPmIssueNumbers.length !== 1) {
+                  core.setFailed(
+                    `Issue #${issue_number} must define exactly one "${parentPmField}" reference.`,
+                  );
+                } else {
+                  const parentIssue = await getIssue(parentPmIssueNumbers[0]);
+                  const parentNames = parentIssue.labels
+                    .map((label) => (typeof label === 'string' ? label : label.name))
+                    .filter(Boolean);
+                  const parentAgentLabels = parentNames.filter((name) =>
+                    name.startsWith('agent:'),
+                  );
+
+                  if (
+                    parentAgentLabels.length !== 1 ||
+                    parentAgentLabels[0] !== pmAgentLabel
+                  ) {
+                    core.setFailed(
+                      `Parent issue #${parentIssue.number} must be owned by ${pmAgentLabel}. Found: ${parentAgentLabels.join(', ') || 'none'}.`,
+                    );
+                  }
+
+                  if (requireParentToReferenceChildIssue) {
+                    const childReferencePattern = new RegExp(
+                      `#${issue_number}(\\D|$)`,
+                    );
+                    if (!childReferencePattern.test(parentIssue.body || '')) {
+                      core.setFailed(
+                        `Parent PM issue #${parentIssue.number} must reference child issue #${issue_number}.`,
+                      );
+                    }
+                  }
+                }
+              }
+
+              if (
+                isExecutionAgent &&
+                requireDependencyClosure &&
+                dependencyIssueNumbers.length > 0
+              ) {
+                for (const dependencyIssueNumber of dependencyIssueNumbers) {
+                  const dependencyIssue = await getIssue(dependencyIssueNumber);
+                  if (dependencyIssue.state !== 'closed') {
+                    core.setFailed(
+                      `Dependency issue #${dependencyIssueNumber} must be closed before #${issue_number} can be merged.`,
+                    );
+                  }
+
+                  if (executionOrder) {
+                    const dependencyOrderRaw = extractIssueField(
+                      dependencyIssue.body || '',
+                      executionOrderField,
+                    );
+                    const dependencyOrder = parseExecutionOrder(dependencyOrderRaw);
+                    if (dependencyOrder && dependencyOrder >= executionOrder) {
+                      core.setFailed(
+                        `Dependency issue #${dependencyIssueNumber} has "${executionOrderField}"=${dependencyOrder}, which must be lower than #${issue_number} (${executionOrder}).`,
+                      );
+                    }
+                  }
+                }
               }
 
               const projectStatus = await getProjectItemStatus(issue_number, projectScope);
@@ -330,12 +568,48 @@ jobs:
               core.setFailed(`PR must include the "${requiredSection}" section.`);
             }
 
-            const frameworkChecked = frameworkOptions.some((option) =>
-              new RegExp(`-\\s*\\[[xX]\\]\\s*${escapeRegex(option)}`, 'i').test(body),
+            const frameworkChecks = new Map(
+              frameworkOptions.map((option) => [
+                option,
+                new RegExp(`-\\s*\\[[xX]\\]\\s*${escapeRegex(option)}`, 'i').test(body),
+              ]),
             );
+            const frameworkChecked = [...frameworkChecks.values()].some(Boolean);
             if (!frameworkChecked) {
               core.setFailed(
                 `AI Self-Review Gate must mark at least one framework: ${frameworkOptions.map((option) => `"${option}"`).join(' or ')}.`,
+              );
+            }
+
+            const changedFiles = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100,
+            });
+            const touchesWeb = changedFiles.some((file) =>
+              file.filename.startsWith('apps/web/'),
+            );
+            const touchesApi = changedFiles.some((file) =>
+              file.filename.startsWith('apps/api/'),
+            );
+
+            const angularOption = frameworkOptions.find((option) =>
+              /angular way/i.test(option),
+            );
+            const nestOption = frameworkOptions.find((option) =>
+              /nestjs way/i.test(option),
+            );
+
+            if (touchesWeb && angularOption && !frameworkChecks.get(angularOption)) {
+              core.setFailed(
+                `AI Self-Review Gate must mark "${angularOption}" when PR changes apps/web.`,
+              );
+            }
+
+            if (touchesApi && nestOption && !frameworkChecks.get(nestOption)) {
+              core.setFailed(
+                `AI Self-Review Gate must mark "${nestOption}" when PR changes apps/api.`,
               );
             }
 

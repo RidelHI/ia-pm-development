@@ -15,10 +15,13 @@ Aplicar siempre en el ultimo paso tecnico, antes de abrir PR o de mover la issue
 - [ ] Scope implementado coincide con criterios de aceptacion de la issue.
 - [ ] Se mantiene `1 issue = 1 branch = 1 PR`.
 - [ ] PR incluye `Closes #<issue_number>`.
+- [ ] Si la issue no es PM: `Parent PM`, `Execution Order` y `Depends on` estan completos y coherentes.
+- [ ] Dependencias declaradas en `Depends on` estan cerradas antes de merge.
 - [ ] Se ejecutaron y pasaron:
   - `pnpm lint`
   - `pnpm test`
   - `pnpm build`
+- [ ] Se consultaron docs/runbooks, MCP y skills relevantes para la tarea.
 - [ ] Riesgos residuales y limitaciones quedaron documentados.
 
 ## Checklist Angular way

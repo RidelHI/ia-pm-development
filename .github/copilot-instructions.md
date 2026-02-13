@@ -16,14 +16,29 @@
 - Prefer native control flow (`@if`, `@for`, `@switch`).
 
 ## Agent-first delivery rules
+- Start with a PM parent issue (`agent:pm`) that defines ordered child issues and ownership.
+- Non-PM issues must include:
+  - `Parent PM: #<issue_number>`
+  - `Execution Order: <positive_integer>`
+  - `Depends on: #<issue_number>, ...` or `none`
 - Require linked issue with exactly one `agent:*` label.
 - Keep `1 issue = 1 branch = 1 PR`.
 - Include `Closes #<issue_number>` in PR body.
 - Complete `AI Self-Review Gate` in PR body using `docs/ai/checklists/ai-self-review-gate.md`.
+- If PR changes `apps/web`, mark `Angular way`.
+- If PR changes `apps/api`, mark `NestJS way`.
 - Validate and report:
   - `pnpm lint`
   - `pnpm test`
   - `pnpm build`
+
+## Orchestration sequence
+1. PM plans and sequences.
+2. Assigned agent executes only when dependencies are closed.
+3. QA/review validates before merge.
+
+## References
+- Consult relevant docs/runbooks, MCP, and skills for the active role.
 
 ## Source of truth
 - `AGENTS.md`

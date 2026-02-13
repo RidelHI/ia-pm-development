@@ -10,9 +10,10 @@ Reglas base:
 1. `main` es la rama estable y protegida.
 2. Todo cambio sale desde `main` actualizada.
 3. 1 issue = 1 branch = 1 PR.
-4. Ramas cortas (ideal: menos de 2 dias).
-5. Merge por `squash` y borrado automatico de rama al merge.
-6. Releases por tags/versionado, no por ramas largas de release.
+4. Toda issue de ejecucion debe depender de una issue padre `agent:pm` con secuencia definida.
+5. Ramas cortas (ideal: menos de 2 dias).
+6. Merge por `squash` y borrado automatico de rama al merge.
+7. Releases por tags/versionado, no por ramas largas de release.
 
 Convencion de ramas:
 - `feature/<issue_number>-<slug>`
@@ -23,6 +24,11 @@ Preflight obligatorio antes de codificar:
 ```bash
 pnpm agent:preflight -- --issue <issue_number> --agent <agent:role>
 ```
+
+En issues no-PM, el preflight exige:
+- `Parent PM: #<issue_number>`
+- `Execution Order: <positive_integer>`
+- `Depends on: #<issue_number>, ...` o `none`
 
 ## Preparacion local (una vez por repo)
 ```bash

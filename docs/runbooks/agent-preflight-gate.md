@@ -33,6 +33,14 @@ Roles validos:
 6. Label `agent:*` coincide con el `--agent` indicado.
 7. Issue pertenece al Project configurado.
 8. Estado de card valido (`In Progress` por defecto, o `Todo` con `--allow-todo-status`).
+9. Para agentes de ejecucion (`agent:backend|frontend|qa|release`):
+   - `Parent PM` referencia exactamente una issue.
+   - La issue padre tiene label `agent:pm`.
+   - La issue padre referencia a la issue hija en su plan.
+   - `Execution Order` es entero positivo.
+   - `Depends on` existe (usar `none` cuando no hay bloqueos).
+   - Todas las dependencias listadas estan `CLOSED`.
+   - Si dependencias tienen `Execution Order`, debe ser menor al de la issue actual.
 
 ## Flags utiles
 - `--allow-todo-status` (o `--AllowTodoStatus`): permite validar en `Todo` cuando el PM aun no mueve la card.
@@ -41,10 +49,12 @@ Roles validos:
 ## Notas de autonomia para IA
 - Este gate solo fija orden, ownership y trazabilidad.
 - La IA conserva libertad para analizar, planificar y decidir la logica tecnica/negocio dentro del scope de la issue.
+- Antes de implementar o revisar, consultar documentacion relevante, MCP y skills del rol activo.
 
 ## Flujo recomendado
-1. PM refina issue y la mueve a `Todo`.
-2. Agente crea rama con issue id en el nombre.
-3. Agente mueve card a `In Progress`.
-4. Agente ejecuta preflight.
-5. Recien despues empieza implementacion.
+1. PM refina issue padre `agent:pm` y define subtareas ordenadas.
+2. PM crea child issues con `Parent PM`, `Execution Order`, `Depends on`.
+3. Agente crea rama con issue id en el nombre.
+4. Agente mueve card a `In Progress`.
+5. Agente ejecuta preflight.
+6. Recien despues empieza implementacion.

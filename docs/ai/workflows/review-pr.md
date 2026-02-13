@@ -10,9 +10,12 @@ description: Review a pull request against issue scope, agent ownership, and qua
 
 ## Step 1: Context Load
 1. Read PR description and linked issue.
-2. Confirm PR includes `Closes #<issue_number>`.
-3. Confirm issue has exactly one `agent:*` label.
-4. Confirm PR includes `AI Self-Review Gate` with framework marked and decision.
+2. Load relevant docs/runbooks, MCP references, and skills for the active review scope.
+3. Confirm PR includes `Closes #<issue_number>`.
+4. Confirm issue has exactly one `agent:*` label.
+5. For non-PM issues, confirm `Parent PM`, `Execution Order`, and `Depends on` are present and valid.
+6. Confirm dependencies listed in `Depends on` are closed.
+7. Confirm PR includes `AI Self-Review Gate` with framework marked and decision.
 
 ## Step 2: Scope Validation
 1. Compare issue acceptance criteria vs implemented behavior.
@@ -28,7 +31,7 @@ description: Review a pull request against issue scope, agent ownership, and qua
 1. Verify `pnpm lint`, `pnpm test`, `pnpm build` status.
 2. Verify CI `quality` check is passing.
 3. Check for release-impacting risk when workflow or runtime config changed.
-4. Cross-check self-review claims against actual code changes.
+4. Cross-check self-review claims against actual code changes (`apps/web` => Angular way, `apps/api` => NestJS way).
 
 ## Step 5: Decision
 1. Approve when criteria and quality gates are satisfied.

@@ -3,6 +3,30 @@ description: CI/CD, deployment, runtime hardening, and post-deploy validation
 title: "OPS-XX: "
 labels: ["type:devops", "agent:release", "priority:p2"]
 body:
+  - type: input
+    id: parent_pm
+    attributes:
+      label: Parent PM
+      description: PM issue that defines this delivery plan.
+      placeholder: "#123"
+    validations:
+      required: true
+  - type: input
+    id: execution_order
+    attributes:
+      label: Execution Order
+      description: Positive integer that defines sequence across sibling tasks.
+      placeholder: "4"
+    validations:
+      required: true
+  - type: input
+    id: depends_on
+    attributes:
+      label: Depends on
+      description: Blocking issues that must be closed first. Use `none` when no blockers exist.
+      placeholder: "#120, #121 or none"
+    validations:
+      required: true
   - type: textarea
     id: objective
     attributes:
@@ -31,5 +55,16 @@ body:
         - [ ] workflow runs successfully
         - [ ] deployed endpoint passes smoke test
         - [ ] runbook reflects final process
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References Consulted
+      description: Record docs, MCP tools, and skills consulted before implementation.
+      placeholder: |
+        - docs/... (release criteria used)
+        - MCP: ... (if used)
+        - Skills: release-cicd-operator, etc.
     validations:
       required: true

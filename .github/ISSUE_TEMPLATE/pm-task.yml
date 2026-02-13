@@ -33,3 +33,26 @@ body:
         - [ ] project status and docs are updated
     validations:
       required: true
+  - type: textarea
+    id: execution_plan
+    attributes:
+      label: Execution Plan (Ordered Subtasks)
+      description: Break down implementation into ordered child issues and assign exactly one agent per issue.
+      placeholder: |
+        1. [ ] #120 agent:backend - API contract and tests
+        2. [ ] #121 agent:frontend - UI integration and UX states (depends on #120)
+        3. [ ] #122 agent:qa - regression and acceptance evidence (depends on #121)
+        4. [ ] #123 agent:release - CI/CD and deployment verification (depends on #122)
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References Consulted
+      description: Record docs, MCP sources, and skills used for planning criteria.
+      placeholder: |
+        - docs/... (workflow and governance references)
+        - MCP: ... (if used)
+        - Skills: pm-github-orchestrator
+    validations:
+      required: true

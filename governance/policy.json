@@ -1,5 +1,5 @@
 {
-  "governanceVersion": "1.0.0",
+  "governanceVersion": "1.1.0",
   "branch": {
     "prefixes": ["feature", "fix", "chore"],
     "slugRegex": "[a-z0-9._-]+"
@@ -28,6 +28,24 @@
   },
   "quality": {
     "requiredCommands": ["pnpm lint", "pnpm test", "pnpm build"]
+  },
+  "orchestration": {
+    "requirePmParentForExecutionAgents": true,
+    "executionAgents": [
+      "agent:backend",
+      "agent:frontend",
+      "agent:qa",
+      "agent:release"
+    ],
+    "pmAgentLabel": "agent:pm",
+    "parentPmField": "Parent PM",
+    "executionOrderField": "Execution Order",
+    "dependsOnField": "Depends on",
+    "noneValue": "none",
+    "requireExecutionOrderForExecutionAgents": true,
+    "requireDependsOnFieldForExecutionAgents": true,
+    "requireDependencyClosure": true,
+    "requireParentToReferenceChildIssue": true
   },
   "aiOperatingBounds": {
     "mustFollowWorkflowOrder": true,

@@ -15,9 +15,11 @@ No se asume ejecucion paralela de cinco agentes independientes.
 ## Decisiones clave
 1. GitHub Project es la fuente unica de verdad para backlog y estados.
 2. Toda tarea nace como issue y debe tener exactamente un label `agent:*`.
-3. Cada cambio tecnico se entrega por PR pequena enlazada con `Closes #<issue_number>`.
-4. CI bloquea merge si falta issue enlazada o si la issue no tiene ownership por agente.
-5. La estrategia de ramas es `GitHub Flow` con ramas cortas segun `docs/runbooks/git-branching-model.md`.
+3. Todo flujo multi-rol inicia con una issue padre `agent:pm` que descompone subtareas y define secuencia.
+4. Cada issue de ejecucion debe declarar `Parent PM`, `Execution Order` y `Depends on`.
+5. Cada cambio tecnico se entrega por PR pequena enlazada con `Closes #<issue_number>`.
+6. CI bloquea merge si falta issue enlazada o si la issue no tiene ownership por agente.
+7. La estrategia de ramas es `GitHub Flow` con ramas cortas segun `docs/runbooks/git-branching-model.md`.
 
 ## Taxonomia de agentes
 | Label | Rol | Responsabilidad principal | Entregables obligatorios |
@@ -37,14 +39,15 @@ Para reducir overhead mental, usar tres modos macro durante la ejecucion:
 Los labels `agent:*` siguen siendo obligatorios para ownership y trazabilidad, aunque la ejecucion sea por un solo agente IA.
 
 ## Flujo operativo
-1. PM crea o refina issue, define alcance, criterios de aceptacion y labels (`type:*`, `priority:*`, `agent:*`).
-2. PM mueve card a `Todo`.
-3. Agente owner mueve card a `In Progress`, crea rama y ejecuta implementacion.
-4. Agente owner valida `pnpm lint`, `pnpm test`, `pnpm build`.
-5. Agente owner ejecuta self-review final con `docs/ai/checklists/ai-self-review-gate.md`.
-6. Agente owner abre PR con `Closes #<issue_number>` y seccion `AI Self-Review Gate`; luego mueve issue a `In Review`.
-7. Reviewer/QA valida cumplimiento funcional y calidad.
-8. Con merge a `main`, issue pasa a `Done`.
+1. PM crea o refina issue padre `agent:pm`, define alcance, criterios de aceptacion y plan de subtareas ordenadas.
+2. PM crea/subdivide child issues con exactamente un `agent:*` cada una y completa `Parent PM`, `Execution Order`, `Depends on`.
+3. PM mueve issues a `Todo` segun secuencia.
+4. Agente owner toma la issue habilitada (dependencias cerradas), mueve card a `In Progress`, crea rama y ejecuta preflight.
+5. Agente owner implementa y valida `pnpm lint`, `pnpm test`, `pnpm build`.
+6. Agente owner ejecuta self-review final con `docs/ai/checklists/ai-self-review-gate.md`.
+7. Agente owner abre PR con `Closes #<issue_number>` y seccion `AI Self-Review Gate`; luego mueve issue a `In Review`.
+8. Reviewer/QA valida cumplimiento funcional, calidad y coherencia con Angular/NestJS way.
+9. Con merge a `main`, issue pasa a `Done`; se repite hasta cerrar toda la secuencia.
 
 ## Definition of done por agente
 ### `agent:pm`
@@ -75,9 +78,12 @@ Los labels `agent:*` siguen siendo obligatorios para ownership y trazabilidad, a
 ## Reglas de orquestacion
 1. Sin issue refinada, no hay desarrollo.
 2. Sin ownership por agente, la issue no entra en ejecucion.
-3. Sin preflight (`pnpm agent:preflight -- --issue <issue_number> --agent <agent:role>`), no hay implementacion.
-4. Sin PR enlazada a issue, no hay merge.
-5. Sin evidencia de calidad, no hay cierre.
+3. Sin issue padre `agent:pm` y secuencia definida, no hay ejecucion multi-rol.
+4. Sin `Parent PM`, `Execution Order` y `Depends on` en issues de ejecucion, no hay implementacion.
+5. Sin preflight (`pnpm agent:preflight -- --issue <issue_number> --agent <agent:role>`), no hay implementacion.
+6. Sin PR enlazada a issue, no hay merge.
+7. Sin evidencia de calidad, no hay cierre.
+8. Antes de implementar/revisar, se consultan docs, MCP y skills relevantes al rol.
 
 ## Workflows y prompts
 Usar estos artefactos para repetir procesos con consistencia:
