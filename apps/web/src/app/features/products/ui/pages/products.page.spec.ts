@@ -22,6 +22,7 @@ describe('ProductsPageComponent', () => {
   const loadingSignal = signal(false);
   const errorSignal = signal<string | null>(null);
   const errorCodeSignal = signal<number | null>(null);
+  const isEmptySignal = signal(false);
   let loadProductsCalls: string[];
   let clearErrorCalls: number;
   let clearSessionCalls: number;
@@ -31,6 +32,7 @@ describe('ProductsPageComponent', () => {
     loading: loadingSignal,
     error: errorSignal,
     errorCode: errorCodeSignal,
+    isEmpty: isEmptySignal,
     loadProducts(query: string) {
       loadProductsCalls.push(query);
     },
@@ -54,6 +56,7 @@ describe('ProductsPageComponent', () => {
     loadingSignal.set(false);
     errorSignal.set(null);
     errorCodeSignal.set(null);
+    isEmptySignal.set(false);
     await TestBed.configureTestingModule({
       imports: [ProductsPageComponent],
       providers: [
@@ -84,6 +87,7 @@ describe('ProductsPageComponent', () => {
         updatedAt: '2026-02-12T00:00:00.000Z',
       },
     ]);
+    isEmptySignal.set(false);
     const fixture = TestBed.createComponent(ProductsPageComponent);
 
     fixture.detectChanges();
@@ -105,6 +109,7 @@ describe('ProductsPageComponent', () => {
     }) as Router['navigate'];
 
     errorCodeSignal.set(401);
+    isEmptySignal.set(false);
     fixture.detectChanges();
     await fixture.whenStable();
 

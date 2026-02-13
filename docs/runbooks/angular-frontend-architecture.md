@@ -58,3 +58,14 @@ apps/web/src/app
 - Use `signalStore` with `withState`, `withComputed`, `withMethods`.
 - Use `rxMethod` for side effects and API calls.
 - Keep error/loading/data state explicit inside store state.
+
+## UI Composition Standard
+
+- Pages act as containers and orchestrate navigation + store interactions.
+- Presentational components receive data via inputs and communicate via outputs.
+- Presentational components do not inject API services or feature stores.
+- Critical feedback states must be explicit and accessible:
+  - loading
+  - error (`role="alert"` for blocking errors)
+  - empty
+  - success/status (`aria-live="polite"` where appropriate)
