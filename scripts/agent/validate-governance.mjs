@@ -165,6 +165,8 @@ function validatePreflight(policy, options) {
       String(projectNumber),
       "--owner",
       String(projectOwner),
+      "--limit",
+      "100",
       "--format",
       "json"
     ])
