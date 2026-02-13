@@ -1,26 +1,35 @@
-import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
+import { of } from 'rxjs';
 import { AuthStore } from '../../../auth/state/auth.store';
+import { ProductsApiService } from '../../data-access/products-api.service';
+import type { Product, ProductMutationInput } from '../../domain/products.models';
 import { ProductsStore } from '../../state/products.store';
-import { ProductsSearchFormComponent } from '../components/products-search-form.component';
+import { ProductsGridComponent } from '../components/products-grid.component';
 import { ProductsPageComponent } from './products.page';
 
 describe('ProductsPageComponent', () => {
-  const productsSignal = signal<
-    {
-      id: string;
-      sku: string;
-      name: string;
-      quantity: number;
-      unitPriceCents: number;
-      status: 'active' | 'inactive';
-      location: string | null;
-      createdAt: string;
-      updatedAt: string;
-    }[]
-  >([]);
+  const baseProduct: Product = {
+    id: 'prod-01',
+    sku: 'SKU-01',
+    barcode: '7501234567890',
+    name: 'Product 01',
+    category: 'Lacteos',
+    brand: 'Marca Norte',
+    quantity: 2,
+    minimumStock: 1,
+    unitPriceCents: 1500,
+    imageUrl: 'https://images.example.com/product-01.jpg',
+    status: 'active',
+    location: 'A-01',
+    notes: 'Nota',
+    createdAt: '2026-02-12T00:00:00.000Z',
+    updatedAt: '2026-02-12T00:00:00.000Z',
+  };
+
+  const productsSignal = signal<Product[]>([]);
   const loadingSignal = signal(false);
   const errorSignal = signal<string | null>(null);
   const errorCodeSignal = signal<number | null>(null);
@@ -28,6 +37,9 @@ describe('ProductsPageComponent', () => {
   let loadProductsCalls: string[];
   let clearErrorCalls: number;
   let clearSessionCalls: number;
+  let createCalls: number;
+  let getProductCalls: string[];
+  let deleteCalls: string[];
 
   const productsStoreMock = {
     products: productsSignal,
@@ -49,16 +61,43 @@ describe('ProductsPageComponent', () => {
       clearSessionCalls += 1;
     },
   };
+  const productsApiServiceMock = {
+    getProduct(productId: string) {
+      getProductCalls.push(productId);
+      return of({
+        ...baseProduct,
+        id: productId,
+      });
+    },
+    createProduct(input: ProductMutationInput) {
+      void input;
+      createCalls += 1;
+      return of(baseProduct);
+    },
+    updateProduct(productId: string, input: ProductMutationInput) {
+      void productId;
+      void input;
+      return of(baseProduct);
+    },
+    deleteProduct(productId: string) {
+      deleteCalls.push(productId);
+      return of(void 0);
+    },
+  };
 
   beforeEach(async () => {
     loadProductsCalls = [];
     clearErrorCalls = 0;
     clearSessionCalls = 0;
+    createCalls = 0;
+    getProductCalls = [];
+    deleteCalls = [];
     productsSignal.set([]);
     loadingSignal.set(false);
     errorSignal.set(null);
     errorCodeSignal.set(null);
     isEmptySignal.set(false);
+
     await TestBed.configureTestingModule({
       imports: [ProductsPageComponent],
       providers: [
@@ -71,25 +110,16 @@ describe('ProductsPageComponent', () => {
           provide: AuthStore,
           useValue: authStoreMock,
         },
+        {
+          provide: ProductsApiService,
+          useValue: productsApiServiceMock,
+        },
       ],
     }).compileComponents();
   });
 
   it('loads products from store on init', async () => {
-    productsSignal.set([
-      {
-        id: 'prod-01',
-        sku: 'SKU-01',
-        name: 'Product 01',
-        quantity: 2,
-        unitPriceCents: 1500,
-        status: 'active',
-        location: 'A-01',
-        createdAt: '2026-02-12T00:00:00.000Z',
-        updatedAt: '2026-02-12T00:00:00.000Z',
-      },
-    ]);
-    isEmptySignal.set(false);
+    productsSignal.set([baseProduct]);
     const fixture = TestBed.createComponent(ProductsPageComponent);
 
     fixture.detectChanges();
@@ -111,7 +141,6 @@ describe('ProductsPageComponent', () => {
     }) as Router['navigate'];
 
     errorCodeSignal.set(401);
-    isEmptySignal.set(false);
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -120,34 +149,65 @@ describe('ProductsPageComponent', () => {
     expect(navigateCalls).toEqual([[['/login']]]);
   });
 
-  it('renders empty state feedback when store is empty', async () => {
+  it('loads product details when grid emits view event', async () => {
+    productsSignal.set([baseProduct]);
     const fixture = TestBed.createComponent(ProductsPageComponent);
-    productsSignal.set([]);
-    errorSignal.set(null);
-    isEmptySignal.set(true);
 
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const html = fixture.nativeElement as HTMLElement;
-    expect(html.textContent).toContain('No hay productos');
+    const gridDebug = fixture.debugElement.query(By.directive(ProductsGridComponent));
+    const grid = gridDebug.componentInstance as ProductsGridComponent;
+
+    grid.viewRequested.emit('prod-01');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(getProductCalls).toEqual(['prod-01']);
+    expect(fixture.componentInstance.editorMode()).toBe('detail');
+    expect(fixture.componentInstance.selectedProduct()?.id).toBe('prod-01');
   });
 
-  it('requests products with current query when search form emits submit', async () => {
+  it('creates a product and reloads listing', async () => {
     const fixture = TestBed.createComponent(ProductsPageComponent);
-
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const searchFormDebug = fixture.debugElement.query(
-      By.directive(ProductsSearchFormComponent),
-    );
-    const searchForm = searchFormDebug.componentInstance as ProductsSearchFormComponent;
+    const component = fixture.componentInstance;
+    component.startCreate();
+    component.productForm.patchValue({
+      sku: 'SKU-NEW-01',
+      name: 'Nuevo producto',
+      quantity: 4,
+      unitPriceCents: 1999,
+      status: 'active',
+    });
+    component.saveProduct(new Event('submit'));
+    await fixture.whenStable();
 
-    searchForm.queryChange.emit('lllll');
-    searchForm.searchRequested.emit();
+    expect(createCalls).toBe(1);
+    expect(loadProductsCalls).toEqual(['', '']);
+  });
+
+  it('deletes product when user confirms action', async () => {
+    productsSignal.set([baseProduct]);
+    const fixture = TestBed.createComponent(ProductsPageComponent);
+    const originalConfirm = window.confirm;
+    Object.defineProperty(window, 'confirm', {
+      value: () => true,
+      configurable: true,
+    });
+
     fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.componentInstance.removeProduct('prod-01');
+    await fixture.whenStable();
 
-    expect(loadProductsCalls).toEqual(['', 'lllll']);
+    expect(deleteCalls).toEqual(['prod-01']);
+
+    Object.defineProperty(window, 'confirm', {
+      value: originalConfirm,
+      configurable: true,
+    });
   });
 });
