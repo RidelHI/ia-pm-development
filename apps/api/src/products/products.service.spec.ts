@@ -47,6 +47,9 @@ describe('ProductsService', () => {
     const bySku = await service.findAll({ sku: 'APPLE' });
     const byName = await service.findAll({ name: 'milk' });
     const byLocation = await service.findAll({ location: 'B-03' });
+    const byCategory = await service.findAll({ category: 'frutas' });
+    const byBrand = await service.findAll({ brand: 'campo' });
+    const byBarcode = await service.findAll({ barcode: '7501001' });
 
     expect(bySku.data).toHaveLength(1);
     expect(bySku.data[0]?.sku).toBe('SKU-APPLE-001');
@@ -54,12 +57,22 @@ describe('ProductsService', () => {
     expect(byName.data[0]?.name).toBe('Milk Pack');
     expect(byLocation.data).toHaveLength(1);
     expect(byLocation.data[0]?.location).toBe('B-03');
+    expect(byCategory.data).toHaveLength(1);
+    expect(byCategory.data[0]?.category).toBe('Frutas');
+    expect(byBrand.data).toHaveLength(1);
+    expect(byBrand.data[0]?.brand).toBe('Campo Azul');
+    expect(byBarcode.data).toHaveLength(1);
+    expect(byBarcode.data[0]?.barcode).toBe('7501001001001');
   });
 
   it('filters products by numeric ranges', async () => {
     const quantityRange = await service.findAll({
       quantityMin: 20,
       quantityMax: 50,
+    });
+    const minimumStockRange = await service.findAll({
+      minimumStockMin: 10,
+      minimumStockMax: 15,
     });
     const priceRange = await service.findAll({
       unitPriceMin: 500,
@@ -68,6 +81,8 @@ describe('ProductsService', () => {
 
     expect(quantityRange.data).toHaveLength(1);
     expect(quantityRange.data[0]?.name).toBe('Apple Box');
+    expect(minimumStockRange.data).toHaveLength(1);
+    expect(minimumStockRange.data[0]?.name).toBe('Apple Box');
     expect(priceRange.data).toHaveLength(1);
     expect(priceRange.data[0]?.name).toBe('Apple Box');
   });
@@ -75,13 +90,21 @@ describe('ProductsService', () => {
   it('creates a product', async () => {
     const product = await service.create({
       sku: 'SKU-BREAD-003',
+      barcode: '7503003003003',
       name: 'Bread Pack',
+      category: 'Panaderia',
+      brand: 'El Trigo',
       quantity: 8,
+      minimumStock: 3,
       unitPriceCents: 199,
+      imageUrl: 'https://images.example.com/bread-pack.jpg',
+      notes: 'Reponer por la manana',
     });
 
     expect(product.id).toBeDefined();
     expect(product.status).toBe('active');
+    expect(product.minimumStock).toBe(3);
+    expect(product.imageUrl).toBe('https://images.example.com/bread-pack.jpg');
   });
 
   it('updates a product', async () => {

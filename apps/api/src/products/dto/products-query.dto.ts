@@ -88,12 +88,33 @@ export class ProductsQueryDto {
   @MaxLength(64)
   sku?: string;
 
+  @ApiPropertyOptional({ maxLength: 64, example: '7501234567890' })
+  @Transform(trimOptionalString)
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  barcode?: string;
+
   @ApiPropertyOptional({ maxLength: 120, example: 'Apple Box' })
   @Transform(trimOptionalString)
   @IsOptional()
   @IsString()
   @MaxLength(120)
   name?: string;
+
+  @ApiPropertyOptional({ maxLength: 80, example: 'Bebidas' })
+  @Transform(trimOptionalString)
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  category?: string;
+
+  @ApiPropertyOptional({ maxLength: 80, example: 'Marca Norte' })
+  @Transform(trimOptionalString)
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  brand?: string;
 
   @ApiPropertyOptional({ maxLength: 64, example: 'A-01' })
   @Transform(trimOptionalString)
@@ -123,6 +144,23 @@ export class ProductsQueryDto {
     message: 'quantityMax must be greater than or equal to quantityMin',
   })
   quantityMax?: number;
+
+  @ApiPropertyOptional({ minimum: 0, example: 5 })
+  @Transform(({ value }) => parseOptionalInt(value))
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  minimumStockMin?: number;
+
+  @ApiPropertyOptional({ minimum: 0, example: 20 })
+  @Transform(({ value }) => parseOptionalInt(value))
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @IsGreaterThanOrEqualField('minimumStockMin', {
+    message: 'minimumStockMax must be greater than or equal to minimumStockMin',
+  })
+  minimumStockMax?: number;
 
   @ApiPropertyOptional({ minimum: 0, example: 100 })
   @Transform(({ value }) => parseOptionalInt(value))
