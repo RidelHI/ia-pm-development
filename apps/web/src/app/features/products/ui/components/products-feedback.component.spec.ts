@@ -23,4 +23,15 @@ describe('ProductsFeedbackComponent', () => {
     const html = fixture.nativeElement as HTMLElement;
     expect(html.textContent).toContain('No hay productos');
   });
+
+  it('renders no message when data exists and no error is present', () => {
+    const fixture = TestBed.createComponent(ProductsFeedbackComponent);
+
+    fixture.componentRef.setInput('errorMessage', null);
+    fixture.componentRef.setInput('isEmpty', false);
+    fixture.detectChanges();
+
+    const html = fixture.nativeElement as HTMLElement;
+    expect(html.textContent?.trim()).toBe('');
+  });
 });

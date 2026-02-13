@@ -117,4 +117,17 @@ describe('ProductsPageComponent', () => {
     expect(clearErrorCalls).toBe(1);
     expect(navigateCalls).toEqual([[['/login']]]);
   });
+
+  it('renders empty state feedback when store is empty', async () => {
+    const fixture = TestBed.createComponent(ProductsPageComponent);
+    productsSignal.set([]);
+    errorSignal.set(null);
+    isEmptySignal.set(true);
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const html = fixture.nativeElement as HTMLElement;
+    expect(html.textContent).toContain('No hay productos');
+  });
 });

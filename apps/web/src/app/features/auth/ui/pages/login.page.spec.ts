@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 import { AuthApiService } from '../../data-access/auth-api.service';
 import { LoginPageComponent } from './login.page';
 
@@ -76,5 +76,37 @@ describe('LoginPageComponent', () => {
     await component.submit();
 
     expect(component.errorMessage()).toContain('Credenciales inválidas');
+  });
+
+  it('shows loading state while request is in flight', async () => {
+    const loginSubject = new Subject<unknown>();
+    loginImplementation = () => loginSubject.asObservable();
+    const fixture = TestBed.createComponent(LoginPageComponent);
+    const component = fixture.componentInstance;
+    const router = TestBed.inject(Router);
+    router.navigate = (() => Promise.resolve(true)) as Router['navigate'];
+
+    component.form.setValue({
+      username: 'warehouse.user',
+      password: 'StrongPassword123!',
+    });
+
+    const submitPromise = component.submit();
+    fixture.detectChanges();
+
+    const submitButton = fixture.nativeElement.querySelector(
+      'button[type="submit"]',
+    ) as HTMLButtonElement;
+    expect(component.isSubmitting()).toBe(true);
+    expect(submitButton.disabled).toBe(true);
+    expect(submitButton.textContent).toContain('Entrando...');
+
+    loginSubject.next({
+      accessToken: 'token-123',
+      tokenType: 'Bearer',
+      expiresInSeconds: 900,
+    });
+    loginSubject.complete();
+    await submitPromise;
   });
 });
