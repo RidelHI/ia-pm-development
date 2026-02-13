@@ -4,6 +4,7 @@
 
 ## Core governance
 - AGENTS.md
+- governance/policy.json
 - docs/ai/agent-operating-model.md
 - docs/ai/checklists/ai-self-review-gate.md
 - docs/runbooks/github-project-workflow.md
