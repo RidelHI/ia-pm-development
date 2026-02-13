@@ -10,14 +10,14 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
         [value]="query()"
         (input)="onQueryInput($event)"
         aria-label="Buscar productos por nombre o SKU"
-        class="min-w-64 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
+        class="min-w-64 flex-1 rounded-lg border border-slate-300 bg-slate-50/70 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:border-cyan-400 focus:bg-white focus:ring-2"
         placeholder="Buscar por nombre o SKU"
         type="search"
       />
       <button
         [attr.aria-busy]="loading()"
         [disabled]="loading()"
-        class="rounded-lg bg-cyan-700 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
+        class="rounded-lg bg-cyan-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
         type="submit"
       >
         @if (loading()) { Cargando... } @else { Buscar }

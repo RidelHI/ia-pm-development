@@ -23,12 +23,31 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'products',
+    path: 'dashboard',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/products/ui/pages/products.page').then(
-        (m) => m.ProductsPageComponent,
+      import('./features/dashboard/ui/components/dashboard-shell.component').then(
+        (m) => m.DashboardShellComponent,
       ),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'products',
+      },
+      {
+        path: 'products',
+        loadComponent: () =>
+          import('./features/products/ui/pages/products.page').then(
+            (m) => m.ProductsPageComponent,
+          ),
+      },
+    ],
+  },
+  {
+    path: 'products',
+    pathMatch: 'full',
+    redirectTo: 'dashboard/products',
   },
   {
     path: '**',

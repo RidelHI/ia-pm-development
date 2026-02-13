@@ -37,7 +37,7 @@ describe('LoginPageComponent', () => {
     }).compileComponents();
   });
 
-  it('submits valid credentials and navigates to products', async () => {
+  it('submits valid credentials and navigates to dashboard products', async () => {
     const fixture = TestBed.createComponent(LoginPageComponent);
     const component = fixture.componentInstance;
     const router = TestBed.inject(Router);
@@ -59,7 +59,7 @@ describe('LoginPageComponent', () => {
         password: 'StrongPassword123!',
       },
     ]);
-    expect(navigateCalls).toEqual([[['/products']]]);
+    expect(navigateCalls).toEqual([[['/dashboard/products']]]);
     expect(component.errorMessage()).toBeNull();
   });
 

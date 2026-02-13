@@ -19,6 +19,7 @@ describe('AuthStore', () => {
   it('starts unauthenticated when storage is empty', () => {
     expect(store.isAuthenticated()).toBe(false);
     expect(store.accessToken()).toBeNull();
+    expect(store.username()).toBeNull();
   });
 
   it('sets and clears session state', async () => {
@@ -32,12 +33,14 @@ describe('AuthStore', () => {
 
     expect(store.isAuthenticated()).toBe(true);
     expect(store.accessToken()).toBe('token-123');
+    expect(store.username()).toBe('warehouse.user');
 
     store.clearSession();
     await Promise.resolve();
 
     expect(store.isAuthenticated()).toBe(false);
     expect(store.accessToken()).toBeNull();
+    expect(store.username()).toBeNull();
   });
 
   it('removes malformed session data from storage', () => {

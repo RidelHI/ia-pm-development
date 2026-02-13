@@ -45,9 +45,11 @@ export const AuthStore = signalStore(
   }),
   withComputed(({ session }) => {
     const accessToken = computed(() => session()?.accessToken ?? null);
+    const username = computed(() => session()?.username ?? null);
 
     return {
       accessToken,
+      username,
       isAuthenticated: computed(() => accessToken() !== null),
     };
   }),

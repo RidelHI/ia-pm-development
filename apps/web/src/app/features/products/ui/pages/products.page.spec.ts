@@ -264,4 +264,81 @@ describe('ProductsPageComponent', () => {
     );
     expect(loadProductsCalls).toEqual(['', '']);
   });
+
+  it('loads a local image file into the form', async () => {
+    const fixture = TestBed.createComponent(ProductsPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component.startCreate();
+
+    const originalFileReader = globalThis.FileReader;
+    const imageDataUrl = 'data:image/png;base64,AAA=';
+    class MockFileReader {
+      result: string | ArrayBuffer | null = null;
+      onload: ((this: FileReader, ev: ProgressEvent<FileReader>) => unknown) | null = null;
+
+      readAsDataURL(): void {
+        this.result = imageDataUrl;
+        this.onload?.call(
+          this as unknown as FileReader,
+          new ProgressEvent('load') as ProgressEvent<FileReader>,
+        );
+      }
+    }
+    Object.defineProperty(globalThis, 'FileReader', {
+      value: MockFileReader,
+      configurable: true,
+    });
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    const imageFile = new File([new Uint8Array([1, 2, 3])], 'image.png', {
+      type: 'image/png',
+    });
+    Object.defineProperty(fileInput, 'files', {
+      value: [imageFile],
+      configurable: true,
+    });
+
+    component.onImageFileSelected({ target: fileInput } as unknown as Event);
+
+    expect(component.productForm.controls.imageUrl.value).toBe(imageDataUrl);
+
+    Object.defineProperty(globalThis, 'FileReader', {
+      value: originalFileReader,
+      configurable: true,
+    });
+  });
+
+  it('shows validation message when selected file exceeds maximum size', async () => {
+    const fixture = TestBed.createComponent(ProductsPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component.startCreate();
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    const oversizedFile = new File(
+      [new Uint8Array(5 * 1024 * 1024 + 1)],
+      'big-image.png',
+      {
+        type: 'image/png',
+      },
+    );
+    Object.defineProperty(fileInput, 'files', {
+      value: [oversizedFile],
+      configurable: true,
+    });
+
+    component.onImageFileSelected({ target: fileInput } as unknown as Event);
+
+    expect(component.productForm.controls.imageUrl.value).toBe('');
+    expect(component.formErrorMessage()).toBe(
+      'La imagen es demasiado grande. Usa una imagen menor a 5 MB o una URL externa.',
+    );
+  });
 });

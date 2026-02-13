@@ -35,7 +35,7 @@ describe('guestGuard', () => {
     expect(result).toBe(true);
   });
 
-  it('redirects authenticated users to /products', () => {
+  it('redirects authenticated users to /dashboard/products', () => {
     isAuthenticated = true;
 
     const result = TestBed.runInInjectionContext(() =>
@@ -44,6 +44,6 @@ describe('guestGuard', () => {
 
     expect(result instanceof UrlTree).toBe(true);
     const router = TestBed.inject(Router);
-    expect(router.serializeUrl(result as UrlTree)).toBe('/products');
+    expect(router.serializeUrl(result as UrlTree)).toBe('/dashboard/products');
   });
 });

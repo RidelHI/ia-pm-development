@@ -33,331 +33,320 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
     ProductsGridComponent,
   ],
   template: `
-    <main class="min-h-screen bg-shell p-6 md:p-10">
-      <section class="mx-auto max-w-5xl space-y-4">
-        <header class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
-          <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
-              Protected Route
-            </p>
-            <h1 class="text-2xl font-semibold text-slate-900">Productos</h1>
-            <p class="text-sm text-slate-600">
-              Inventario con CRUD completo, imagen y metadatos de almacén.
-            </p>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <button
-              (click)="startCreate()"
-              class="rounded-lg bg-cyan-700 px-3 py-2 text-sm font-semibold text-white hover:bg-cyan-600"
-              type="button"
-            >
-              Nuevo producto
-            </button>
-            <button
-              (click)="logout()"
-              class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-              type="button"
-            >
-              Cerrar sesión
-            </button>
-          </div>
-        </header>
+    <section class="space-y-4">
+      <header class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">Inventario</p>
+          <h1 class="text-2xl font-semibold text-slate-900">Productos</h1>
+          <p class="text-sm text-slate-600">CRUD completo, imagen y metadatos de almacen.</p>
+        </div>
+        <button
+          (click)="startCreate()"
+          class="rounded-lg bg-cyan-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-cyan-600"
+          type="button"
+        >
+          Nuevo producto
+        </button>
+      </header>
 
-        <section class="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
-          <app-products-search-form
-            [loading]="isLoading()"
-            [query]="query()"
-            (queryChange)="query.set($event)"
-            (searchRequested)="loadProducts()"
-          />
-        </section>
-
-        <app-products-feedback
-          [errorMessage]="errorMessage()"
-          [isEmpty]="isEmpty()"
+      <section class="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
+        <app-products-search-form
+          [loading]="isLoading()"
+          [query]="query()"
+          (queryChange)="query.set($event)"
+          (searchRequested)="loadProducts()"
         />
+      </section>
 
-        @if (actionErrorMessage()) {
-          <section
-            aria-live="assertive"
-            class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-            role="alert"
-          >
-            {{ actionErrorMessage() }}
-          </section>
-        }
+      <app-products-feedback [errorMessage]="errorMessage()" [isEmpty]="isEmpty()" />
 
-        @if (actionSuccessMessage()) {
-          <section
-            aria-live="polite"
-            class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
-            role="status"
-          >
-            {{ actionSuccessMessage() }}
-          </section>
-        }
+      @if (actionErrorMessage()) {
+        <section
+          aria-live="assertive"
+          class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+          role="alert"
+        >
+          {{ actionErrorMessage() }}
+        </section>
+      }
 
-        @if (products().length > 0) {
-          <app-products-grid
-            [products]="products()"
-            (viewRequested)="showDetails($event)"
-            (editRequested)="startEdit($event)"
-            (deleteRequested)="removeProduct($event)"
-          />
-        }
+      @if (actionSuccessMessage()) {
+        <section
+          aria-live="polite"
+          class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
+          role="status"
+        >
+          {{ actionSuccessMessage() }}
+        </section>
+      }
 
-        @if (editorMode()) {
-          <section class="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
-            <header class="mb-4 flex items-start justify-between gap-3 border-b border-stone-200 pb-3">
-              <div>
-                <h2 class="text-lg font-semibold text-slate-900">{{ editorTitle() }}</h2>
-                <p class="text-sm text-slate-600">{{ editorDescription() }}</p>
-              </div>
-              <button
-                type="button"
-                (click)="closeEditor()"
-                class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-              >
-                Cerrar
-              </button>
-            </header>
+      @if (products().length > 0) {
+        <app-products-grid
+          [products]="products()"
+          (viewRequested)="showDetails($event)"
+          (editRequested)="startEdit($event)"
+          (deleteRequested)="removeProduct($event)"
+        />
+      }
 
-            @if (isDetailMode()) {
-              @if (detailLoading()) {
-                <p class="text-sm text-slate-600">Cargando detalle...</p>
-              } @else if (selectedProduct()) {
-                <article class="space-y-4">
-                  <div class="overflow-hidden rounded-xl border border-stone-200 bg-slate-100">
-                    @if (selectedProduct()?.imageUrl) {
-                      <img
-                        [src]="selectedProduct()?.imageUrl ?? ''"
-                        [alt]="'Imagen de ' + (selectedProduct()?.name ?? 'producto')"
-                        class="h-64 w-full object-cover"
-                      />
-                    } @else {
-                      <div
-                        class="flex h-64 items-center justify-center text-xs font-semibold uppercase tracking-[0.2em] text-slate-500"
-                      >
-                        Sin imagen
-                      </div>
-                    }
-                  </div>
-                  <div class="grid gap-3 text-sm text-slate-700 md:grid-cols-2">
-                    <p><strong>SKU:</strong> {{ selectedProduct()?.sku }}</p>
-                    <p>
-                      <strong>Código de barras:</strong>
-                      {{ selectedProduct()?.barcode || 'No definido' }}
-                    </p>
-                    <p><strong>Nombre:</strong> {{ selectedProduct()?.name }}</p>
-                    <p>
-                      <strong>Categoría:</strong> {{ selectedProduct()?.category || 'Sin categoría' }}
-                    </p>
-                    <p><strong>Marca:</strong> {{ selectedProduct()?.brand || 'Sin marca' }}</p>
-                    <p><strong>Cantidad:</strong> {{ selectedProduct()?.quantity }}</p>
-                    <p>
-                      <strong>Stock mínimo:</strong>
-                      {{ selectedProduct()?.minimumStock ?? 'No definido' }}
-                    </p>
-                    <p><strong>Precio (centavos):</strong> {{ selectedProduct()?.unitPriceCents }}</p>
-                    <p><strong>Estado:</strong> {{ selectedProduct()?.status }}</p>
-                    <p>
-                      <strong>Ubicación:</strong> {{ selectedProduct()?.location || 'No definida' }}
-                    </p>
-                    <p class="md:col-span-2">
-                      <strong>Notas:</strong> {{ selectedProduct()?.notes || 'Sin notas' }}
-                    </p>
-                  </div>
-                  <div class="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      class="rounded-lg border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-700 hover:bg-cyan-50"
-                      (click)="startEdit(selectedProduct()?.id ?? '')"
+      @if (editorMode()) {
+        <section class="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm md:p-5">
+          <header class="mb-4 flex items-start justify-between gap-3 border-b border-slate-200 pb-3">
+            <div>
+              <h2 class="text-lg font-semibold text-slate-900">{{ editorTitle() }}</h2>
+              <p class="text-sm text-slate-600">{{ editorDescription() }}</p>
+            </div>
+            <button
+              type="button"
+              (click)="closeEditor()"
+              class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+            >
+              Cerrar
+            </button>
+          </header>
+
+          @if (isDetailMode()) {
+            @if (detailLoading()) {
+              <p class="text-sm text-slate-600">Cargando detalle...</p>
+            } @else if (selectedProduct()) {
+              <article class="space-y-4">
+                <div class="overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                  @if (selectedProduct()?.imageUrl) {
+                    <img
+                      [src]="selectedProduct()?.imageUrl ?? ''"
+                      [alt]="'Imagen de ' + (selectedProduct()?.name ?? 'producto')"
+                      class="h-64 w-full object-cover"
+                    />
+                  } @else {
+                    <div
+                      class="flex h-64 items-center justify-center text-xs font-semibold uppercase tracking-[0.2em] text-slate-500"
                     >
-                      Editar producto
-                    </button>
-                  </div>
-                </article>
-              }
-            } @else {
-              <form class="grid gap-3 md:grid-cols-2" [formGroup]="productForm" (submit)="saveProduct($event)" novalidate>
-                <label class="space-y-1">
-                  <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">SKU *</span>
-                  <input
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
-                    formControlName="sku"
-                    placeholder="SKU-APPLE-001"
-                    type="text"
-                  />
-                </label>
-
-                <label class="space-y-1">
-                  <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">
-                    Código de barras
-                  </span>
-                  <input
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
-                    formControlName="barcode"
-                    placeholder="7501234567890"
-                    type="text"
-                  />
-                </label>
-
-                <label class="space-y-1 md:col-span-2">
-                  <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Nombre *</span>
-                  <input
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
-                    formControlName="name"
-                    placeholder="Apple Box"
-                    type="text"
-                  />
-                </label>
-
-                <label class="space-y-1">
-                  <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Categoría</span>
-                  <input
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
-                    formControlName="category"
-                    placeholder="Frutas"
-                    type="text"
-                  />
-                </label>
-
-                <label class="space-y-1">
-                  <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Marca</span>
-                  <input
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
-                    formControlName="brand"
-                    placeholder="Fresh Farm"
-                    type="text"
-                  />
-                </label>
-
-                <label class="space-y-1">
-                  <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Cantidad *</span>
-                  <input
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
-                    formControlName="quantity"
-                    min="0"
-                    type="number"
-                  />
-                </label>
-
-                <label class="space-y-1">
-                  <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Stock mínimo</span>
-                  <input
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
-                    formControlName="minimumStock"
-                    min="0"
-                    type="number"
-                  />
-                </label>
-
-                <label class="space-y-1">
-                  <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Precio (centavos) *</span>
-                  <input
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
-                    formControlName="unitPriceCents"
-                    min="0"
-                    type="number"
-                  />
-                </label>
-
-                <label class="space-y-1">
-                  <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Estado *</span>
-                  <select
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
-                    formControlName="status"
-                  >
-                    <option value="active">active</option>
-                    <option value="inactive">inactive</option>
-                  </select>
-                </label>
-
-                <label class="space-y-1 md:col-span-2">
-                  <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Ubicación</span>
-                  <input
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
-                    formControlName="location"
-                    placeholder="A-01"
-                    type="text"
-                  />
-                </label>
-
-                <label class="space-y-1 md:col-span-2">
-                  <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">URL de imagen</span>
-                  <input
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
-                    formControlName="imageUrl"
-                    placeholder="https://... o data:image/..."
-                    type="text"
-                  />
-                </label>
-
-                <div class="space-y-2 md:col-span-2">
-                  <p class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">
-                    Cargar imagen
-                  </p>
-                  <p class="text-xs text-slate-500">
-                    Formatos soportados: imagen desde tu equipo (máx. 5 MB) o URL externa.
-                  </p>
-                  <input
-                    (change)="onImageFileSelected($event)"
-                    accept="image/*"
-                    class="block w-full rounded-lg border border-dashed border-slate-300 px-3 py-2 text-sm text-slate-700"
-                    type="file"
-                  />
-                  @if (productForm.controls.imageUrl.value) {
-                    <div class="overflow-hidden rounded-xl border border-stone-200 bg-slate-100">
-                      <img
-                        [src]="productForm.controls.imageUrl.value"
-                        alt="Vista previa de imagen"
-                        class="h-48 w-full object-cover"
-                      />
+                      Sin imagen
                     </div>
                   }
                 </div>
-
-                <label class="space-y-1 md:col-span-2">
-                  <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Notas</span>
-                  <textarea
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-cyan-400 focus:ring-2"
-                    formControlName="notes"
-                    maxlength="500"
-                    rows="3"
-                  ></textarea>
-                </label>
-
-                @if (formErrorMessage()) {
-                  <p class="md:col-span-2 text-sm text-rose-700">{{ formErrorMessage() }}</p>
-                }
-
-                <div class="flex flex-wrap gap-2 md:col-span-2">
-                  <button
-                    [disabled]="actionLoading()"
-                    [attr.aria-busy]="actionLoading()"
-                    class="rounded-lg bg-cyan-700 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
-                    type="submit"
-                  >
-                    @if (actionLoading()) {
-                      Guardando...
-                    } @else {
-                      {{ submitButtonLabel() }}
-                    }
-                  </button>
+                <div class="grid gap-3 text-sm text-slate-700 md:grid-cols-2">
+                  <p><strong>SKU:</strong> {{ selectedProduct()?.sku }}</p>
+                  <p>
+                    <strong>Codigo de barras:</strong>
+                    {{ selectedProduct()?.barcode || 'No definido' }}
+                  </p>
+                  <p><strong>Nombre:</strong> {{ selectedProduct()?.name }}</p>
+                  <p>
+                    <strong>Categoria:</strong> {{ selectedProduct()?.category || 'Sin categoria' }}
+                  </p>
+                  <p><strong>Marca:</strong> {{ selectedProduct()?.brand || 'Sin marca' }}</p>
+                  <p><strong>Cantidad:</strong> {{ selectedProduct()?.quantity }}</p>
+                  <p>
+                    <strong>Stock minimo:</strong>
+                    {{ selectedProduct()?.minimumStock ?? 'No definido' }}
+                  </p>
+                  <p><strong>Precio (centavos):</strong> {{ selectedProduct()?.unitPriceCents }}</p>
+                  <p><strong>Estado:</strong> {{ selectedProduct()?.status }}</p>
+                  <p>
+                    <strong>Ubicacion:</strong> {{ selectedProduct()?.location || 'No definida' }}
+                  </p>
+                  <p class="md:col-span-2">
+                    <strong>Notas:</strong> {{ selectedProduct()?.notes || 'Sin notas' }}
+                  </p>
+                </div>
+                <div class="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    (click)="closeEditor()"
-                    class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                    class="rounded-lg border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-700 transition hover:bg-cyan-50"
+                    (click)="startEdit(selectedProduct()?.id ?? '')"
                   >
-                    Cancelar
+                    Editar producto
                   </button>
                 </div>
-              </form>
+              </article>
             }
-          </section>
-        }
-      </section>
-    </main>
+          } @else {
+            <form
+              class="grid gap-3 md:grid-cols-2"
+              [formGroup]="productForm"
+              (submit)="saveProduct($event)"
+              novalidate
+            >
+              <label class="space-y-1">
+                <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">SKU *</span>
+                <input
+                  class="w-full rounded-lg border border-slate-300 bg-slate-50/70 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:border-cyan-400 focus:bg-white focus:ring-2"
+                  formControlName="sku"
+                  placeholder="SKU-APPLE-001"
+                  type="text"
+                />
+              </label>
+
+              <label class="space-y-1">
+                <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">
+                  Codigo de barras
+                </span>
+                <input
+                  class="w-full rounded-lg border border-slate-300 bg-slate-50/70 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:border-cyan-400 focus:bg-white focus:ring-2"
+                  formControlName="barcode"
+                  placeholder="7501234567890"
+                  type="text"
+                />
+              </label>
+
+              <label class="space-y-1 md:col-span-2">
+                <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Nombre *</span>
+                <input
+                  class="w-full rounded-lg border border-slate-300 bg-slate-50/70 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:border-cyan-400 focus:bg-white focus:ring-2"
+                  formControlName="name"
+                  placeholder="Apple Box"
+                  type="text"
+                />
+              </label>
+
+              <label class="space-y-1">
+                <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Categoria</span>
+                <input
+                  class="w-full rounded-lg border border-slate-300 bg-slate-50/70 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:border-cyan-400 focus:bg-white focus:ring-2"
+                  formControlName="category"
+                  placeholder="Frutas"
+                  type="text"
+                />
+              </label>
+
+              <label class="space-y-1">
+                <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Marca</span>
+                <input
+                  class="w-full rounded-lg border border-slate-300 bg-slate-50/70 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:border-cyan-400 focus:bg-white focus:ring-2"
+                  formControlName="brand"
+                  placeholder="Fresh Farm"
+                  type="text"
+                />
+              </label>
+
+              <label class="space-y-1">
+                <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Cantidad *</span>
+                <input
+                  class="w-full rounded-lg border border-slate-300 bg-slate-50/70 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:border-cyan-400 focus:bg-white focus:ring-2"
+                  formControlName="quantity"
+                  min="0"
+                  type="number"
+                />
+              </label>
+
+              <label class="space-y-1">
+                <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Stock minimo</span>
+                <input
+                  class="w-full rounded-lg border border-slate-300 bg-slate-50/70 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:border-cyan-400 focus:bg-white focus:ring-2"
+                  formControlName="minimumStock"
+                  min="0"
+                  type="number"
+                />
+              </label>
+
+              <label class="space-y-1">
+                <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">
+                  Precio (centavos) *
+                </span>
+                <input
+                  class="w-full rounded-lg border border-slate-300 bg-slate-50/70 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:border-cyan-400 focus:bg-white focus:ring-2"
+                  formControlName="unitPriceCents"
+                  min="0"
+                  type="number"
+                />
+              </label>
+
+              <label class="space-y-1">
+                <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Estado *</span>
+                <select
+                  class="w-full rounded-lg border border-slate-300 bg-slate-50/70 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:border-cyan-400 focus:bg-white focus:ring-2"
+                  formControlName="status"
+                >
+                  <option value="active">active</option>
+                  <option value="inactive">inactive</option>
+                </select>
+              </label>
+
+              <label class="space-y-1 md:col-span-2">
+                <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Ubicacion</span>
+                <input
+                  class="w-full rounded-lg border border-slate-300 bg-slate-50/70 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:border-cyan-400 focus:bg-white focus:ring-2"
+                  formControlName="location"
+                  placeholder="A-01"
+                  type="text"
+                />
+              </label>
+
+              <label class="space-y-1 md:col-span-2">
+                <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">URL de imagen</span>
+                <input
+                  class="w-full rounded-lg border border-slate-300 bg-slate-50/70 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:border-cyan-400 focus:bg-white focus:ring-2"
+                  formControlName="imageUrl"
+                  placeholder="https://... o data:image/..."
+                  type="text"
+                />
+              </label>
+
+              <div class="space-y-2 md:col-span-2">
+                <p class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">
+                  Cargar imagen
+                </p>
+                <p class="text-xs text-slate-500">
+                  Formatos soportados: imagen desde tu equipo (max. 5 MB) o URL externa.
+                </p>
+                <input
+                  (change)="onImageFileSelected($event)"
+                  accept="image/*"
+                  class="block w-full rounded-lg border border-dashed border-slate-300 bg-slate-50/70 px-3 py-2 text-sm text-slate-700"
+                  type="file"
+                />
+                @if (productForm.controls.imageUrl.value) {
+                  <div class="overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                    <img
+                      [src]="productForm.controls.imageUrl.value"
+                      alt="Vista previa de imagen"
+                      class="h-48 w-full object-cover"
+                    />
+                  </div>
+                }
+              </div>
+
+              <label class="space-y-1 md:col-span-2">
+                <span class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Notas</span>
+                <textarea
+                  class="w-full rounded-lg border border-slate-300 bg-slate-50/70 px-3 py-2 text-sm outline-none ring-cyan-400 transition focus:border-cyan-400 focus:bg-white focus:ring-2"
+                  formControlName="notes"
+                  maxlength="500"
+                  rows="3"
+                ></textarea>
+              </label>
+
+              @if (formErrorMessage()) {
+                <p class="md:col-span-2 text-sm text-rose-700">{{ formErrorMessage() }}</p>
+              }
+
+              <div class="flex flex-wrap gap-2 md:col-span-2">
+                <button
+                  [disabled]="actionLoading()"
+                  [attr.aria-busy]="actionLoading()"
+                  class="rounded-lg bg-cyan-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  type="submit"
+                >
+                  @if (actionLoading()) {
+                    Guardando...
+                  } @else {
+                    {{ submitButtonLabel() }}
+                  }
+                </button>
+                <button
+                  type="button"
+                  (click)="closeEditor()"
+                  class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          }
+        </section>
+      }
+    </section>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

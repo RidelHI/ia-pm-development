@@ -8,7 +8,7 @@ import type { Product } from '../../domain/products.models';
   template: `
     <section class="grid gap-3 md:grid-cols-2">
       @for (product of products(); track product.id) {
-        <article class="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+        <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white/95 shadow-sm">
           <div class="relative aspect-[16/9] bg-slate-100">
             @if (product.imageUrl) {
               <img
@@ -54,21 +54,21 @@ import type { Product } from '../../domain/products.models';
             <div class="flex flex-wrap gap-2 pt-2">
               <button
                 type="button"
-                class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
                 (click)="viewRequested.emit(product.id)"
               >
                 Ver detalle
               </button>
               <button
                 type="button"
-                class="rounded-lg border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-700 hover:bg-cyan-50"
+                class="rounded-lg border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-700 transition hover:bg-cyan-50"
                 (click)="editRequested.emit(product.id)"
               >
                 Editar
               </button>
               <button
                 type="button"
-                class="rounded-lg border border-rose-300 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50"
+                class="rounded-lg border border-rose-300 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-50"
                 (click)="deleteRequested.emit(product.id)"
               >
                 Eliminar

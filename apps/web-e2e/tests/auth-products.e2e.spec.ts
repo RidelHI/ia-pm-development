@@ -58,6 +58,7 @@ async function loginFromUi(page: Page, credentials: Credentials): Promise<void> 
   await page.getByLabel('Usuario').fill(credentials.username);
   await page.getByLabel('Password').fill(credentials.password);
   await page.getByRole('button', { name: /^Entrar$/ }).click();
+  await expect(page).toHaveURL(/\/dashboard\/products$/);
   await expect(
     page.getByRole('heading', {
       name: 'Productos',
@@ -68,7 +69,7 @@ async function loginFromUi(page: Page, credentials: Credentials): Promise<void> 
 
 function productCard(page: Page, text: string): Locator {
   return page
-    .locator('article')
+    .locator('app-products-grid article')
     .filter({
       has: page.getByRole('button', { name: 'Ver detalle' }),
       hasText: text,
@@ -76,8 +77,8 @@ function productCard(page: Page, text: string): Locator {
     .first();
 }
 
-test('redirects guests from /products to /login', async ({ page }) => {
-  await page.goto('/products');
+test('redirects guests from /dashboard/products to /login', async ({ page }) => {
+  await page.goto('/dashboard/products');
 
   await expect(page).toHaveURL(/\/login$/);
   await expect(
@@ -109,7 +110,7 @@ test('registers via UI, logs in, logs out, and blocks protected route afterwards
   await page.getByLabel('Password').fill(credentials.password);
   await page.getByRole('button', { name: /^Entrar$/ }).click();
 
-  await expect(page).toHaveURL(/\/products$/);
+  await expect(page).toHaveURL(/\/dashboard\/products$/);
   await expect(
     page.getByRole('heading', {
       name: 'Productos',
@@ -123,7 +124,7 @@ test('registers via UI, logs in, logs out, and blocks protected route afterwards
     .poll(() => page.evaluate(() => localStorage.getItem('warehouse.auth.session')))
     .toBeNull();
 
-  await page.goto('/products');
+  await page.goto('/dashboard/products');
   await expect(page).toHaveURL(/\/login$/);
 });
 
