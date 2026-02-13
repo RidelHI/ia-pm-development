@@ -38,6 +38,7 @@ describe('ProductsPageComponent', () => {
   let clearErrorCalls: number;
   let clearSessionCalls: number;
   let createCalls: number;
+  let updateCalls: { productId: string; input: ProductMutationInput }[];
   let getProductCalls: string[];
   let deleteCalls: string[];
 
@@ -75,8 +76,7 @@ describe('ProductsPageComponent', () => {
       return of(baseProduct);
     },
     updateProduct(productId: string, input: ProductMutationInput) {
-      void productId;
-      void input;
+      updateCalls.push({ productId, input });
       return of(baseProduct);
     },
     deleteProduct(productId: string) {
@@ -90,6 +90,7 @@ describe('ProductsPageComponent', () => {
     clearErrorCalls = 0;
     clearSessionCalls = 0;
     createCalls = 0;
+    updateCalls = [];
     getProductCalls = [];
     deleteCalls = [];
     productsSignal.set([]);
@@ -209,5 +210,33 @@ describe('ProductsPageComponent', () => {
       value: originalConfirm,
       configurable: true,
     });
+  });
+
+  it('updates a product when edit form is submitted', async () => {
+    productsSignal.set([baseProduct]);
+    const fixture = TestBed.createComponent(ProductsPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component.startEdit('prod-01');
+    await fixture.whenStable();
+
+    component.productForm.patchValue({
+      name: 'Producto actualizado',
+      quantity: 9,
+      unitPriceCents: 2590,
+      status: 'active',
+    });
+    component.saveProduct(new Event('submit'));
+    await fixture.whenStable();
+
+    expect(updateCalls).toHaveLength(1);
+    expect(updateCalls[0]).toEqual(
+      expect.objectContaining({
+        productId: 'prod-01',
+      }),
+    );
+    expect(loadProductsCalls).toEqual(['', '']);
   });
 });
