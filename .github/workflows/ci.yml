@@ -7,6 +7,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  repository-projects: read
+
 jobs:
   quality:
     runs-on: ubuntu-latest
@@ -216,12 +222,28 @@ jobs:
             async function getProjectItemStatus(issueNumber, projectScope) {
               let after = null;
               do {
-                const response = await github.graphql(
-                  projectScope === 'organization'
-                    ? PROJECT_ITEMS_QUERY_ORG
-                    : PROJECT_ITEMS_QUERY_USER,
-                  { owner: projectOwner, projectNumber, after },
-                );
+                let response;
+                try {
+                  response = await github.graphql(
+                    projectScope === 'organization'
+                      ? PROJECT_ITEMS_QUERY_ORG
+                      : PROJECT_ITEMS_QUERY_USER,
+                    { owner: projectOwner, projectNumber, after },
+                  );
+                } catch (error) {
+                  const errorMessage = String(error?.message ?? error);
+                  if (
+                    /Could not resolve to a ProjectV2 with the number/i.test(errorMessage)
+                  ) {
+                    core.warning(
+                      `ProjectV2 #${projectNumber} for "${projectOwner}" is not accessible with current token. Project status check is skipped for this run.`,
+                    );
+                    return '__PROJECT_ACCESS_UNAVAILABLE__';
+                  }
+
+                  core.setFailed(`Project status validation failed: ${errorMessage}`);
+                  return '__PROJECT_ACCESS_UNAVAILABLE__';
+                }
 
                 const project =
                   projectScope === 'organization'
@@ -285,6 +307,10 @@ jobs:
               }
 
               const projectStatus = await getProjectItemStatus(issue_number, projectScope);
+              if (projectStatus === '__PROJECT_ACCESS_UNAVAILABLE__') {
+                continue;
+              }
+
               if (projectStatus === undefined) {
                 core.setFailed(
                   `Issue #${issue_number} must be added to project #${projectNumber} (${projectOwner}).`,
