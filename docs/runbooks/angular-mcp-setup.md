@@ -1,7 +1,7 @@
 # Runbook: Angular MCP Setup
 
 ## Objective
-Standardize safe MCP setup for Angular AI workflows in this repository.
+Standardize safe MCP setup for Angular AI workflows in this repository, including Angular CLI MCP and Context7 MCP.
 
 ## Prerequisites
 - Node.js 22+
@@ -12,6 +12,7 @@ Standardize safe MCP setup for Angular AI workflows in this repository.
 - Use `--read-only` by default.
 - Enable write/command tools only for explicit implementation tasks.
 - Keep servers local-first and least-privilege.
+- Use Context7 only for targeted external docs lookup when local docs are insufficient.
 
 ## Recommended command
 ```bash
@@ -31,6 +32,11 @@ pnpm exec ng mcp --read-only
       "type": "stdio",
       "command": "pnpm",
       "args": ["exec", "ng", "mcp", "--read-only"]
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
     }
   }
 }
@@ -43,9 +49,26 @@ pnpm exec ng mcp --read-only
     "angular-cli": {
       "command": "pnpm",
       "args": ["exec", "ng", "mcp", "--read-only"]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
     }
   }
 }
+```
+
+## Optional Context7 API key
+Context7 works without a key for basic usage. For higher limits, use `CONTEXT7_API_KEY`.
+
+PowerShell (current session):
+```powershell
+$env:CONTEXT7_API_KEY="your_api_key"
+```
+
+Persist for user profile (Windows):
+```powershell
+setx CONTEXT7_API_KEY "your_api_key"
 ```
 
 ## Escalation modes
@@ -66,6 +89,8 @@ pnpm exec ng mcp --read-only
 ## Troubleshooting
 - `ng: command not found`:
   - Run `pnpm install` and retry `pnpm exec ng mcp --read-only`.
+- `npx` fails to start Context7:
+  - Verify Node.js 22+ and retry `npx -y @upstash/context7-mcp`.
 - MCP server not discovered in IDE:
   - Check JSON format and working directory in IDE MCP settings.
 - Unexpected tool behavior:
@@ -75,3 +100,5 @@ pnpm exec ng mcp --read-only
 - `docs/ai/angular-ai-professional-playbook.md`
 - `docs/runbooks/angular-frontend-architecture.md`
 - `docs/ai/agent-operating-model.md`
+- Context7 MCP server catalog: `https://mcpservers.org/servers/upstash/context7`
+- Context7 MCP package: `https://www.npmjs.com/package/@upstash/context7-mcp`
