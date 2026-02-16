@@ -66,6 +66,6 @@ Recomendacion CORS para GitHub Pages:
 - Si no puedes usar Blueprint, crear `Web Service` manual con los mismos comandos y health check.
 
 ## Postman (assets listos)
-- Collection: `docs/postman/warehouse-api.postman_collection.json`
-- Environment: `docs/postman/warehouse-api.render.postman_environment.json`
+- Collection: `docs/postman/warehouse-api.collection.json`
+- Environment: `docs/postman/render.environment.json`
 - Flujo recomendado: `1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10`.

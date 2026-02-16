@@ -90,7 +90,7 @@ Usar estos artefactos para repetir procesos con consistencia:
   - `docs/runbooks/agent-preflight-gate.md`
 - Angular + AI:
   - `docs/ai/angular-ai-professional-playbook.md`
-  - `docs/runbooks/angular-frontend-architecture.md`
+  - `docs/runbooks/angular-frontend-architecture.md` (resumen operativo)
   - `docs/runbooks/angular-mcp-setup.md`
 - Prompt templates:
   - `docs/ai/prompts/feature-spec-prompt.md`

@@ -34,7 +34,7 @@ Operate as a professional software delivery agent for a monorepo with:
 - Operating model: `docs/ai/agent-operating-model.md`
 - Angular + AI playbook: `docs/ai/angular-ai-professional-playbook.md`
 - AI self-review gate: `docs/ai/checklists/ai-self-review-gate.md`
-- Backlog conventions: `docs/planning/github-project-backlog.md`
+- Backlog conventions: `docs/runbooks/github-project-workflow.md`
 - Local operation: `docs/runbooks/local-dev.md`
 - MCP setup: `docs/runbooks/angular-mcp-setup.md`
 - Web E2E (Playwright): `docs/runbooks/playwright-web-e2e.md`

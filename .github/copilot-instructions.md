@@ -28,5 +28,5 @@
 ## Source of truth
 - `AGENTS.md`
 - `docs/ai/angular-ai-professional-playbook.md`
-- `docs/runbooks/angular-frontend-architecture.md`
+- `docs/runbooks/angular-frontend-architecture.md` (operational summary)
 - `docs/runbooks/angular-mcp-setup.md`

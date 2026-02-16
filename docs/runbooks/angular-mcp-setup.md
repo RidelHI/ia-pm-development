@@ -73,5 +73,5 @@ pnpm exec ng mcp --read-only
 
 ## Related docs
 - `docs/ai/angular-ai-professional-playbook.md`
-- `docs/runbooks/angular-frontend-architecture.md`
+- `docs/runbooks/angular-frontend-architecture.md` (operational summary)
 - `docs/ai/agent-operating-model.md`

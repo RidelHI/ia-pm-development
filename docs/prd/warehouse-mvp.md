@@ -1,4 +1,9 @@
-# Warehouse Product Manager - Definición MVP
+# Warehouse Product Manager - PRD MVP
+
+## Metadata
+- Status: Active
+- Last updated: 2026-02-16
+- Product stage: MVP
 
 ## 1) Problema que resolvemos
 Pequeños almacenes suelen llevar inventario en hojas sueltas o chats, lo que provoca errores de stock, precios desactualizados y baja trazabilidad.
@@ -44,12 +49,12 @@ Construir una app full-stack profesional, simple y útil para gestionar producto
 - `SKU-MILK-002`, `Milk Pack`, `quantity: 12`, `unitPriceCents: 249`.
 
 ## 7) Endpoints objetivo (MVP)
-- `GET /products`
-- `GET /products/:id`
-- `POST /products`
-- `PATCH /products/:id`
-- `DELETE /products/:id`
-- `GET /health`
+- `GET /v1/products`
+- `GET /v1/products/:id`
+- `POST /v1/products`
+- `PATCH /v1/products/:id`
+- `DELETE /v1/products/:id`
+- `GET /v1/health/live`
 
 ## 8) Fuera de alcance por ahora
 - Movimientos de inventario complejos (kardex completo).

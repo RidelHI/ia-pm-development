@@ -1,47 +1,71 @@
 # Runbook: GitHub Project Workflow (Agent-First)
 
 ## Objetivo
-Operar con flujo profesional de entrega usando GitHub Issues + GitHub Projects + PR, con asignacion explicita a agentes por label.
+Operar un flujo profesional y trazable con GitHub Issues + GitHub Project + PR, con ownership explicito por agente.
 
 ## Fuente de verdad
 - Planificacion y estado: GitHub Project (`MVP - Warehouse Kanban`).
-- Asignacion de ownership: label `agent:*` en cada issue.
+- Ownership de ejecucion: label `agent:*` en cada issue.
 - Ejecucion tecnica: rama + commits + PR en el repo.
-- Cierre: merge a `main` con issue cerrada por `Closes #<issue_number>`.
+- Cierre: merge a `main` con `Closes #<issue_number>`.
 
-## Regla de ownership
-Cada issue debe tener exactamente un label `agent:*`:
-- `agent:pm`
-- `agent:backend`
-- `agent:frontend`
-- `agent:qa`
-- `agent:release`
+## Espacio operativo
+- Project: `MVP - Warehouse Kanban`
+- Owner: `RidelHI`
+- Repositorio: `RidelHI/ia-pm-development`
 
-Sin ese label, la tarea se considera mal definida y no entra a ejecucion.
+## Columnas del tablero
+- `Todo`
+- `In Progress`
+- `In Review`
+- `Done`
+
+## Taxonomia de labels
+- Tipo: `type:backend`, `type:frontend`, `type:devops`, `type:docs`, `type:test`
+- Prioridad: `priority:p1`, `priority:p2`, `priority:p3`
+- Estado especial: `status:blocked`
+- Ownership (exactamente uno): `agent:pm`, `agent:backend`, `agent:frontend`, `agent:qa`, `agent:release`
+
+## Contrato minimo de issue
+Toda issue debe incluir:
+1. Objetivo, scope y criterios de aceptacion.
+2. Labels `type:*`, `priority:*` y exactamente un `agent:*`.
+3. Milestone (cuando aplique a entregable de release).
+
+Sin ownership `agent:*`, la tarea no entra a ejecucion.
 
 ## Flujo estandar por tarea
-1. PM define o refina la issue con alcance y criterios de aceptacion.
-2. PM agrega labels `type:*`, `priority:*` y exactamente un `agent:*`.
-3. PM mueve la card a `Todo` en el Project.
-4. Agente owner crea rama con issue id (`feature/<issue_number>-<slug>`, `fix/<issue_number>-<slug>` o `chore/<issue_number>-<slug>`).
-5. Agente owner toma la issue y la mueve a `In Progress`.
-6. Agente owner ejecuta preflight obligatorio:
+1. PM crea/refina issue y valida criterios de aceptacion.
+2. PM mueve la card a `Todo`.
+3. Agente owner crea rama con issue id:
+   - `feature/<issue_number>-<slug>`
+   - `fix/<issue_number>-<slug>`
+   - `chore/<issue_number>-<slug>`
+4. Agente owner toma issue y mueve card a `In Progress`.
+5. Agente owner ejecuta preflight obligatorio:
    - `pnpm agent:preflight -- --issue <issue_number> --agent <agent:role>`
-7. Agente owner ejecuta implementacion acotada al scope.
-8. Agente owner ejecuta calidad local: `pnpm lint`, `pnpm test`, `pnpm build`.
-9. Agente owner ejecuta self-review final con `docs/ai/checklists/ai-self-review-gate.md`.
-10. Agente owner abre PR con `Closes #<issue_number>` y seccion `AI Self-Review Gate`.
-11. Agente owner mueve la issue a `In Review`.
-12. QA/Reviewer valida criterios de aceptacion y evidencia tecnica.
-13. Al merge, la issue pasa a `Done`.
+6. Agente owner implementa solo el scope de la issue.
+7. Agente owner ejecuta: `pnpm lint`, `pnpm test`, `pnpm build`.
+8. Agente owner completa self-review en `docs/ai/checklists/ai-self-review-gate.md`.
+9. Agente owner abre PR con `Closes #<issue_number>` + seccion `AI Self-Review Gate`.
+10. Agente owner mueve card a `In Review`.
+11. QA/Reviewer valida criterios y evidencia.
+12. Al merge, la issue pasa a `Done`.
 
 ## Reglas operativas
-- 1 issue = 1 rama = 1 PR.
+- `1 issue = 1 rama = 1 PR`.
 - Rama debe incluir issue id y coincidir con `Closes #<issue_number>`.
-- PR pequena y trazable.
-- No expandir scope fuera de criterios de aceptacion.
+- PR pequena, trazable y sin scope creep.
+- No se trabaja fuera de issue activa del tablero.
 - CI debe pasar antes de merge.
-- El check `quality` valida convencion de rama, issue enlazada con label `agent:*`, pertenencia al Project y `AI Self-Review Gate` en PR.
+- El check `quality` valida rama, issue enlazada, ownership `agent:*`, pertenencia al Project y `AI Self-Review Gate`.
+
+## Asignacion sugerida por tipo
+- `type:backend` -> `agent:backend`
+- `type:frontend` -> `agent:frontend`
+- `type:test` -> `agent:qa` (o owner tecnico si testing acoplado)
+- `type:devops` -> `agent:release`
+- `type:docs` -> `agent:pm` (o owner tecnico del area)
 
 ## Operacion diaria con CLI
 ```bash
@@ -51,10 +75,10 @@ gh project item-list 1 --owner RidelHI --limit 30
 gh pr list --state open --limit 20
 ```
 
-## Referencia
-- Modelo completo de roles y reglas: `docs/ai/agent-operating-model.md`
-- Estrategia de ramas por caso: `docs/runbooks/git-branching-model.md`
-- Preflight local obligatorio: `docs/runbooks/agent-preflight-gate.md`
-- Instrucciones persistentes del agente: `AGENTS.md`
-- Workflows operativos: `docs/ai/workflows/`
-- Prompt templates: `docs/ai/prompts/`
+## Referencias
+- `docs/ai/agent-operating-model.md`
+- `docs/runbooks/git-branching-model.md`
+- `docs/runbooks/agent-preflight-gate.md`
+- `docs/runbooks/github-pr-flow.md`
+- `docs/ai/workflows/new-feature.md`
+- `AGENTS.md`

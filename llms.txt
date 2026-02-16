@@ -5,16 +5,23 @@
 ## Core governance
 - AGENTS.md
 - governance/policy.json
+- docs/README.md
 - docs/ai/agent-operating-model.md
 - docs/ai/checklists/ai-self-review-gate.md
 - docs/runbooks/github-project-workflow.md
 - docs/runbooks/git-branching-model.md
 
 ## Angular architecture and AI standards
-- docs/runbooks/angular-frontend-architecture.md
 - docs/ai/angular-ai-professional-playbook.md
+- docs/runbooks/angular-frontend-architecture.md
 - docs/runbooks/angular-mcp-setup.md
 - docs/runbooks/playwright-web-e2e.md
+
+## Product, architecture, and QA evidence
+- docs/prd/warehouse-mvp.md
+- docs/arch/overview.md
+- docs/qa/reports/qa-01-auth-flow.md
+- docs/qa/reports/qa-02-angular-architecture.md
 
 ## Prompt templates
 - docs/ai/prompts/feature-spec-prompt.md
