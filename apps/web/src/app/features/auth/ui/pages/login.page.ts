@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { firstValueFrom } from 'rxjs';
@@ -18,6 +19,7 @@ import { AuthApiService } from '../../data-access/auth-api.service';
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
   ],
@@ -25,20 +27,25 @@ import { AuthApiService } from '../../data-access/auth-api.service';
     <main class="auth-page">
       <section class="auth-layout">
         <mat-card class="brand-panel" appearance="outlined">
-          <p class="brand-eyebrow">Warehouse Portal</p>
-          <h1>Login para ver productos protegidos</h1>
+          <p class="brand-eyebrow">Warehouse Cloud</p>
+          <h1>Control de inventario en tiempo real</h1>
           <p class="brand-copy">
-            Flujo autenticado con guard + interceptor y dashboard operativo en Angular Material.
+            Plataforma operativa para equipos de almacén: visibilidad, trazabilidad y ejecución desde un solo panel.
           </p>
         </mat-card>
 
         <mat-card class="auth-panel" appearance="outlined">
+          <p class="auth-eyebrow">
+            <mat-icon aria-hidden="true">lock</mat-icon>
+            Acceso seguro
+          </p>
           <h2>Iniciar sesión</h2>
-          <p class="subtitle">Accede a la gestión de productos protegida.</p>
+          <p class="subtitle">Ingresa para administrar inventario y operaciones.</p>
 
           <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
             <mat-form-field appearance="outline">
               <mat-label>Usuario</mat-label>
+              <mat-icon matPrefix aria-hidden="true">person</mat-icon>
               <input
                 matInput
                 formControlName="username"
@@ -47,10 +54,15 @@ import { AuthApiService } from '../../data-access/auth-api.service';
                 placeholder="warehouse.user"
                 type="text"
               />
+              <mat-hint>Mínimo 3 caracteres.</mat-hint>
+              @if (form.controls.username.touched && form.controls.username.hasError('required')) {
+                <mat-error>Usuario es obligatorio.</mat-error>
+              }
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>Password</mat-label>
+              <mat-icon matPrefix aria-hidden="true">key</mat-icon>
               <input
                 matInput
                 formControlName="password"
@@ -59,6 +71,10 @@ import { AuthApiService } from '../../data-access/auth-api.service';
                 placeholder="StrongPassword123!"
                 type="password"
               />
+              <mat-hint>Mínimo 8 caracteres.</mat-hint>
+              @if (form.controls.password.touched && form.controls.password.hasError('required')) {
+                <mat-error>Password es obligatorio.</mat-error>
+              }
             </mat-form-field>
 
             @if (errorMessage()) {
@@ -115,17 +131,18 @@ import { AuthApiService } from '../../data-access/auth-api.service';
       }
 
       .auth-layout {
-        width: min(1100px, 100%);
+        width: min(1060px, 100%);
         display: grid;
-        gap: 1rem;
+        gap: var(--space-4);
       }
 
       .brand-panel {
-        border-color: color-mix(in srgb, var(--border-soft) 75%, white);
+        border-color: color-mix(in srgb, var(--border-soft) 70%, #fff);
         background:
           linear-gradient(155deg, #0f2f57 0%, #236ca4 45%, #62b4dc 100%)
           border-box;
         color: #eaf6ff;
+        padding: clamp(1rem, 2.4vw, 1.5rem);
       }
 
       .brand-eyebrow {
@@ -137,27 +154,40 @@ import { AuthApiService } from '../../data-access/auth-api.service';
       }
 
       .brand-panel h1 {
-        margin: 0.8rem 0;
+        margin: 0.7rem 0;
         max-width: 22ch;
-        font-size: clamp(1.6rem, 3vw, 2.2rem);
+        font-size: clamp(1.5rem, 2.6vw, 2rem);
         line-height: 1.15;
       }
 
       .brand-copy {
         margin: 0;
-        max-width: 34ch;
+        max-width: 40ch;
         color: #ddf2ff;
+        font-size: 1rem;
       }
 
       .auth-panel {
-        border-color: color-mix(in srgb, var(--border-soft) 70%, white);
+        border-color: color-mix(in srgb, var(--border-soft) 70%, #fff);
         background: var(--panel-background);
-        backdrop-filter: blur(8px);
+        padding: clamp(1rem, 2.4vw, 1.5rem);
       }
 
       .auth-panel h2 {
         margin: 0;
         font-size: 1.4rem;
+      }
+
+      .auth-eyebrow {
+        margin: 0 0 0.65rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        color: #0f4b8b;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.72rem;
+        font-weight: 700;
       }
 
       .subtitle {
@@ -167,7 +197,7 @@ import { AuthApiService } from '../../data-access/auth-api.service';
 
       form {
         display: grid;
-        gap: 0.5rem;
+        gap: 0.7rem;
       }
 
       mat-form-field {
@@ -211,6 +241,9 @@ import { AuthApiService } from '../../data-access/auth-api.service';
         margin: 1.2rem 0 0;
         color: var(--text-muted);
         font-size: 0.92rem;
+        display: flex;
+        gap: var(--space-1);
+        flex-wrap: wrap;
       }
 
       .link-line a {
@@ -220,8 +253,8 @@ import { AuthApiService } from '../../data-access/auth-api.service';
 
       @media (min-width: 900px) {
         .auth-layout {
-          grid-template-columns: minmax(330px, 1fr) minmax(370px, 1fr);
-          align-items: stretch;
+          grid-template-columns: minmax(320px, 1fr) minmax(380px, 1fr);
+          align-items: start;
         }
       }
     `,

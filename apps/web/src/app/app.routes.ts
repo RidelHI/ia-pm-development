@@ -26,9 +26,18 @@ export const routes: Routes = [
     path: 'products',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/products/ui/pages/products.page').then(
-        (m) => m.ProductsPageComponent,
+      import('./features/products/ui/pages/products-shell.page').then(
+        (m) => m.ProductsShellPageComponent,
       ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/products/ui/pages/products.page').then(
+            (m) => m.ProductsPageComponent,
+          ),
+      },
+    ],
   },
   {
     path: '**',

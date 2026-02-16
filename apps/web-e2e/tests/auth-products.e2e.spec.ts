@@ -66,14 +66,8 @@ async function loginFromUi(page: Page, credentials: Credentials): Promise<void> 
   ).toBeVisible();
 }
 
-function productCard(page: Page, text: string): Locator {
-  return page
-    .locator('article')
-    .filter({
-      has: page.getByRole('button', { name: 'Ver detalle' }),
-      hasText: text,
-    })
-    .first();
+function productRow(page: Page, text: string): Locator {
+  return page.locator('tr.mat-mdc-row').filter({ hasText: text }).first();
 }
 
 test('redirects guests from /products to /login', async ({ page }) => {
@@ -82,7 +76,7 @@ test('redirects guests from /products to /login', async ({ page }) => {
   await expect(page).toHaveURL(/\/login$/);
   await expect(
     page.getByRole('heading', {
-      name: 'Login para ver productos protegidos',
+      name: 'Control de inventario en tiempo real',
       exact: true,
     }),
   ).toBeVisible();
@@ -160,10 +154,10 @@ test('shows empty state when search has no matching products', async ({
   await page
     .getByRole('searchbox', { name: 'Buscar productos por nombre o SKU' })
     .fill(noMatchQuery);
-  await page.getByRole('button', { name: /^Buscar$/ }).click();
+  await page.getByRole('button', { name: /^Aplicar filtros$/ }).click();
 
   await expect(
-    page.getByText('No hay productos para mostrar con los filtros actuales.'),
+    page.getByText('No hay productos para mostrar'),
   ).toBeVisible();
 });
 
@@ -198,13 +192,16 @@ test('supports create, search, detail, edit, and delete for products', async ({
   await page
     .getByRole('searchbox', { name: 'Buscar productos por nombre o SKU' })
     .fill(product.sku);
-  await page.getByRole('button', { name: /^Buscar$/ }).click();
+  await page.getByRole('button', { name: /^Aplicar filtros$/ }).click();
 
-  const createdCard = productCard(page, product.sku);
-  await expect(createdCard).toBeVisible();
-  await expect(createdCard.getByRole('heading', { name: product.name })).toBeVisible();
+  const createdRow = productRow(page, product.sku);
+  await expect(createdRow).toBeVisible();
+  await expect(createdRow).toContainText(product.name);
 
-  await createdCard.getByRole('button', { name: /^Ver detalle$/ }).click();
+  await createdRow
+    .getByRole('button', { name: new RegExp(`Acciones para ${product.name}`) })
+    .click();
+  await page.getByRole('menuitem', { name: 'Ver detalle' }).click();
   await expect(
     page.getByRole('heading', { name: 'Detalle de producto', exact: true }),
   ).toBeVisible();
@@ -234,16 +231,15 @@ test('supports create, search, detail, edit, and delete for products', async ({
     }),
   ).toBeVisible();
 
-  const updatedCard = productCard(page, product.updatedName);
-  await expect(updatedCard).toBeVisible();
-  await expect(
-    updatedCard.getByRole('heading', { name: product.updatedName }),
-  ).toBeVisible();
+  const updatedRow = productRow(page, product.updatedName);
+  await expect(updatedRow).toBeVisible();
+  await expect(updatedRow).toContainText(product.updatedName);
 
-  page.once('dialog', (dialog) => {
-    void dialog.accept();
-  });
-  await updatedCard.getByRole('button', { name: /^Eliminar$/ }).click();
+  await updatedRow
+    .getByRole('button', { name: new RegExp(`Acciones para ${product.updatedName}`) })
+    .click();
+  await page.getByRole('menuitem', { name: 'Eliminar' }).click();
+  await page.getByRole('button', { name: /^Eliminar$/ }).click();
 
   await expect(
     page.getByRole('status').filter({
@@ -251,6 +247,6 @@ test('supports create, search, detail, edit, and delete for products', async ({
     }),
   ).toBeVisible();
   await expect(
-    page.getByText('No hay productos para mostrar con los filtros actuales.'),
+    page.getByText('No hay productos para mostrar'),
   ).toBeVisible();
 });

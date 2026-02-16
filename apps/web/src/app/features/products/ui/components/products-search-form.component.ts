@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
@@ -9,22 +10,34 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   imports: [
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
   ],
   template: `
     <form class="search-form" (submit)="onSubmit($event)" novalidate>
       <mat-form-field appearance="outline" class="search-input">
-        <mat-label>Buscar productos</mat-label>
+        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
         <input
           matInput
           id="products-query"
           [value]="query()"
           (input)="onQueryInput($event)"
           aria-label="Buscar productos por nombre o SKU"
-          placeholder="Buscar por nombre o SKU"
+          placeholder="SKU, nombre, marca o ubicación"
           type="search"
         />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          aria-label="Limpiar búsqueda"
+          [disabled]="!query()"
+          (click)="queryChange.emit('')"
+        >
+          <mat-icon aria-hidden="true">close</mat-icon>
+        </button>
+        <mat-hint>Usa coincidencias parciales para encontrar resultados más rápido.</mat-hint>
       </mat-form-field>
 
       <button
@@ -42,7 +55,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
           ></mat-progress-spinner>
           Cargando...
         } @else {
-          Buscar
+          Aplicar filtros
         }
       </button>
     </form>
@@ -51,20 +64,28 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     `
       .search-form {
         display: grid;
-        gap: 0.75rem;
+        gap: var(--space-3);
       }
 
       .search-input {
         width: 100%;
+        --mat-form-field-container-height: 40px;
+        --mat-form-field-container-text-size: 0.88rem;
+        --mat-form-field-container-vertical-padding: 0.35rem;
+      }
+
+      .search-input .mat-mdc-form-field-subscript-wrapper {
+        margin-top: 2px;
       }
 
       button[type='submit'] {
         width: 100%;
-        min-height: 46px;
+        min-height: 40px;
+        font-size: 0.88rem;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
+        gap: var(--space-2);
       }
 
       .button-spinner {
@@ -73,13 +94,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
       @media (min-width: 760px) {
         .search-form {
-          grid-template-columns: minmax(280px, 1fr) auto;
-          align-items: center;
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: start;
         }
 
         button[type='submit'] {
           width: auto;
-          padding-inline: 1.2rem;
+          padding-inline: 1rem;
         }
       }
     `,
