@@ -1,6 +1,8 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { AuthStore } from '../../../auth/state/auth.store';
@@ -41,6 +43,8 @@ describe('ProductsPageComponent', () => {
   let updateCalls: { productId: string; input: ProductMutationInput }[];
   let getProductCalls: string[];
   let deleteCalls: string[];
+  let confirmDeletion: boolean;
+  let snackMessages: string[];
 
   const productsStoreMock = {
     products: productsSignal,
@@ -84,6 +88,18 @@ describe('ProductsPageComponent', () => {
       return of(void 0);
     },
   };
+  const dialogMock = {
+    open() {
+      return {
+        afterClosed: () => of(confirmDeletion),
+      };
+    },
+  };
+  const snackBarMock = {
+    open(message: string) {
+      snackMessages.push(message);
+    },
+  };
 
   beforeEach(async () => {
     loadProductsCalls = [];
@@ -93,6 +109,8 @@ describe('ProductsPageComponent', () => {
     updateCalls = [];
     getProductCalls = [];
     deleteCalls = [];
+    confirmDeletion = true;
+    snackMessages = [];
     productsSignal.set([]);
     loadingSignal.set(false);
     errorSignal.set(null);
@@ -114,6 +132,14 @@ describe('ProductsPageComponent', () => {
         {
           provide: ProductsApiService,
           useValue: productsApiServiceMock,
+        },
+        {
+          provide: MatDialog,
+          useValue: dialogMock,
+        },
+        {
+          provide: MatSnackBar,
+          useValue: snackBarMock,
         },
       ],
     }).compileComponents();
@@ -218,11 +244,6 @@ describe('ProductsPageComponent', () => {
   it('deletes product when user confirms action', async () => {
     productsSignal.set([baseProduct]);
     const fixture = TestBed.createComponent(ProductsPageComponent);
-    const originalConfirm = window.confirm;
-    Object.defineProperty(window, 'confirm', {
-      value: () => true,
-      configurable: true,
-    });
 
     fixture.detectChanges();
     await fixture.whenStable();
@@ -230,11 +251,7 @@ describe('ProductsPageComponent', () => {
     await fixture.whenStable();
 
     expect(deleteCalls).toEqual(['prod-01']);
-
-    Object.defineProperty(window, 'confirm', {
-      value: originalConfirm,
-      configurable: true,
-    });
+    expect(snackMessages).toContain('Producto eliminado correctamente.');
   });
 
   it('updates a product when edit form is submitted', async () => {

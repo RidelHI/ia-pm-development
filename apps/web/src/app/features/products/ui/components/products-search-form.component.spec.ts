@@ -48,4 +48,16 @@ describe('ProductsSearchFormComponent', () => {
     expect(button.textContent).toContain('Cargando...');
     expect(button.getAttribute('aria-busy')).toBe('true');
   });
+
+  it('renders updated submit copy when not loading', () => {
+    const fixture = TestBed.createComponent(ProductsSearchFormComponent);
+
+    fixture.componentRef.setInput('loading', false);
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector(
+      'button[type="submit"]',
+    ) as HTMLButtonElement;
+    expect(button.textContent).toContain('Aplicar filtros');
+  });
 });

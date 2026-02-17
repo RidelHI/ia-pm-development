@@ -14,13 +14,17 @@ import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CurrencyPipe } from '@angular/common';
 import { finalize } from 'rxjs';
+import { ConfirmDialogComponent } from '../../../../shared/ui/confirm-dialog.component';
 import { AuthStore } from '../../../auth/state/auth.store';
 import { ProductsApiService } from '../../data-access/products-api.service';
 import type { Product, ProductMutationInput, ProductStatus } from '../../domain/products.models';
@@ -28,6 +32,7 @@ import { ProductsStore } from '../../state/products.store';
 import { ProductsFeedbackComponent } from '../components/products-feedback.component';
 import { ProductsGridComponent } from '../components/products-grid.component';
 import { ProductsSearchFormComponent } from '../components/products-search-form.component';
+import { ProductsStockChartComponent } from '../components/products-stock-chart.component';
 
 type EditorMode = 'create' | 'edit' | 'detail' | null;
 const MAX_IMAGE_FILE_SIZE_BYTES = 5 * 1024 * 1024;
@@ -41,28 +46,39 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
     ProductsSearchFormComponent,
     ProductsFeedbackComponent,
     ProductsGridComponent,
+    ProductsStockChartComponent,
     MatButtonModule,
     MatCardModule,
     MatChipsModule,
     MatDividerModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    MatToolbarModule,
+    MatSelectModule,
   ],
   template: `
     <main class="dashboard-page">
-      <mat-toolbar class="dashboard-toolbar">
-        <span class="toolbar-title">Warehouse Command Center</span>
-        <span class="toolbar-spacer"></span>
-        <button mat-stroked-button color="primary" type="button" (click)="startCreate()">
-          Nuevo producto
-        </button>
-        <button mat-stroked-button type="button" (click)="logout()">Cerrar sesión</button>
-      </mat-toolbar>
-
       <section class="dashboard-content">
-        <h1 class="page-title">Productos</h1>
+        <section class="dashboard-header surface-card-strong">
+          <div>
+            <p class="dashboard-eyebrow">Resumen</p>
+            <h1 class="page-title">Productos</h1>
+            <p class="dashboard-copy">
+              Controla inventario, visibilidad operativa y calidad de datos desde un panel unificado.
+            </p>
+          </div>
+          <div class="header-actions">
+            <button mat-stroked-button type="button" (click)="loadProducts()" [disabled]="isLoading()">
+              <mat-icon aria-hidden="true">refresh</mat-icon>
+              Actualizar
+            </button>
+            <button mat-flat-button color="primary" type="button" (click)="startCreate()">
+              <mat-icon aria-hidden="true">add</mat-icon>
+              Nuevo producto
+            </button>
+          </div>
+        </section>
 
         <section class="kpi-grid">
           <mat-card appearance="outlined" class="kpi-card">
@@ -76,29 +92,47 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
           </mat-card>
 
           <mat-card appearance="outlined" class="kpi-card">
+            <p class="kpi-label">Productos activos</p>
+            <p class="kpi-value">{{ activeProductsCount() }}</p>
+          </mat-card>
+
+          <mat-card appearance="outlined" class="kpi-card">
             <p class="kpi-label">Valor inventario</p>
             <p class="kpi-value">{{ totalInventoryValueCents() / 100 | currency: 'USD' }}</p>
           </mat-card>
         </section>
 
-        <mat-card appearance="outlined" class="panel-card">
-          <mat-card-header>
-            <h2 mat-card-title>Buscar y filtrar</h2>
-            <p mat-card-subtitle>
-              Consulta por nombre o SKU y recarga resultados del inventario.
-            </p>
-          </mat-card-header>
-          <mat-card-content>
-            <app-products-search-form
-              [loading]="isLoading()"
-              [query]="query()"
-              (queryChange)="query.set($event)"
-              (searchRequested)="loadProducts()"
-            />
-          </mat-card-content>
-        </mat-card>
+        <section class="dashboard-main-grid">
+          <mat-card appearance="outlined" class="panel-card">
+            <mat-card-header>
+              <h2 mat-card-title>Buscar y filtrar</h2>
+              <p mat-card-subtitle>
+                Consulta en API por texto libre y usa el filtro local para refinar la tabla.
+              </p>
+            </mat-card-header>
+            <mat-card-content>
+              <app-products-search-form
+                [loading]="isLoading()"
+                [query]="query()"
+                (queryChange)="query.set($event)"
+                (searchRequested)="loadProducts()"
+              />
+            </mat-card-content>
+          </mat-card>
 
-        <app-products-feedback [errorMessage]="errorMessage()" [isEmpty]="isEmpty()" />
+          <mat-card appearance="outlined" class="panel-card chart-card">
+            <mat-card-content>
+              <app-products-stock-chart [products]="products()" />
+            </mat-card-content>
+          </mat-card>
+        </section>
+
+        <app-products-feedback
+          [errorMessage]="errorMessage()"
+          [isEmpty]="isEmpty()"
+          (retryRequested)="loadProducts()"
+          (createRequested)="startCreate()"
+        />
 
         @if (actionErrorMessage()) {
           <mat-card appearance="outlined" class="status-card status-card-error" role="alert" aria-live="assertive">
@@ -112,21 +146,22 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
           </mat-card>
         }
 
-        @if (products().length > 0) {
-          <app-products-grid
-            [products]="products()"
-            (viewRequested)="showDetails($event)"
-            (editRequested)="startEdit($event)"
-            (deleteRequested)="removeProduct($event)"
-          />
-        }
+        <app-products-grid
+          [products]="products()"
+          [loading]="isLoading()"
+          (viewRequested)="showDetails($event)"
+          (editRequested)="startEdit($event)"
+          (deleteRequested)="removeProduct($event)"
+        />
 
         @if (editorMode()) {
           <mat-card appearance="outlined" class="editor-card">
             <mat-card-header>
-              <h2 mat-card-title>{{ editorTitle() }}</h2>
-              <p mat-card-subtitle>{{ editorDescription() }}</p>
-              <span class="toolbar-spacer"></span>
+              <div>
+                <h2 mat-card-title>{{ editorTitle() }}</h2>
+                <p mat-card-subtitle>{{ editorDescription() }}</p>
+              </div>
+              <span class="header-spacer"></span>
               <button mat-stroked-button type="button" (click)="closeEditor()">Cerrar</button>
             </mat-card-header>
 
@@ -160,7 +195,10 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
                       <p><strong>Marca:</strong> {{ selectedProduct()?.brand || 'Sin marca' }}</p>
                       <p><strong>Cantidad:</strong> {{ selectedProduct()?.quantity }}</p>
                       <p><strong>Stock mínimo:</strong> {{ selectedProduct()?.minimumStock ?? 'No definido' }}</p>
-                      <p><strong>Precio (centavos):</strong> {{ selectedProduct()?.unitPriceCents }}</p>
+                      <p>
+                        <strong>Precio:</strong>
+                        {{ (selectedProduct()?.unitPriceCents ?? 0) / 100 | currency: 'USD' }}
+                      </p>
                       <p>
                         <strong>Estado:</strong>
                         <mat-chip-set>
@@ -170,7 +208,7 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
                         </mat-chip-set>
                       </p>
                       <p><strong>Ubicación:</strong> {{ selectedProduct()?.location || 'No definida' }}</p>
-                      <p class="full-row"><strong>Notas:</strong> {{ selectedProduct()?.notes || 'Sin notas' }}</p>
+                      <p class="full-row"><strong>Notas:</strong> {{ selectedProduct()?.notes || 'Sin notas registradas' }}</p>
                     </div>
 
                     <div>
@@ -229,10 +267,10 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
 
                   <mat-form-field appearance="outline">
                     <mat-label>Estado *</mat-label>
-                    <select matNativeControl formControlName="status">
-                      <option value="active">active</option>
-                      <option value="inactive">inactive</option>
-                    </select>
+                    <mat-select formControlName="status">
+                      <mat-option value="active">active</mat-option>
+                      <mat-option value="inactive">inactive</mat-option>
+                    </mat-select>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="field-span-2">
@@ -305,69 +343,104 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
       }
 
       .dashboard-page {
-        min-height: 100vh;
-      }
-
-      .dashboard-toolbar {
-        position: sticky;
-        top: 0;
-        z-index: 20;
-        background: color-mix(in srgb, #10294a 82%, #1f5994 18%);
-        color: #eaf4ff;
-        border-bottom: 1px solid #2f4f74;
-        gap: 0.6rem;
-      }
-
-      .toolbar-title {
-        letter-spacing: 0.04em;
-        font-size: 1rem;
-        font-weight: 700;
-      }
-
-      .toolbar-spacer {
-        flex: 1;
+        min-height: 100%;
       }
 
       .dashboard-content {
-        width: min(1160px, 100%);
+        width: min(1220px, 100%);
         margin: 0 auto;
-        padding: clamp(0.8rem, 2.5vw, 1.8rem);
+        padding: clamp(1rem, 2.8vw, 2.1rem);
         display: grid;
-        gap: 1rem;
+        gap: var(--space-4);
+      }
+
+      .dashboard-header {
+        padding: clamp(1.1rem, 2.4vw, 1.5rem);
+        display: grid;
+        gap: var(--space-3);
+      }
+
+      .dashboard-eyebrow {
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--text-muted);
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+
+      .dashboard-copy {
+        margin-top: var(--space-1);
+        color: var(--text-muted);
+        font-size: 0.94rem;
+        max-width: 62ch;
+      }
+
+      .header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
       }
 
       .page-title {
-        margin: 0;
-        font-size: clamp(1.45rem, 3vw, 2rem);
+        margin-top: var(--space-1);
+        font-size: clamp(1.42rem, 2.8vw, 1.95rem);
       }
 
       .kpi-grid {
         display: grid;
-        gap: 0.8rem;
+        gap: var(--space-3);
+      }
+
+      .dashboard-main-grid {
+        display: grid;
+        gap: var(--space-3);
+        grid-template-columns: 1fr;
       }
 
       .kpi-card,
       .panel-card,
       .editor-card,
       .status-card {
-        border-color: color-mix(in srgb, var(--border-soft) 75%, white);
+        border-color: var(--border-soft);
         background: var(--panel-background);
-        backdrop-filter: blur(8px);
+        color: var(--text-primary);
+      }
+
+      .panel-card mat-card-header {
+        margin-bottom: var(--space-2);
+      }
+
+      .panel-card mat-card-title {
+        font-size: 1.5rem;
+      }
+
+      .panel-card mat-card-subtitle {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      .kpi-card {
+        padding: var(--space-4) var(--space-4) var(--space-3);
       }
 
       .kpi-label {
         margin: 0;
         text-transform: uppercase;
-        letter-spacing: 0.15em;
+        letter-spacing: 0.1em;
         font-size: 0.72rem;
-        color: #4a6082;
+        color: var(--text-muted);
         font-weight: 700;
       }
 
       .kpi-value {
-        margin: 0.5rem 0 0;
+        margin: var(--space-2) 0 0;
         font-size: clamp(1.35rem, 3vw, 1.8rem);
         font-weight: 700;
+      }
+
+      .panel-card mat-card-content {
+        padding-top: var(--space-3);
       }
 
       .status-card p {
@@ -387,7 +460,16 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
       }
 
       .editor-card mat-card-content {
-        padding-top: 1rem;
+        padding-top: var(--space-4);
+      }
+
+      .header-spacer {
+        flex: 1;
+      }
+
+      .editor-card mat-card-header {
+        align-items: flex-start;
+        gap: var(--space-2);
       }
 
       .loading-detail {
@@ -434,7 +516,7 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
 
       .detail-data-grid p {
         margin: 0;
-        color: #435066;
+        color: var(--text-muted);
       }
 
       .detail-data-grid strong {
@@ -457,13 +539,13 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
 
       .editor-form {
         display: grid;
-        gap: 0.55rem;
+        gap: var(--space-3);
       }
 
       .upload-panel {
-        border: 1px dashed color-mix(in srgb, var(--border-soft) 85%, white);
+        border: 1px dashed var(--border-strong);
         border-radius: 12px;
-        padding: 0.8rem;
+        padding: var(--space-3);
         background: #f8fbff;
       }
 
@@ -477,7 +559,7 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
       }
 
       .upload-copy {
-        margin: 0.4rem 0 0.75rem;
+        margin: var(--space-2) 0 var(--space-3);
         color: var(--text-muted);
         font-size: 0.86rem;
       }
@@ -504,7 +586,7 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
       .actions-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.6rem;
+        gap: var(--space-2);
       }
 
       .button-spinner {
@@ -513,7 +595,7 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
 
       @media (min-width: 760px) {
         .kpi-grid {
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .editor-form,
@@ -527,7 +609,23 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
         }
       }
 
+      @media (min-width: 900px) {
+        .dashboard-header {
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: end;
+        }
+
+        .dashboard-main-grid {
+          grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+          align-items: start;
+        }
+      }
+
       @media (min-width: 980px) {
+        .kpi-grid {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
         .detail-layout {
           grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
           align-items: start;
@@ -539,14 +637,18 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
       }
 
       @media (max-width: 640px) {
-        .dashboard-toolbar {
-          flex-wrap: wrap;
-          height: auto;
-          padding-block: 0.6rem;
+        .header-actions {
+          width: 100%;
+          display: grid;
+          grid-template-columns: 1fr;
         }
 
-        .toolbar-spacer {
-          display: none;
+        .header-actions button {
+          width: 100%;
+        }
+
+        .panel-card mat-card-title {
+          font-size: 1.35rem;
         }
       }
     `,
@@ -558,6 +660,8 @@ export class ProductsPageComponent {
   private readonly router = inject(Router);
   private readonly productsStore = inject(ProductsStore);
   private readonly productsApiService = inject(ProductsApiService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly products = this.productsStore.products;
@@ -574,6 +678,9 @@ export class ProductsPageComponent {
   readonly formErrorMessage = signal<string | null>(null);
 
   readonly isDetailMode = computed(() => this.editorMode() === 'detail');
+  readonly activeProductsCount = computed(
+    () => this.products().filter((product) => product.status === 'active').length,
+  );
   readonly lowStockCount = computed(() =>
     this.products().filter(
       (product) => product.minimumStock !== null && product.quantity <= product.minimumStock,
@@ -749,7 +856,9 @@ export class ProductsPageComponent {
         )
         .subscribe({
           next: (created) => {
-            this.actionSuccessMessage.set(`Producto ${created.sku} creado correctamente.`);
+            const message = `Producto ${created.sku} creado correctamente.`;
+            this.actionSuccessMessage.set(message);
+            this.showSnack(message, 'success');
             this.closeEditor();
             this.productsStore.loadProducts(this.query());
           },
@@ -758,9 +867,9 @@ export class ProductsPageComponent {
               return;
             }
 
-            this.actionErrorMessage.set(
-              this.resolveActionErrorMessage(error, 'No se pudo crear el producto.'),
-            );
+            const message = this.resolveActionErrorMessage(error, 'No se pudo crear el producto.');
+            this.actionErrorMessage.set(message);
+            this.showSnack(message, 'error');
           },
         });
 
@@ -790,7 +899,9 @@ export class ProductsPageComponent {
       .subscribe({
         next: (updated) => {
           this.selectedProduct.set(updated);
-          this.actionSuccessMessage.set(`Producto ${updated.sku} actualizado correctamente.`);
+          const message = `Producto ${updated.sku} actualizado correctamente.`;
+          this.actionSuccessMessage.set(message);
+          this.showSnack(message, 'success');
           this.closeEditor();
           this.productsStore.loadProducts(this.query());
         },
@@ -799,9 +910,12 @@ export class ProductsPageComponent {
             return;
           }
 
-          this.actionErrorMessage.set(
-            this.resolveActionErrorMessage(error, 'No se pudo actualizar el producto.'),
+          const message = this.resolveActionErrorMessage(
+            error,
+            'No se pudo actualizar el producto.',
           );
+          this.actionErrorMessage.set(message);
+          this.showSnack(message, 'error');
         },
       });
   }
@@ -809,40 +923,55 @@ export class ProductsPageComponent {
   removeProduct(productId: string): void {
     const selected = this.products().find((product) => product.id === productId);
     const reference = selected?.name ?? selected?.sku ?? productId;
-    const confirmed = window.confirm(`¿Eliminar ${reference}? Esta acción no se puede deshacer.`);
 
-    if (!confirmed) {
-      return;
-    }
-
-    this.actionLoading.set(true);
-    this.actionErrorMessage.set(null);
-    this.actionSuccessMessage.set(null);
-    this.productsApiService
-      .deleteProduct(productId)
-      .pipe(
-        finalize(() => {
-          this.actionLoading.set(false);
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: () => {
-          this.actionSuccessMessage.set('Producto eliminado correctamente.');
-          if (this.selectedProduct()?.id === productId) {
-            this.closeEditor();
-          }
-          this.productsStore.loadProducts(this.query());
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: 'Eliminar producto',
+          message: `¿Eliminar ${reference}? Esta acción no se puede deshacer.`,
+          confirmLabel: 'Eliminar',
         },
-        error: (error) => {
-          if (this.handleUnauthorizedError(error)) {
-            return;
-          }
+      })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((confirmed) => {
+        if (!confirmed) {
+          return;
+        }
 
-          this.actionErrorMessage.set(
-            this.resolveActionErrorMessage(error, 'No se pudo eliminar el producto.'),
-          );
-        },
+        this.actionLoading.set(true);
+        this.actionErrorMessage.set(null);
+        this.actionSuccessMessage.set(null);
+        this.productsApiService
+          .deleteProduct(productId)
+          .pipe(
+            finalize(() => {
+              this.actionLoading.set(false);
+            }),
+            takeUntilDestroyed(this.destroyRef),
+          )
+          .subscribe({
+            next: () => {
+              this.actionSuccessMessage.set('Producto eliminado correctamente.');
+              this.showSnack('Producto eliminado correctamente.', 'success');
+              if (this.selectedProduct()?.id === productId) {
+                this.closeEditor();
+              }
+              this.productsStore.loadProducts(this.query());
+            },
+            error: (error) => {
+              if (this.handleUnauthorizedError(error)) {
+                return;
+              }
+
+              const message = this.resolveActionErrorMessage(
+                error,
+                'No se pudo eliminar el producto.',
+              );
+              this.actionErrorMessage.set(message);
+              this.showSnack(message, 'error');
+            },
+          });
       });
   }
 
@@ -885,11 +1014,6 @@ export class ProductsPageComponent {
     this.productsStore.loadProducts(this.query());
   }
 
-  logout(): void {
-    this.authStore.clearSession();
-    void this.router.navigate(['/login']);
-  }
-
   private loadSelectedProduct(productId: string, patchForm = false): void {
     this.detailLoading.set(true);
     this.selectedProduct.set(null);
@@ -915,9 +1039,12 @@ export class ProductsPageComponent {
             return;
           }
 
-          this.actionErrorMessage.set(
-            this.resolveActionErrorMessage(error, 'No se pudo cargar el detalle del producto.'),
+          const message = this.resolveActionErrorMessage(
+            error,
+            'No se pudo cargar el detalle del producto.',
           );
+          this.actionErrorMessage.set(message);
+          this.showSnack(message, 'error');
         },
       });
   }
@@ -1018,6 +1145,13 @@ export class ProductsPageComponent {
     }
 
     return fallback;
+  }
+
+  private showSnack(message: string, tone: 'success' | 'error'): void {
+    this.snackBar.open(message, 'Cerrar', {
+      duration: 3600,
+      panelClass: tone === 'success' ? ['snackbar-success'] : ['snackbar-error'],
+    });
   }
 
   private handleUnauthorizedError(error: unknown): boolean {

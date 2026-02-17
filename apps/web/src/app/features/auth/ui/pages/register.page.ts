@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { firstValueFrom } from 'rxjs';
@@ -18,21 +19,23 @@ import { AuthApiService } from '../../data-access/auth-api.service';
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
   ],
   template: `
     <main class="register-page">
       <mat-card class="register-card" appearance="outlined">
-        <p class="eyebrow">Nuevo acceso</p>
-        <h1>Crear usuario</h1>
+        <p class="eyebrow">Onboarding</p>
+        <h1>Crear cuenta de operador</h1>
         <p class="subtitle">
-          Endpoint backend: <code>/v1/auth/register</code>
+          Alta segura de usuarios para acceso a la plataforma de inventario.
         </p>
 
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
           <mat-form-field appearance="outline">
             <mat-label>Usuario</mat-label>
+            <mat-icon matPrefix aria-hidden="true">person_add</mat-icon>
             <input
               matInput
               formControlName="username"
@@ -41,10 +44,15 @@ import { AuthApiService } from '../../data-access/auth-api.service';
               placeholder="warehouse.user"
               type="text"
             />
+            <mat-hint>Mínimo 3 caracteres.</mat-hint>
+            @if (form.controls.username.touched && form.controls.username.hasError('required')) {
+              <mat-error>Usuario es obligatorio.</mat-error>
+            }
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Password</mat-label>
+            <mat-icon matPrefix aria-hidden="true">lock</mat-icon>
             <input
               matInput
               formControlName="password"
@@ -53,6 +61,10 @@ import { AuthApiService } from '../../data-access/auth-api.service';
               placeholder="StrongPassword123!"
               type="password"
             />
+            <mat-hint>Mínimo 8 caracteres.</mat-hint>
+            @if (form.controls.password.touched && form.controls.password.hasError('required')) {
+              <mat-error>Password es obligatorio.</mat-error>
+            }
           </mat-form-field>
 
           @if (errorMessage()) {
@@ -109,9 +121,9 @@ import { AuthApiService } from '../../data-access/auth-api.service';
 
       .register-card {
         width: min(560px, 100%);
-        border-color: color-mix(in srgb, var(--border-soft) 65%, white);
+        border-color: color-mix(in srgb, var(--border-soft) 65%, #fff);
         background: var(--panel-background);
-        backdrop-filter: blur(8px);
+        padding: clamp(1rem, 2.4vw, 1.5rem);
       }
 
       .eyebrow {
@@ -135,7 +147,7 @@ import { AuthApiService } from '../../data-access/auth-api.service';
 
       form {
         display: grid;
-        gap: 0.55rem;
+        gap: 0.7rem;
       }
 
       mat-form-field,
@@ -179,6 +191,9 @@ import { AuthApiService } from '../../data-access/auth-api.service';
         margin: 1.2rem 0 0;
         color: var(--text-muted);
         font-size: 0.92rem;
+        display: flex;
+        gap: var(--space-1);
+        flex-wrap: wrap;
       }
 
       .link-line a {
