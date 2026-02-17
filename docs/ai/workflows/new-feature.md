@@ -18,10 +18,6 @@ description: Deliver a new feature using the agent-first model with issue-to-PR 
    - One `priority:*`
    - Exactly one `agent:*`
 3. Confirm project status is `Todo` or `In Progress`.
-4. Create branch with issue id:
-   - `feature/<issue_number>-<slug>` or `fix/<issue_number>-<slug>`
-5. Run mandatory preflight before coding:
-   - `pnpm agent:preflight -- --issue <issue_number> --agent <agent:role>`
 
 ## Step 2: Plan
 1. Build an implementation plan with:
@@ -33,8 +29,10 @@ description: Deliver a new feature using the agent-first model with issue-to-PR 
 3. Get explicit approval before coding.
 
 ## Step 3: Execute
-1. Implement minimal change that satisfies criteria.
-2. Keep unrelated refactors out.
+1. Create branch using naming policy:
+   - `feature/<slug>` or `fix/<slug>`
+2. Implement minimal change that satisfies criteria.
+3. Keep unrelated refactors out.
 
 ## Step 4: Verify
 1. Run:
