@@ -35,37 +35,24 @@ Toda issue debe incluir:
 Sin ownership `agent:*`, la tarea no entra a ejecucion.
 
 ## Flujo estandar por tarea
-1. PM crea/refina issue y valida criterios de aceptacion.
-2. PM mueve la card a `Todo`.
-3. Agente owner crea rama con issue id:
-   - `feature/<issue_number>-<slug>`
-   - `fix/<issue_number>-<slug>`
-   - `chore/<issue_number>-<slug>`
-4. Agente owner toma issue y mueve card a `In Progress`.
-5. Agente owner ejecuta preflight obligatorio:
-   - `pnpm agent:preflight -- --issue <issue_number> --agent <agent:role>`
-6. Agente owner implementa solo el scope de la issue.
-7. Agente owner ejecuta: `pnpm lint`, `pnpm test`, `pnpm build`.
-8. Agente owner completa self-review en `docs/ai/checklists/ai-self-review-gate.md`.
-9. Agente owner abre PR con `Closes #<issue_number>` + seccion `AI Self-Review Gate`.
-10. Agente owner mueve card a `In Review`.
-11. QA/Reviewer valida criterios y evidencia.
-12. Al merge, la issue pasa a `Done`.
+1. PM define o refina la issue con alcance y criterios de aceptacion.
+2. PM agrega labels `type:*`, `priority:*` y exactamente un `agent:*`.
+3. PM mueve la card a `Todo` en el Project.
+4. Agente owner toma la issue y la mueve a `In Progress`.
+5. Agente owner crea rama (`feature/<slug>` o `fix/<slug>`) y ejecuta implementacion acotada al scope.
+6. Agente owner ejecuta calidad local: `pnpm lint`, `pnpm test`, `pnpm build`.
+7. Agente owner ejecuta self-review final con `docs/ai/checklists/ai-self-review-gate.md`.
+8. Agente owner abre PR con `Closes #<issue_number>` y seccion `AI Self-Review Gate`.
+9. Agente owner mueve la issue a `In Review`.
+10. QA/Reviewer valida criterios de aceptacion y evidencia tecnica.
+11. Al merge, la issue pasa a `Done`.
 
 ## Reglas operativas
-- `1 issue = 1 rama = 1 PR`.
-- Rama debe incluir issue id y coincidir con `Closes #<issue_number>`.
-- PR pequena, trazable y sin scope creep.
-- No se trabaja fuera de issue activa del tablero.
+- 1 issue = 1 rama = 1 PR.
+- PR pequena y trazable.
+- No expandir scope fuera de criterios de aceptacion.
 - CI debe pasar antes de merge.
-- El check `quality` valida rama, issue enlazada, ownership `agent:*`, pertenencia al Project y `AI Self-Review Gate`.
-
-## Asignacion sugerida por tipo
-- `type:backend` -> `agent:backend`
-- `type:frontend` -> `agent:frontend`
-- `type:test` -> `agent:qa` (o owner tecnico si testing acoplado)
-- `type:devops` -> `agent:release`
-- `type:docs` -> `agent:pm` (o owner tecnico del area)
+- El check `quality` valida convencion de rama, issue enlazada con label `agent:*` y `AI Self-Review Gate` en PR.
 
 ## Operacion diaria con CLI
 ```bash
@@ -75,10 +62,9 @@ gh project item-list 1 --owner RidelHI --limit 30
 gh pr list --state open --limit 20
 ```
 
-## Referencias
-- `docs/ai/agent-operating-model.md`
-- `docs/runbooks/git-branching-model.md`
-- `docs/runbooks/agent-preflight-gate.md`
-- `docs/runbooks/github-pr-flow.md`
-- `docs/ai/workflows/new-feature.md`
-- `AGENTS.md`
+## Referencia
+- Modelo completo de roles y reglas: `docs/ai/agent-operating-model.md`
+- Estrategia de ramas por caso: `docs/runbooks/git-branching-model.md`
+- Instrucciones persistentes del agente: `AGENTS.md`
+- Workflows operativos: `docs/ai/workflows/`
+- Prompt templates: `docs/ai/prompts/`
