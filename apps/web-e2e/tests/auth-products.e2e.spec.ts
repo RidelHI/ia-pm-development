@@ -222,7 +222,8 @@ test('supports create, search, detail, edit, and delete for products', async ({
     page.getByRole('heading', { name: 'Editar producto', exact: true }),
   ).toBeVisible();
   await page.locator('[formcontrolname="name"]').fill(product.updatedName);
-  await page.locator('[formcontrolname="status"]').selectOption('inactive');
+  await page.locator('[formcontrolname="status"]').click();
+  await page.getByRole('option', { name: 'inactive', exact: true }).click();
   await page.getByRole('button', { name: /^Guardar cambios$/ }).click();
 
   await expect(
