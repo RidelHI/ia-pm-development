@@ -271,3 +271,32 @@ jobs:
 
       - name: E2E Web (Playwright)
         run: pnpm test:e2e:web
+
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs:
+      - governance
+      - lint
+      - test
+      - build
+      - e2e-web
+
+    steps:
+      - name: Enforce upstream job results
+        run: |
+          results=(
+            "${{ needs.governance.result }}"
+            "${{ needs.lint.result }}"
+            "${{ needs.test.result }}"
+            "${{ needs.build.result }}"
+            "${{ needs.e2e-web.result }}"
+          )
+
+          for result in "${results[@]}"; do
+            if [[ "$result" != "success" ]]; then
+              echo "Blocking merge because a required job completed with: $result"
+              exit 1
+            fi
+          done
