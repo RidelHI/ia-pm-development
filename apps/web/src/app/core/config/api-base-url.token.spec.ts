@@ -23,11 +23,11 @@ describe('API_BASE_URL token', () => {
 
   it('uses runtime apiBaseUrl and normalizes trailing slash', () => {
     runtimeConfigGlobal.__APP_CONFIG__ = {
-      apiBaseUrl: 'https://ia-pm-development-api.vercel.app/v1/',
+      apiBaseUrl: 'https://warehouse-api.onrender.com/v1/',
     };
 
     const baseUrl = TestBed.inject(API_BASE_URL);
 
-    expect(baseUrl).toBe('https://ia-pm-development-api.vercel.app/v1');
+    expect(baseUrl).toBe('https://warehouse-api.onrender.com/v1');
   });
 });
