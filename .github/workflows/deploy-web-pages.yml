@@ -53,7 +53,7 @@ jobs:
         run: |
           API_BASE_URL="$WEB_API_BASE_URL"
           if [ -z "$API_BASE_URL" ]; then
-            API_BASE_URL="https://ia-pm-development-api.vercel.app/v1"
+            API_BASE_URL="https://warehouse-api.onrender.com/v1"
           fi
           cat <<EOF > apps/web/public/env.js
           window.__APP_CONFIG__ = window.__APP_CONFIG__ || {};

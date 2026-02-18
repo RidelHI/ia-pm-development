@@ -60,10 +60,10 @@ pnpm test:e2e:web
 2. Si falla por permisos, habilitar Pages en el repo (source: GitHub Actions).
 3. Push a `main` con cambios en `apps/web`.
 4. Workflow: `.github/workflows/deploy-web-pages.yml`.
-5. Configurar variable de repositorio `WEB_API_BASE_URL` con la URL del API publicada (ejemplo: `https://ia-pm-development-api.vercel.app/v1`).
+5. Configurar variable de repositorio `WEB_API_BASE_URL` con la URL del API publicada (ejemplo: `https://warehouse-api.onrender.com/v1`).
 
 Notas operativas:
-- Si `WEB_API_BASE_URL` no existe, el workflow usa fallback `https://ia-pm-development-api.vercel.app/v1`.
+- Si `WEB_API_BASE_URL` no existe, el workflow usa fallback `https://warehouse-api.onrender.com/v1`.
 - El deploy genera `404.html` a partir de `index.html` para soportar refresh en rutas SPA (`/login`, `/products`).
 
 ## Deploy API (Render)
