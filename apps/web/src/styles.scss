@@ -55,10 +55,12 @@ $warehouse-theme: mat.define-theme(
   --elevation-focus: 0 0 0 3px rgba(12, 150, 214, 0.3);
 
   --shell-background: radial-gradient(130% 120% at 8% 6%, #fef8eb 0%, #f4f8ff 52%, #ecf3ff 100%) fixed;
+  --shell-overlay: linear-gradient(140deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.26) 55%, rgba(201, 230, 255, 0.26) 100%);
   --sidebar-background: var(--brand-navy-900);
   --toolbar-background: #ffffff;
   --panel-background: #ffffff;
   --panel-strong-background: #ffffff;
+  --panel-highlight: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(238, 247, 255, 0.88) 100%);
   --border-soft: var(--brand-neutral-200);
   --border-strong: #9db6d6;
   --text-primary: #11253f;
@@ -94,8 +96,40 @@ body {
   margin: 0;
   color: var(--text-primary);
   font-family: var(--font-body);
-  background: var(--shell-background);
+  background:
+    var(--shell-overlay),
+    var(--shell-background);
   line-height: 1.35;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  pointer-events: none;
+  z-index: -1;
+  border-radius: 999px;
+  filter: blur(6px);
+}
+
+body::before {
+  width: clamp(220px, 38vw, 480px);
+  height: clamp(220px, 38vw, 480px);
+  right: -140px;
+  top: 12%;
+  background: radial-gradient(circle at center, rgba(109, 193, 255, 0.28) 0%, rgba(109, 193, 255, 0) 72%);
+  animation: drift 14s ease-in-out infinite alternate;
+}
+
+body::after {
+  width: clamp(220px, 30vw, 360px);
+  height: clamp(220px, 30vw, 360px);
+  left: -90px;
+  bottom: 8%;
+  background: radial-gradient(circle at center, rgba(255, 203, 121, 0.2) 0%, rgba(255, 203, 121, 0) 74%);
+  animation: drift 17s ease-in-out infinite alternate-reverse;
 }
 
 h1,
@@ -134,6 +168,11 @@ a {
 
 .mat-drawer-content {
   background: transparent;
+}
+
+.shell-sidebar .mat-drawer-inner-container {
+  height: 100%;
+  overflow: hidden !important;
 }
 
 .mat-mdc-card,
@@ -293,15 +332,75 @@ code {
 }
 
 .surface-card {
-  background: var(--panel-background);
+  background: var(--panel-highlight);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
   box-shadow: var(--elevation-1);
 }
 
 .surface-card-strong {
-  background: var(--panel-strong-background);
+  background: var(--panel-highlight);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
   box-shadow: var(--elevation-2);
+}
+
+.dashboard-page .dashboard-header {
+  border: 1px solid color-mix(in srgb, var(--border-soft) 72%, #fff);
+  background:
+    linear-gradient(140deg, rgba(255, 255, 255, 0.96) 0%, rgba(233, 245, 255, 0.88) 100%),
+    var(--panel-strong-background);
+}
+
+.dashboard-page .dashboard-content {
+  gap: var(--space-3);
+}
+
+.dashboard-page .dashboard-insights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.dashboard-page .dashboard-insights span {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.dashboard-page .header-actions {
+  align-items: center;
+}
+
+.dashboard-page .header-actions button {
+  min-height: 42px;
+}
+
+.dashboard-page .kpi-icon {
+  width: 1.3rem;
+  height: 1.3rem;
+  font-size: 1.3rem;
+  color: #2d628f;
+}
+
+.dashboard-page .kpi-meta {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.79rem;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(0, -18px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after {
+    animation: none;
+  }
 }

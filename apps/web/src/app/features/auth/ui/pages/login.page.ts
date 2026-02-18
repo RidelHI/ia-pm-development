@@ -32,6 +32,36 @@ import { AuthApiService } from '../../data-access/auth-api.service';
           <p class="brand-copy">
             Plataforma operativa para equipos de almacén: visibilidad, trazabilidad y ejecución desde un solo panel.
           </p>
+
+          <ul class="brand-points" aria-label="Beneficios principales">
+            <li>
+              <mat-icon aria-hidden="true">monitoring</mat-icon>
+              Alertas de stock y movimientos críticos en minutos.
+            </li>
+            <li>
+              <mat-icon aria-hidden="true">hub</mat-icon>
+              Flujo conectado entre compras, almacén y ventas.
+            </li>
+            <li>
+              <mat-icon aria-hidden="true">verified_user</mat-icon>
+              Trazabilidad por usuario con acceso seguro.
+            </li>
+          </ul>
+
+          <div class="brand-kpis" aria-hidden="true">
+            <article>
+              <p>99.9%</p>
+              <span>Disponibilidad</span>
+            </article>
+            <article>
+              <p>24/7</p>
+              <span>Operación</span>
+            </article>
+            <article>
+              <p>+120k</p>
+              <span>Items auditados</span>
+            </article>
+          </div>
         </mat-card>
 
         <mat-card class="auth-panel" appearance="outlined">
@@ -134,15 +164,17 @@ import { AuthApiService } from '../../data-access/auth-api.service';
         width: min(1060px, 100%);
         display: grid;
         gap: var(--space-4);
+        align-items: stretch;
       }
 
       .brand-panel {
         border-color: color-mix(in srgb, var(--border-soft) 70%, #fff);
-        background:
-          linear-gradient(155deg, #0f2f57 0%, #236ca4 45%, #62b4dc 100%)
-          border-box;
+        background: linear-gradient(155deg, #0f2f57 0%, #236ca4 45%, #62b4dc 100%) border-box;
         color: #eaf6ff;
         padding: clamp(1rem, 2.4vw, 1.5rem);
+        box-shadow: 0 18px 34px rgba(14, 49, 84, 0.26);
+        display: grid;
+        gap: var(--space-4);
       }
 
       .brand-eyebrow {
@@ -167,10 +199,56 @@ import { AuthApiService } from '../../data-access/auth-api.service';
         font-size: 1rem;
       }
 
+      .brand-points {
+        display: grid;
+        gap: var(--space-2);
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .brand-points li {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: var(--space-2);
+        align-items: start;
+        line-height: 1.35;
+      }
+
+      .brand-points mat-icon {
+        margin-top: 2px;
+        color: #d2e8ff;
+      }
+
+      .brand-kpis {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--space-2);
+      }
+
+      .brand-kpis article {
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(178, 212, 255, 0.26);
+        background: rgba(12, 31, 56, 0.24);
+        padding: 0.65rem;
+      }
+
+      .brand-kpis p {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+      }
+
+      .brand-kpis span {
+        font-size: 0.76rem;
+        color: #d7ebff;
+      }
+
       .auth-panel {
         border-color: color-mix(in srgb, var(--border-soft) 70%, #fff);
         background: var(--panel-background);
         padding: clamp(1rem, 2.4vw, 1.5rem);
+        box-shadow: var(--elevation-1);
       }
 
       .auth-panel h2 {
@@ -255,6 +333,12 @@ import { AuthApiService } from '../../data-access/auth-api.service';
         .auth-layout {
           grid-template-columns: minmax(320px, 1fr) minmax(380px, 1fr);
           align-items: start;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .brand-kpis {
+          grid-template-columns: 1fr;
         }
       }
     `,

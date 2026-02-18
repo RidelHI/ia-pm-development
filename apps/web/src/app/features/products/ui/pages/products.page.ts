@@ -61,12 +61,18 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
     <main class="dashboard-page">
       <section class="dashboard-content">
         <section class="dashboard-header surface-card-strong">
-          <div>
+          <div class="dashboard-header-copy">
             <p class="dashboard-eyebrow">Resumen</p>
             <h1 class="page-title">Productos</h1>
             <p class="dashboard-copy">
               Controla inventario, visibilidad operativa y calidad de datos desde un panel unificado.
             </p>
+
+            <div class="dashboard-insights" aria-hidden="true">
+              <span>Actualización en tiempo real</span>
+              <span>Flujo orientado a operación</span>
+              <span>Estado de inventario accionable</span>
+            </div>
           </div>
           <div class="header-actions">
             <button mat-stroked-button type="button" (click)="loadProducts()" [disabled]="isLoading()">
@@ -82,23 +88,31 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
 
         <section class="kpi-grid">
           <mat-card appearance="outlined" class="kpi-card">
+            <mat-icon class="kpi-icon" aria-hidden="true">inventory_2</mat-icon>
             <p class="kpi-label">Productos visibles</p>
             <p class="kpi-value">{{ products().length }}</p>
+            <p class="kpi-meta">Total de filas disponibles para operación.</p>
           </mat-card>
 
           <mat-card appearance="outlined" class="kpi-card">
+            <mat-icon class="kpi-icon" aria-hidden="true">warning_amber</mat-icon>
             <p class="kpi-label">Stock bajo</p>
             <p class="kpi-value">{{ lowStockCount() }}</p>
+            <p class="kpi-meta">Ítems por debajo del mínimo definido.</p>
           </mat-card>
 
           <mat-card appearance="outlined" class="kpi-card">
+            <mat-icon class="kpi-icon" aria-hidden="true">task_alt</mat-icon>
             <p class="kpi-label">Productos activos</p>
             <p class="kpi-value">{{ activeProductsCount() }}</p>
+            <p class="kpi-meta">Disponibles para venta o despacho.</p>
           </mat-card>
 
           <mat-card appearance="outlined" class="kpi-card">
+            <mat-icon class="kpi-icon" aria-hidden="true">payments</mat-icon>
             <p class="kpi-label">Valor inventario</p>
             <p class="kpi-value">{{ totalInventoryValueCents() / 100 | currency: 'USD' }}</p>
+            <p class="kpi-meta">Valor total estimado en almacén.</p>
           </mat-card>
         </section>
 
@@ -351,7 +365,6 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
         margin: 0 auto;
         padding: clamp(1rem, 2.8vw, 2.1rem);
         display: grid;
-        gap: var(--space-4);
       }
 
       .dashboard-header {
@@ -370,10 +383,7 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
       }
 
       .dashboard-copy {
-        margin-top: var(--space-1);
         color: var(--text-muted);
-        font-size: 0.94rem;
-        max-width: 62ch;
       }
 
       .header-actions {
@@ -489,6 +499,7 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
         border-radius: 14px;
         border: 1px solid color-mix(in srgb, var(--border-soft) 80%, white);
         background: #edf2fa;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.48);
       }
 
       .detail-image img {
@@ -546,7 +557,7 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
         border: 1px dashed var(--border-strong);
         border-radius: 12px;
         padding: var(--space-3);
-        background: #f8fbff;
+        background: linear-gradient(135deg, #f8fbff 0%, #f0f7ff 100%);
       }
 
       .upload-title {
