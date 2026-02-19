@@ -6,13 +6,14 @@ description: Review a pull request against issue scope, agent ownership, and qua
 
 ## Inputs
 - PR number.
-- Linked issue number.
+- Linked Linear issue identifier.
 
 ## Step 1: Context Load
 1. Read PR description and linked issue.
-2. Confirm PR includes `Closes #<issue_number>`.
-3. Confirm issue has exactly one `agent:*` label.
-4. Confirm PR includes `AI Self-Review Gate` with framework marked and decision.
+2. Confirm PR includes `Linear: <TEAM-ISSUE>`.
+3. Confirm linked Linear issue has exactly one `agent:*` label.
+4. Confirm PR includes `Agent Owner: agent:<role>` and `Notion: <url>`.
+5. Confirm PR includes `AI Self-Review Gate` with framework marked and decision.
 
 ## Step 2: Scope Validation
 1. Compare issue acceptance criteria vs implemented behavior.

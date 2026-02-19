@@ -53,9 +53,10 @@ gh api repos/<owner>/<repo>/branches/main/protection
 
 ## 5) Guardrails CI para Angular + IA
 El job `quality` en `.github/workflows/ci.yml` valida adicionalmente:
-- PR body con `Closes #<issue_number>` exacto.
-- Exactamente 1 issue de cierre por PR.
-- Issue de cierre abierta y con exactamente 1 label `agent:*`.
+- PR body con `Linear: <TEAM-ISSUE>` exacto.
+- Exactamente 1 issue de Linear por PR.
+- Referencia explicita a owner `agent:*` en PR body (`Agent Owner: agent:<role>`).
+- Referencia `Notion: <url>` en PR body.
 - Seccion `AI Self-Review Gate` presente en PR body.
 - Framework marcado en self-review (`Angular way` o `NestJS way`).
 - Decision de self-review (`Compliant` o `Needs Changes`).
@@ -72,10 +73,12 @@ El job `quality` en `.github/workflows/ci.yml` valida adicionalmente:
   - `docs/runbooks/angular-mcp-setup.md`
 
 ## 6) Troubleshooting rapido
-- Falla por `Closes #<issue_number>`:
+- Falla por `Linear: <TEAM-ISSUE>`:
   - Agregar la linea exacta en el cuerpo del PR y re-ejecutar checks.
-- Falla por ownership `agent:*`:
-  - Ajustar labels de la issue para dejar exactamente un `agent:*`.
+- Falla por `Agent Owner: agent:*`:
+  - Agregar exactamente un owner en el PR body y verificar que coincide con la issue de Linear.
+- Falla por `Notion: <url>`:
+  - Agregar la URL de la pagina de Notion enlazada al trabajo.
 - Falla por `AI Self-Review Gate`:
   - Completar seccion del PR template usando `docs/ai/checklists/ai-self-review-gate.md`.
   - Marcar framework aplicable y definir `Decision: Compliant` o `Decision: Needs Changes`.

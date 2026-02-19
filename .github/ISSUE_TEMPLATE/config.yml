@@ -1,1 +1,5 @@
 blank_issues_enabled: false
+contact_links:
+  - name: Use Linear for backlog
+    url: https://linear.app/ia-integration
+    about: Create and manage tasks in Linear. Operational workflow is documented in docs/runbooks/github-project-workflow.md.

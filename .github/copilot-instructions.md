@@ -16,9 +16,10 @@
 - Prefer native control flow (`@if`, `@for`, `@switch`).
 
 ## Agent-first delivery rules
-- Require linked issue with exactly one `agent:*` label.
+- Require linked Linear issue with exactly one `agent:*` label.
 - Keep `1 issue = 1 branch = 1 PR`.
-- Include `Closes #<issue_number>` in PR body.
+- Include `Linear: <TEAM-ISSUE>` in PR body (example: `Linear: IA-17`).
+- Include `Agent Owner: agent:<role>` in PR body.
 - Complete `AI Self-Review Gate` in PR body using `docs/ai/checklists/ai-self-review-gate.md`.
 - Validate and report:
   - `pnpm lint`

@@ -41,7 +41,7 @@ Razon: encaja con el objetivo de costo cero y separa claramente frontend estatic
 ## Alcance inicial
 - Monorepo con `apps/web`, `apps/api`, `libs/shared`.
 - Calidad base: lint, test y build en CI.
-- Estructura preparada para integrar Supabase (Auth/DB/RLS) y flujo de gestion con GitHub Issues + Projects en siguientes tareas.
+- Estructura preparada para integrar Supabase (Auth/DB/RLS) y flujo de gestion con Linear + Notion en siguientes tareas.
 
 ## Consecuencias
 - Menor complejidad de arranque.

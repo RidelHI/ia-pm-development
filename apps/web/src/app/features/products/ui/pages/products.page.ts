@@ -141,6 +141,46 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
           </mat-card>
         </section>
 
+        <mat-card appearance="outlined" class="panel-card attention-card">
+          <mat-card-header>
+            <h2 mat-card-title>Productos que requieren atención</h2>
+            <p mat-card-subtitle>
+              Ítems con cantidad igual o por debajo del stock mínimo. Prioriza reposición.
+            </p>
+          </mat-card-header>
+          <mat-card-content>
+            @if (lowStockProducts().length > 0) {
+              <ul class="attention-list">
+                @for (product of lowStockProducts(); track product.id) {
+                  <li class="attention-item">
+                    <div class="attention-item-copy">
+                      <p class="attention-item-name">{{ product.name }}</p>
+                      <p class="attention-item-meta">
+                        SKU: {{ product.sku }} | Cantidad: {{ product.quantity }} | Mínimo:
+                        {{ product.minimumStock }}
+                      </p>
+                    </div>
+
+                    <div class="attention-item-actions">
+                      <span class="attention-shortfall">Faltan {{ stockShortfall(product) }}</span>
+                      <button
+                        mat-stroked-button
+                        type="button"
+                        class="attention-action"
+                        (click)="startEdit(product.id)"
+                      >
+                        Atender
+                      </button>
+                    </div>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="attention-empty">Sin alertas de stock crítico en este momento.</p>
+            }
+          </mat-card-content>
+        </mat-card>
+
         <app-products-feedback
           [errorMessage]="errorMessage()"
           [isEmpty]="isEmpty()"
@@ -408,6 +448,66 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
         grid-template-columns: 1fr;
       }
 
+      .attention-card mat-card-content {
+        padding-top: var(--space-3);
+      }
+
+      .attention-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: var(--space-2);
+      }
+
+      .attention-item {
+        border: 1px solid color-mix(in srgb, var(--border-soft) 75%, #fff);
+        border-radius: 12px;
+        padding: 0.9rem;
+        background: linear-gradient(135deg, #fff8ef 0%, #fffdf8 100%);
+        display: grid;
+        gap: 0.8rem;
+      }
+
+      .attention-item-name {
+        margin: 0;
+        font-weight: 700;
+        color: #5f3d0c;
+      }
+
+      .attention-item-meta {
+        margin: var(--space-1) 0 0;
+        color: #7b5c2a;
+        font-size: 0.86rem;
+      }
+
+      .attention-item-actions {
+        display: flex;
+        gap: var(--space-2);
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+
+      .attention-shortfall {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        border: 1px solid #f0b167;
+        background: #ffefda;
+        color: #8a4f0b;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.24rem 0.56rem;
+      }
+
+      .attention-empty {
+        margin: 0;
+        color: var(--text-muted);
+      }
+
       .kpi-card,
       .panel-card,
       .editor-card,
@@ -630,6 +730,11 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8_000_000;
           grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
           align-items: start;
         }
+
+        .attention-item {
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: center;
+        }
       }
 
       @media (min-width: 980px) {
@@ -692,11 +797,20 @@ export class ProductsPageComponent {
   readonly activeProductsCount = computed(
     () => this.products().filter((product) => product.status === 'active').length,
   );
-  readonly lowStockCount = computed(() =>
-    this.products().filter(
-      (product) => product.minimumStock !== null && product.quantity <= product.minimumStock,
-    ).length,
+  readonly lowStockCount = computed(
+    () => this.products().filter((product) => this.isLowStockProduct(product)).length,
   );
+  readonly lowStockProducts = computed(() => {
+    const lowStockProducts = this.products().filter((product) => this.isLowStockProduct(product));
+    return [...lowStockProducts].sort((left, right) => {
+      const shortfallDiff = this.stockShortfall(right) - this.stockShortfall(left);
+      if (shortfallDiff !== 0) {
+        return shortfallDiff;
+      }
+
+      return left.quantity - right.quantity;
+    });
+  });
   readonly totalInventoryValueCents = computed(() =>
     this.products().reduce(
       (total, product) => total + product.unitPriceCents * product.quantity,
@@ -1021,8 +1135,20 @@ export class ProductsPageComponent {
     reader.readAsDataURL(file);
   }
 
+  stockShortfall(product: Product): number {
+    if (product.minimumStock === null) {
+      return 0;
+    }
+
+    return Math.max(product.minimumStock - product.quantity, 0);
+  }
+
   loadProducts(): void {
     this.productsStore.loadProducts(this.query());
+  }
+
+  private isLowStockProduct(product: Product): boolean {
+    return product.minimumStock !== null && product.quantity <= product.minimumStock;
   }
 
   private loadSelectedProduct(productId: string, patchForm = false): void {

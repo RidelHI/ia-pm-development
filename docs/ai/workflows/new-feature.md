@@ -5,7 +5,7 @@ description: Deliver a new feature using the agent-first model with issue-to-PR 
 # Workflow: New Feature
 
 ## Inputs
-- Issue number, or agreement to create a new issue first.
+- Linear issue identifier (ejemplo: `IA-17`), o acuerdo de crearla primero.
 - Target owner role (`agent:backend`, `agent:frontend`, etc).
 
 ## Step 1: Pre-flight
@@ -17,7 +17,7 @@ description: Deliver a new feature using the agent-first model with issue-to-PR 
    - One `type:*`
    - One `priority:*`
    - Exactly one `agent:*`
-3. Confirm project status is `Todo` or `In Progress`.
+3. Confirm issue status is `Todo` or `In Progress` in Linear.
 
 ## Step 2: Plan
 1. Build an implementation plan with:
@@ -46,12 +46,14 @@ description: Deliver a new feature using the agent-first model with issue-to-PR 
 
 ## Step 5: Deliver
 1. Open PR with:
-   - `Closes #<issue_number>`
+   - `Linear: <TEAM-ISSUE>` (ejemplo: `Linear: IA-17`)
+   - `Agent Owner: agent:<role>`
+   - `Notion: <url>`
    - `AI Self-Review Gate` section completed with framework and decision
    - Summary of what changed
    - Validation evidence
    - Residual risks
-2. Move issue status to `In Review`.
+2. Move issue status to `In Review` en Linear y adjuntar enlace a Notion.
 
 ## Output Contract
 - PR ready for review.

@@ -10,7 +10,7 @@ flowchart LR
   W --> A[NestJS API]
   A --> D[(Supabase Postgres)]
   A --> J[JWT Auth]
-  P[GitHub Project + Issues] --> R[PR + CI]
+  P[Linear Issues + Notion Docs] --> R[PR + CI]
   R --> W
   R --> A
 ```
