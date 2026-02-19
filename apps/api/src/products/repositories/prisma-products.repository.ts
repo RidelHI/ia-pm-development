@@ -3,10 +3,8 @@ import {
   Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import type {
-  Prisma,
-  Product as PrismaProduct,
-} from '../../../prisma/generated/client/client';
+import { Prisma } from '../../../prisma/generated/client/client';
+import type { Product as PrismaProduct } from '../../../prisma/generated/client/client';
 import { PrismaService } from '../../integrations/prisma/prisma.service';
 import type {
   PaginatedResult,
@@ -102,15 +100,6 @@ export class PrismaProductsRepository implements ProductsRepository {
     const payload = this.toUpdateData(patch);
 
     try {
-      const existing = await this.prisma.product.findUnique({
-        where: { id },
-        select: { id: true },
-      });
-
-      if (!existing) {
-        return null;
-      }
-
       const updated = await this.prisma.product.update({
         where: { id },
         data: {
@@ -121,6 +110,10 @@ export class PrismaProductsRepository implements ProductsRepository {
 
       return this.toDomain(updated);
     } catch (error) {
+      if (this.isRecordNotFoundError(error)) {
+        return null;
+      }
+
       this.handlePrismaError(error, 'update');
     }
   }
@@ -340,6 +333,22 @@ export class PrismaProductsRepository implements ProductsRepository {
   private normalizeOptional(value: string | undefined): string | undefined {
     const trimmed = value?.trim();
     return trimmed ? trimmed : undefined;
+  }
+
+  private isRecordNotFoundError(error: unknown): boolean {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
+    ) {
+      return true;
+    }
+
+    return (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as { code?: unknown }).code === 'P2025'
+    );
   }
 
   private toDomain(product: PrismaProduct): Product {

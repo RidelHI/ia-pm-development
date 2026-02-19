@@ -169,7 +169,6 @@ describe('PrismaProductsRepository', () => {
   });
 
   it('updates product and refreshes updatedAt timestamp', async () => {
-    const findUnique = jest.fn().mockResolvedValue({ id: 'prod-001' });
     let capturedUpdateArgs:
       | { where: { id: string }; data: { quantity?: number; updatedAt?: Date } }
       | undefined;
@@ -183,7 +182,6 @@ describe('PrismaProductsRepository', () => {
     });
     const prismaService = {
       product: {
-        findUnique,
         update,
       },
     } as unknown as PrismaService;
@@ -194,10 +192,6 @@ describe('PrismaProductsRepository', () => {
       notes: undefined,
     });
 
-    expect(findUnique).toHaveBeenCalledWith({
-      where: { id: 'prod-001' },
-      select: { id: true },
-    });
     expect(capturedUpdateArgs).toBeDefined();
     expect(capturedUpdateArgs?.where).toEqual({ id: 'prod-001' });
     expect(capturedUpdateArgs?.data.quantity).toBe(25);
@@ -206,9 +200,12 @@ describe('PrismaProductsRepository', () => {
   });
 
   it('returns null when updating unknown product', async () => {
+    const notFoundError = Object.assign(new Error('record not found'), {
+      code: 'P2025',
+    });
     const prismaService = {
       product: {
-        findUnique: jest.fn().mockResolvedValue(null),
+        update: jest.fn().mockRejectedValue(notFoundError),
       },
     } as unknown as PrismaService;
     const repository = new PrismaProductsRepository(prismaService);

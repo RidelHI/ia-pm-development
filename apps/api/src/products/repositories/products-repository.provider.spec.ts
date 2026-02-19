@@ -38,10 +38,33 @@ describe('resolveProductsRepository', () => {
       prismaService,
       prismaRepository,
       inMemoryRepository,
+      'development',
     );
 
     expect(selected).toBe(inMemoryRepository);
     expect(findFirst).not.toHaveBeenCalled();
+  });
+
+  it('throws when prisma is not configured in production', async () => {
+    const prismaService = {
+      isConfigured: () => false,
+      product: {
+        findFirst: jest.fn(),
+      },
+    } as PrismaService;
+    const prismaRepository = { name: 'prisma' };
+    const inMemoryRepository = { name: 'in-memory' };
+
+    await expect(
+      resolveProductsRepository(
+        prismaService,
+        prismaRepository,
+        inMemoryRepository,
+        'production',
+      ),
+    ).rejects.toThrow(
+      'Prisma is required in production. Set DATABASE_URL for product persistence.',
+    );
   });
 
   it('returns in-memory repository when prisma probe fails outside production', async () => {
