@@ -1,38 +1,109 @@
-import type { SupabaseService } from '../../integrations/supabase/supabase.service';
+import type { PrismaService } from '../../integrations/prisma/prisma.service';
 import { resolveProductsRepository } from './products-repository.provider';
 
 describe('resolveProductsRepository', () => {
-  it('returns supabase repository when configured', () => {
-    const supabaseService = {
+  it('returns prisma repository when configured and probe succeeds', async () => {
+    const prismaService = {
       isConfigured: () => true,
-    } as SupabaseService;
+      product: {
+        findFirst: jest.fn().mockResolvedValue({ id: 'prod-001' }),
+      },
+    } as PrismaService;
 
-    const supabaseRepository = { name: 'supabase' };
+    const prismaRepository = { name: 'prisma' };
     const inMemoryRepository = { name: 'in-memory' };
 
-    const selected = resolveProductsRepository(
-      supabaseService,
-      supabaseRepository,
+    const selected = await resolveProductsRepository(
+      prismaService,
+      prismaRepository,
       inMemoryRepository,
     );
 
-    expect(selected).toBe(supabaseRepository);
+    expect(selected).toBe(prismaRepository);
   });
 
-  it('returns in-memory repository when supabase is not configured', () => {
-    const supabaseService = {
+  it('returns in-memory repository when prisma is not configured', async () => {
+    const findFirst = jest.fn();
+    const prismaService = {
       isConfigured: () => false,
-    } as SupabaseService;
+      product: {
+        findFirst,
+      },
+    } as PrismaService;
 
-    const supabaseRepository = { name: 'supabase' };
+    const prismaRepository = { name: 'prisma' };
     const inMemoryRepository = { name: 'in-memory' };
 
-    const selected = resolveProductsRepository(
-      supabaseService,
-      supabaseRepository,
+    const selected = await resolveProductsRepository(
+      prismaService,
+      prismaRepository,
       inMemoryRepository,
+      'development',
     );
 
     expect(selected).toBe(inMemoryRepository);
+    expect(findFirst).not.toHaveBeenCalled();
+  });
+
+  it('throws when prisma is not configured in production', async () => {
+    const prismaService = {
+      isConfigured: () => false,
+      product: {
+        findFirst: jest.fn(),
+      },
+    } as PrismaService;
+    const prismaRepository = { name: 'prisma' };
+    const inMemoryRepository = { name: 'in-memory' };
+
+    await expect(
+      resolveProductsRepository(
+        prismaService,
+        prismaRepository,
+        inMemoryRepository,
+        'production',
+      ),
+    ).rejects.toThrow(
+      'Prisma is required in production. Set DATABASE_URL for product persistence.',
+    );
+  });
+
+  it('returns in-memory repository when prisma probe fails outside production', async () => {
+    const prismaService = {
+      isConfigured: () => true,
+      product: {
+        findFirst: jest.fn().mockRejectedValue(new Error('table missing')),
+      },
+    } as PrismaService;
+    const prismaRepository = { name: 'prisma' };
+    const inMemoryRepository = { name: 'in-memory' };
+
+    const selected = await resolveProductsRepository(
+      prismaService,
+      prismaRepository,
+      inMemoryRepository,
+      'test',
+    );
+
+    expect(selected).toBe(inMemoryRepository);
+  });
+
+  it('throws when prisma probe fails in production', async () => {
+    const prismaService = {
+      isConfigured: () => true,
+      product: {
+        findFirst: jest.fn().mockRejectedValue(new Error('db unavailable')),
+      },
+    } as PrismaService;
+    const prismaRepository = { name: 'prisma' };
+    const inMemoryRepository = { name: 'in-memory' };
+
+    await expect(
+      resolveProductsRepository(
+        prismaService,
+        prismaRepository,
+        inMemoryRepository,
+        'production',
+      ),
+    ).rejects.toThrow('db unavailable');
   });
 });
