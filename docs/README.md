@@ -45,6 +45,7 @@ docs/
 - Git branching strategy: `docs/runbooks/git-branching-model.md`
 - Angular + AI canonical playbook: `docs/ai/angular-ai-professional-playbook.md`
 - Local development: `docs/runbooks/local-dev.md`
+- Prisma rollout and recovery: `docs/runbooks/prisma-rollout-recovery.md`
 - QA standards: `docs/qa/standards/quality-gates.md`
 
 ## Conventions
