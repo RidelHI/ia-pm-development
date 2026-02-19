@@ -1,5 +1,5 @@
 import { MemoryHealthIndicator } from '@nestjs/terminus';
-import { SupabaseHealthIndicator } from './indicators/supabase-health.indicator';
+import { PrismaHealthIndicator } from './indicators/prisma-health.indicator';
 import { HealthService } from './health.service';
 
 describe('HealthService', () => {
@@ -7,9 +7,9 @@ describe('HealthService', () => {
     const memoryHealthIndicator = {
       checkHeap: jest.fn(),
     } as unknown as MemoryHealthIndicator;
-    const supabaseHealthIndicator = {
+    const prismaHealthIndicator = {
       isHealthy: jest.fn(),
-    } as unknown as SupabaseHealthIndicator;
+    } as unknown as PrismaHealthIndicator;
 
     const service = new HealthService(
       {
@@ -31,7 +31,7 @@ describe('HealthService', () => {
         },
       },
       memoryHealthIndicator,
-      supabaseHealthIndicator,
+      prismaHealthIndicator,
     );
     const health = service.getLiveness();
 
@@ -49,11 +49,11 @@ describe('HealthService', () => {
       checkHeap: checkHeapMock,
     } as unknown as MemoryHealthIndicator;
     const isHealthyMock = jest.fn().mockResolvedValue({
-      supabase: { status: 'up', configured: true },
+      prisma: { status: 'up', configured: true },
     });
-    const supabaseHealthIndicator = {
+    const prismaHealthIndicator = {
       isHealthy: isHealthyMock,
-    } as unknown as SupabaseHealthIndicator;
+    } as unknown as PrismaHealthIndicator;
 
     const service = new HealthService(
       {
@@ -75,14 +75,14 @@ describe('HealthService', () => {
         },
       },
       memoryHealthIndicator,
-      supabaseHealthIndicator,
+      prismaHealthIndicator,
     );
-    const supabaseCheck = await service.getReadinessSupabase();
+    const prismaCheck = await service.getReadinessPrisma();
     const memoryCheck = await service.getReadinessMemory();
 
-    expect(supabaseCheck.supabase.status).toBe('up');
+    expect(prismaCheck.prisma.status).toBe('up');
     expect(memoryCheck.memory_heap.status).toBe('up');
-    expect(isHealthyMock).toHaveBeenCalledWith('supabase', {
+    expect(isHealthyMock).toHaveBeenCalledWith('prisma', {
       checkRead: true,
     });
     expect(checkHeapMock).toHaveBeenCalledWith(

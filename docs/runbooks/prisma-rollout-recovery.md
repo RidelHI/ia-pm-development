@@ -60,6 +60,18 @@ Expected:
 - HTTP `200`
 - response contains `"application": { "status": "up" }`
 
+### API readiness (admin token required)
+```bash
+TOKEN="<jwt-with-admin-role>"
+curl -fsS "$API_BASE_URL/v1/health/ready" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Expected:
+- HTTP `200`
+- response contains `"prisma": { "status": "up" }`
+- response contains `"memory_heap": { "status": "up" }`
+
 ### Auth flow
 ```bash
 curl -fsS -X POST "$API_BASE_URL/v1/auth/register" \
@@ -119,6 +131,3 @@ git pull --ff-only origin main
 git revert <merge-sha>
 git push origin main
 ```
-
-## Known residual risk
-`/v1/health/ready` still checks Supabase + memory and does not yet include Prisma readiness; track and resolve via `IA-27`.
