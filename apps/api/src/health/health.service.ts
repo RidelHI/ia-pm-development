@@ -3,7 +3,7 @@ import type { ConfigType } from '@nestjs/config';
 import type { HealthIndicatorResult } from '@nestjs/terminus';
 import { MemoryHealthIndicator } from '@nestjs/terminus';
 import appConfig from '../config/app.config';
-import { SupabaseHealthIndicator } from './indicators/supabase-health.indicator';
+import { PrismaHealthIndicator } from './indicators/prisma-health.indicator';
 
 @Injectable()
 export class HealthService {
@@ -11,7 +11,7 @@ export class HealthService {
     @Inject(appConfig.KEY)
     private readonly appConfiguration: ConfigType<typeof appConfig>,
     private readonly memoryHealthIndicator: MemoryHealthIndicator,
-    private readonly supabaseHealthIndicator: SupabaseHealthIndicator,
+    private readonly prismaHealthIndicator: PrismaHealthIndicator,
   ) {}
 
   getLiveness(): HealthIndicatorResult<'application'> {
@@ -26,8 +26,8 @@ export class HealthService {
     };
   }
 
-  getReadinessSupabase(): Promise<HealthIndicatorResult<'supabase'>> {
-    return this.supabaseHealthIndicator.isHealthy('supabase', {
+  getReadinessPrisma(): Promise<HealthIndicatorResult<'prisma'>> {
+    return this.prismaHealthIndicator.isHealthy('prisma', {
       checkRead: true,
     });
   }

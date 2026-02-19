@@ -32,7 +32,7 @@ export class HealthController {
   @HealthCheck()
   getReadiness() {
     return this.health.check([
-      () => this.healthService.getReadinessSupabase(),
+      () => this.healthService.getReadinessPrisma(),
       () => this.healthService.getReadinessMemory(),
     ]);
   }
