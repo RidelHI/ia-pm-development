@@ -241,6 +241,93 @@ describe('ProductsPageComponent', () => {
     );
   });
 
+  it('builds low-stock list ordered by highest shortfall', async () => {
+    productsSignal.set([
+      {
+        ...baseProduct,
+        id: 'prod-warning',
+        sku: 'SKU-WARN',
+        name: 'Producto advertencia',
+        quantity: 3,
+        minimumStock: 4,
+      },
+      {
+        ...baseProduct,
+        id: 'prod-healthy',
+        sku: 'SKU-HEALTHY',
+        name: 'Producto saludable',
+        quantity: 9,
+        minimumStock: 2,
+      },
+      {
+        ...baseProduct,
+        id: 'prod-critical',
+        sku: 'SKU-CRITICAL',
+        name: 'Producto crítico',
+        quantity: 1,
+        minimumStock: 5,
+      },
+    ]);
+
+    const fixture = TestBed.createComponent(ProductsPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    expect(component.lowStockCount()).toBe(2);
+    expect(component.lowStockProducts().map((product: Product) => product.id)).toEqual([
+      'prod-critical',
+      'prod-warning',
+    ]);
+
+    const html = fixture.nativeElement as HTMLElement;
+    expect(html.textContent).toContain('Productos que requieren atención');
+    expect(html.textContent).toContain('Producto crítico');
+    expect(html.textContent).toContain('Faltan 4');
+  });
+
+  it('shows empty low-stock message when no products need attention', async () => {
+    productsSignal.set([
+      {
+        ...baseProduct,
+        quantity: 10,
+        minimumStock: 2,
+      },
+    ]);
+
+    const fixture = TestBed.createComponent(ProductsPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const html = fixture.nativeElement as HTMLElement;
+    expect(html.textContent).toContain('Sin alertas de stock crítico en este momento.');
+  });
+
+  it('opens edit flow when attention action is clicked', async () => {
+    productsSignal.set([
+      {
+        ...baseProduct,
+        id: 'prod-critical',
+        quantity: 2,
+        minimumStock: 5,
+      },
+    ]);
+
+    const fixture = TestBed.createComponent(ProductsPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const actionButton = fixture.debugElement.query(By.css('.attention-action'));
+    expect(actionButton).not.toBeNull();
+
+    actionButton.nativeElement.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(getProductCalls).toContain('prod-critical');
+    expect(fixture.componentInstance.editorMode()).toBe('edit');
+  });
+
   it('deletes product when user confirms action', async () => {
     productsSignal.set([baseProduct]);
     const fixture = TestBed.createComponent(ProductsPageComponent);

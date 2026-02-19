@@ -90,11 +90,11 @@ Notas operativas:
 - Setup MCP Angular CLI: ver `docs/runbooks/angular-mcp-setup.md`.
 - E2E navegador real (Playwright): ver `docs/runbooks/playwright-web-e2e.md`.
 - Setup de Supabase para BE-14: ver `docs/runbooks/supabase-setup.md`.
-- Decision tecnica local-first (GitHub Projects + Codex): ver `docs/adr/0003-github-project-local-first.md`.
+- Decision tecnica local-first (Linear + Notion + Codex): ver `docs/adr/0003-github-project-local-first.md`.
 
-## Quickstart GitHub Projects
-```bash
-gh auth status
-gh project view 1 --owner RidelHI --web
-gh issue list --state open
-```
+## Quickstart Linear + Notion
+1. Crear issue en Linear con labels `type:*`, `priority:*` y exactamente un `agent:*`.
+2. Mover issue a `In Progress` cuando inicie la ejecucion.
+3. Crear pagina de Notion para la issue y pegar su enlace en Linear.
+4. Al abrir PR, incluir `Linear: <TEAM-ISSUE>` en la descripcion.
+5. Mover issue a `In Review` y finalmente a `Done` tras merge.

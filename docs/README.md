@@ -38,9 +38,10 @@ docs/
 - `docs/_templates/`: reusable templates for consistent authoring.
 
 ## Key entry points
-- GitHub Project board: `gh project view 1 --owner RidelHI --web`
+- Linear board: Team `Ia-integration` (`Todo`, `In Progress`, `In Review`, `Done`)
+- Notion workspace: decision/evidence pages linked from each Linear issue
 - Agent operating model: `docs/ai/agent-operating-model.md`
-- GitHub Project workflow: `docs/runbooks/github-project-workflow.md`
+- Linear + Notion workflow: `docs/runbooks/github-project-workflow.md`
 - Git branching strategy: `docs/runbooks/git-branching-model.md`
 - Angular + AI canonical playbook: `docs/ai/angular-ai-professional-playbook.md`
 - Local development: `docs/runbooks/local-dev.md`

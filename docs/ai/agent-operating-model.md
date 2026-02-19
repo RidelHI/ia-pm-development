@@ -1,28 +1,29 @@
 # Operating Model: AI + Agentica Professional
 
 ## Objetivo
-Definir un modelo operativo profesional para desarrollo asistido por IA, con trazabilidad completa en GitHub Projects y ownership claro por agente.
+Definir un modelo operativo profesional para desarrollo asistido por IA, con trazabilidad completa en Linear y documentación operativa en Notion.
 
 ## Topologia real de ejecucion
 Este proyecto opera como `single-agent, multi-role`:
 - Humano (`orquestador`): decide prioridad, aprueba plan y valida resultado.
 - Agente IA (`ejecutor`): cambia de rol segun la tarea (`pm`, `backend`, `frontend`, `qa`, `release`).
-- GitHub (`sistema de registro`): backlog, estado y trazabilidad.
+- Linear (`sistema de registro`): backlog, estado y ownership por agente.
+- Notion (`base de conocimiento`): decisiones, evidencia y contexto reusable.
 - CI/CD (`guardia automatica`): enforcement tecnico antes de merge.
 
 No se asume ejecucion paralela de cinco agentes independientes.
 
 ## Decisiones clave
-1. GitHub Project es la fuente unica de verdad para backlog y estados.
-2. Toda tarea nace como issue y debe tener exactamente un label `agent:*`.
-3. Cada cambio tecnico se entrega por PR pequena enlazada con `Closes #<issue_number>`.
-4. CI bloquea merge si falta issue enlazada o si la issue no tiene ownership por agente.
+1. Linear es la fuente unica de verdad para backlog y estados (`Todo`, `In Progress`, `In Review`, `Done`).
+2. Toda tarea nace como issue de Linear y debe tener exactamente un label `agent:*`.
+3. Cada cambio tecnico se entrega por PR pequena enlazada con `Linear: <TEAM-ISSUE>`.
+4. Cada issue activa debe tener al menos una nota operativa en Notion enlazada al issue.
 5. La estrategia de ramas es `GitHub Flow` con ramas cortas segun `docs/runbooks/git-branching-model.md`.
 
 ## Taxonomia de agentes
 | Label | Rol | Responsabilidad principal | Entregables obligatorios |
 | --- | --- | --- | --- |
-| `agent:pm` | Project Manager Agent | Definir alcance, criterios de aceptacion, priorizacion y secuencia | Issue refinada, criterios de aceptacion claros, estado en Project actualizado |
+| `agent:pm` | Project Manager Agent | Definir alcance, criterios de aceptacion, priorizacion y secuencia | Issue refinada, criterios de aceptacion claros, estado en Linear actualizado |
 | `agent:backend` | Backend Agent | Implementar cambios de API, dominio, seguridad y datos en NestJS | Codigo + tests + docs de contrato cuando aplique |
 | `agent:frontend` | Frontend Agent | Implementar UI/UX Angular y consumo de API | Componentes, estados de loading/error, tests de UI |
 | `agent:qa` | Testing Agent | Definir y ejecutar estrategia de pruebas y regresion | Casos de prueba, evidencia de validacion, reporte de riesgos |
@@ -34,23 +35,24 @@ Para reducir overhead mental, usar tres modos macro durante la ejecucion:
 - `DEV mode`: implementar cambios de backend/frontend.
 - `OPS mode`: validar calidad, CI/CD, deploy y smoke checks.
 
-Los labels `agent:*` siguen siendo obligatorios para ownership y trazabilidad, aunque la ejecucion sea por un solo agente IA.
+Los labels `agent:*` siguen siendo obligatorios para ownership y trazabilidad.
 
 ## Flujo operativo
-1. PM crea o refina issue, define alcance, criterios de aceptacion y labels (`type:*`, `priority:*`, `agent:*`).
+1. PM crea o refina issue en Linear, define alcance, criterios de aceptacion y labels (`type:*`, `priority:*`, `agent:*`).
 2. PM mueve card a `Todo`.
 3. Agente owner mueve card a `In Progress`, crea rama y ejecuta implementacion.
-4. Agente owner valida `pnpm lint`, `pnpm test`, `pnpm build`.
-5. Agente owner ejecuta self-review final con `docs/ai/checklists/ai-self-review-gate.md`.
-6. Agente owner abre PR con `Closes #<issue_number>` y seccion `AI Self-Review Gate`; luego mueve issue a `In Review`.
-7. Reviewer/QA valida cumplimiento funcional y calidad.
-8. Con merge a `main`, issue pasa a `Done`.
+4. Agente owner actualiza/crea una nota en Notion con decisiones y evidencia tecnica.
+5. Agente owner valida `pnpm lint`, `pnpm test`, `pnpm build`.
+6. Agente owner ejecuta self-review final con `docs/ai/checklists/ai-self-review-gate.md`.
+7. Agente owner abre PR con `Linear: <TEAM-ISSUE>` y seccion `AI Self-Review Gate`; luego mueve issue a `In Review`.
+8. Reviewer/QA valida cumplimiento funcional y calidad.
+9. Con merge a `main`, issue pasa a `Done` y la nota de Notion queda como referencia final.
 
 ## Definition of done por agente
 ### `agent:pm`
 - Scope acotado y no ambiguo.
 - Criterios de aceptacion medibles.
-- Labels y milestone correctos.
+- Labels y prioridad correctos.
 
 ### `agent:backend`
 - Contrato API consistente con implementacion.
@@ -65,7 +67,7 @@ Los labels `agent:*` siguen siendo obligatorios para ownership y trazabilidad, a
 ### `agent:qa`
 - Matriz de casos principal cubierta.
 - Riesgos residuales explicitados.
-- Evidencia de verificacion anexada en PR.
+- Evidencia de verificacion anexada en Notion y/o PR.
 
 ### `agent:release`
 - Workflow de CI y deploy exitoso.
@@ -75,7 +77,7 @@ Los labels `agent:*` siguen siendo obligatorios para ownership y trazabilidad, a
 ## Reglas de orquestacion
 1. Sin issue refinada, no hay desarrollo.
 2. Sin ownership por agente, la issue no entra en ejecucion.
-3. Sin PR enlazada a issue, no hay merge.
+3. Sin PR enlazada a issue de Linear, no hay merge.
 4. Sin evidencia de calidad, no hay cierre.
 
 ## Workflows y prompts
@@ -106,18 +108,9 @@ Archivos versionados para mantener consistencia entre herramientas:
 - `.cursor/rules/angular-web.mdc`
 - `llms.txt`
 
-## Operacion con GitHub CLI
-```bash
-gh issue list --state open --limit 20
-gh project item-list 1 --owner RidelHI --limit 30
-gh pr list --state open --limit 20
-```
-
-## Bootstrap de labels de agentes
-```bash
-gh label create "agent:pm" --color "5319E7" --description "Project management and scope ownership"
-gh label create "agent:backend" --color "0E8A16" --description "Backend ownership (NestJS/API)"
-gh label create "agent:frontend" --color "1D76DB" --description "Frontend ownership (Angular/UI)"
-gh label create "agent:qa" --color "FBCA04" --description "Testing and quality ownership"
-gh label create "agent:release" --color "D93F0B" --description "CI/CD and release ownership"
-```
+## Operacion recomendada (MCP)
+- Linear:
+  - crear issue, etiquetar `agent:*`, mover estado (`Todo` -> `In Progress` -> `In Review` -> `Done`)
+- Notion:
+  - crear/actualizar nota operativa por issue
+  - enlazar URL de Notion en la issue de Linear

@@ -6,7 +6,7 @@ description: Execute release and deploy checks for web and API with evidence and
 
 ## Inputs
 - Target: `web`, `api`, or `both`.
-- Deployment issue (recommended with `agent:release`).
+- Deployment issue en Linear (recommended with `agent:release`).
 - Environment: staging/production.
 
 ## Step 1: Release Readiness

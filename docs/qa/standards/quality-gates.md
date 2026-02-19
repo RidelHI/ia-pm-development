@@ -4,13 +4,15 @@
 Define minimum quality gates for issue delivery and PR readiness.
 
 ## Mandatory checks
-1. Scope traceability to one issue with exactly one `agent:*` label.
+1. Scope traceability to one Linear issue with exactly one `agent:*` label.
 2. Local validation commands:
    - `pnpm lint`
    - `pnpm test`
    - `pnpm build`
 3. PR body includes:
-   - `Closes #<issue_number>`
+   - `Linear: <TEAM-ISSUE>`
+   - `Agent Owner: agent:<role>`
+   - `Notion: <url>`
    - `AI Self-Review Gate` section with framework and decision.
 
 ## Evidence requirements

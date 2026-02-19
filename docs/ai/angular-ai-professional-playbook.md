@@ -110,12 +110,13 @@ apps/web/src/app
 ## Delivery contract per issue
 1. Issue has exactly one `agent:*` label.
 2. Branch is scoped to one issue.
-3. PR includes `Closes #<issue_number>`.
-4. Evidence includes:
+3. PR includes `Linear: <TEAM-ISSUE>` (example: `Linear: IA-17`).
+4. PR includes `Agent Owner: agent:<role>` and `Notion: <url>`.
+5. Evidence includes:
    - `pnpm lint`
    - `pnpm test`
    - `pnpm build`
-5. PR includes completed `AI Self-Review Gate` section.
+6. PR includes completed `AI Self-Review Gate` section.
 
 ## Mandatory AI self-review gate
 - Final technical step before opening PR or moving issue to `In Review`.

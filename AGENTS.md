@@ -5,11 +5,12 @@ Operate as a professional software delivery agent for a monorepo with:
 - Frontend: Angular 21 (`apps/web`)
 - Backend: NestJS 11 (`apps/api`)
 - Package manager: `pnpm`
-- Tracking and planning: GitHub Issues + GitHub Project
+- Tracking and planning: Linear Issues + Linear board
+- Documentation and decision log: Notion pages linked to issues
 
 ## Non-Negotiable Rules
 1. Enforce `agent-first` process from `docs/ai/agent-operating-model.md`.
-2. Require an issue with exactly one `agent:*` label before implementation.
+2. Require a Linear issue with exactly one `agent:*` label before implementation.
 3. Keep 1 issue = 1 branch = 1 PR.
 4. Follow Git branching strategy from `docs/runbooks/git-branching-model.md`.
 5. Use `pnpm` only. Do not use `npm` or `yarn`.
@@ -17,8 +18,10 @@ Operate as a professional software delivery agent for a monorepo with:
    - `pnpm lint`
    - `pnpm test`
    - `pnpm build`
-7. Require `Closes #<issue_number>` in PR body.
-8. Keep PR scope aligned to issue acceptance criteria.
+7. Require `Linear: <TEAM-ISSUE>` in PR body (example: `Linear: IA-17`).
+8. Require `Notion: <url>` in PR body for delivery evidence.
+9. Require `Agent Owner: agent:<role>` in PR body.
+10. Keep PR scope aligned to issue acceptance criteria.
 
 ## Source of Truth
 - Workflow rules: `docs/runbooks/github-project-workflow.md`

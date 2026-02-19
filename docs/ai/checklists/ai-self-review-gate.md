@@ -14,7 +14,9 @@ Aplicar siempre en el ultimo paso tecnico, antes de abrir PR o de mover la issue
 ## Checklist global (siempre)
 - [ ] Scope implementado coincide con criterios de aceptacion de la issue.
 - [ ] Se mantiene `1 issue = 1 branch = 1 PR`.
-- [ ] PR incluye `Closes #<issue_number>`.
+- [ ] PR incluye `Linear: <TEAM-ISSUE>` (ejemplo: `Linear: IA-17`).
+- [ ] PR incluye `Agent Owner: agent:<role>`.
+- [ ] PR incluye `Notion: <url>`.
 - [ ] Se ejecutaron y pasaron:
   - `pnpm lint`
   - `pnpm test`

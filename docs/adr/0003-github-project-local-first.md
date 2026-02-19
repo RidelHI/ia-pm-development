@@ -1,24 +1,24 @@
-# ADR 0003: GitHub Projects + Codex (Local-First)
+# ADR 0003: Linear + Notion + Codex (Local-First)
 
 ## Estado
-Aceptado - 2026-02-10
+Aceptado - 2026-02-18
 
 ## Contexto
-Se requiere una forma simple y sostenible de planificar y ejecutar trabajo individual con trazabilidad completa en el mismo ecosistema del repositorio.
+Se requiere mantener un flujo simple y sostenible para planificar y ejecutar trabajo individual, pero con mejor separacion entre gestion operativa (issues/kanban) y documentacion reusable.
 
 ## Opciones evaluadas
-1. Mantener gestion en herramienta externa y ejecutar codigo en local.
-2. Migrar a GitHub Issues + GitHub Projects como espacio unico de gestion.
+1. Mantener gestion en GitHub Issues + GitHub Projects.
+2. Migrar a Linear para backlog/estado y Notion para documentacion operativa.
 
 ## Decision
-Se adopta la opcion 2: GitHub Issues + GitHub Projects como source of truth para backlog/kanban, y Codex en local como implementador principal.
+Se adopta la opcion 2: Linear como source of truth para backlog/kanban y Notion como base de conocimiento operativa, manteniendo Codex en local como implementador principal.
 
 ## Razon
-- Menor friccion operativa para trabajo individual.
-- Trazabilidad directa issue -> branch -> PR -> merge.
-- Menos integraciones y menos mantenimiento de scripts auxiliares.
+- Estados y priorizacion mas directos para operacion diaria (`Todo`, `In Progress`, `In Review`, `Done`).
+- Mejor trazabilidad de decisiones tecnicas en paginas vivas de Notion.
+- Menor friccion para compartir contexto fuera del PR.
 
 ## Consecuencias
-- Se eliminan scripts, semillas y runbooks asociados a la herramienta previa de tracking.
-- El tablero oficial de seguimiento es el GitHub Project del repositorio.
-- Todas las tareas nuevas se crean y gestionan como GitHub Issues.
+- El tablero oficial de seguimiento pasa a Linear.
+- Todas las tareas nuevas se crean y gestionan como issues de Linear.
+- Cada issue activa debe enlazar una nota de Notion para decisiones/evidencia.

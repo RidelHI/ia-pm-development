@@ -44,7 +44,7 @@ git push -u origin feature/<slug>
 ```
 
 Abrir PR enlazando issue:
-- `Closes #<issue_number>`
+- `Linear: <TEAM-ISSUE>` (ejemplo: `Linear: IA-17`)
 
 ### Caso 2: Bug normal (no urgente)
 Mismo flujo que feature, pero usando `fix/<slug>`.
@@ -97,6 +97,6 @@ git push origin main
 
 ## Checklist rapido antes de abrir PR
 1. Rama correcta (`feature/`, `fix/` o `chore/`).
-2. Issue enlazada en descripcion (`Closes #...`).
+2. Issue enlazada en descripcion (`Linear: IA-...`).
 3. Cambios acotados al scope.
 4. `pnpm lint`, `pnpm test`, `pnpm build` en verde.
