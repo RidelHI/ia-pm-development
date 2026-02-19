@@ -1,15 +1,12 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { IntegrationsModule } from '../integrations/integrations.module';
-import { SupabaseService } from '../integrations/supabase/supabase.service';
+import { PrismaService } from '../integrations/prisma/prisma.service';
 import { ProductsController } from './products.controller';
 import { resolveProductsRepository } from './repositories/products-repository.provider';
 import { InMemoryProductsRepository } from './repositories/in-memory-products.repository';
-import {
-  PRODUCTS_REPOSITORY,
-  type ProductsRepository,
-} from './repositories/products.repository';
-import { SupabaseProductsRepository } from './repositories/supabase-products.repository';
+import { PrismaProductsRepository } from './repositories/prisma-products.repository';
+import { PRODUCTS_REPOSITORY } from './repositories/products.repository';
 import { ProductsService } from './products.service';
 
 @Module({
@@ -18,22 +15,22 @@ import { ProductsService } from './products.service';
   providers: [
     ProductsService,
     InMemoryProductsRepository,
-    SupabaseProductsRepository,
+    PrismaProductsRepository,
     {
       provide: PRODUCTS_REPOSITORY,
       inject: [
-        SupabaseService,
-        SupabaseProductsRepository,
+        PrismaService,
+        PrismaProductsRepository,
         InMemoryProductsRepository,
       ],
-      useFactory: (
-        supabaseService: SupabaseService,
-        supabaseRepository: SupabaseProductsRepository,
+      useFactory: async (
+        prismaService: PrismaService,
+        prismaRepository: PrismaProductsRepository,
         inMemoryRepository: InMemoryProductsRepository,
-      ): ProductsRepository =>
-        resolveProductsRepository(
-          supabaseService,
-          supabaseRepository,
+      ) =>
+        await resolveProductsRepository(
+          prismaService,
+          prismaRepository,
           inMemoryRepository,
         ),
     },
