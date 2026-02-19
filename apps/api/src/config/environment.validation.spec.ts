@@ -7,6 +7,8 @@ describe('validateEnvironment', () => {
     expect(validated.NODE_ENV).toBe('development');
     expect(validated.PORT).toBe(3000);
     expect(validated.APP_VERSION).toBe('0.1.0');
+    expect(validated.DATABASE_URL).toBeUndefined();
+    expect(validated.DATABASE_SCHEMA).toBe('public');
     expect(validated.SUPABASE_PRODUCTS_TABLE).toBe('products');
     expect(validated.SUPABASE_USERS_TABLE).toBe('users');
     expect(validated.RATE_LIMIT_TTL_SECONDS).toBe(60);
@@ -22,6 +24,14 @@ describe('validateEnvironment', () => {
     expect(() =>
       validateEnvironment({
         SUPABASE_URL: 'https://example.supabase.co',
+      }),
+    ).toThrow('Invalid environment configuration');
+  });
+
+  it('throws when DATABASE_URL is not postgres', () => {
+    expect(() =>
+      validateEnvironment({
+        DATABASE_URL: 'mysql://example',
       }),
     ).toThrow('Invalid environment configuration');
   });

@@ -4,6 +4,8 @@ export interface ValidatedEnvironment extends RawEnv {
   NODE_ENV: 'development' | 'production' | 'test';
   PORT: number;
   APP_VERSION: string;
+  DATABASE_URL?: string;
+  DATABASE_SCHEMA: string;
   SUPABASE_PRODUCTS_TABLE: string;
   SUPABASE_USERS_TABLE: string;
   RATE_LIMIT_TTL_SECONDS: number;
@@ -93,9 +95,25 @@ export function validateEnvironment(config: RawEnv): ValidatedEnvironment {
 
   const corsOrigins = toNonEmptyString(config.APP_CORS_ORIGINS) ?? '*';
   const docsPath = toNonEmptyString(config.APP_DOCS_PATH) ?? 'docs';
+  const databaseUrl = toNonEmptyString(config.DATABASE_URL);
+  const databaseSchema = toNonEmptyString(config.DATABASE_SCHEMA) ?? 'public';
 
   if (docsPath.includes(' ')) {
     errors.push('APP_DOCS_PATH must not contain spaces');
+  }
+
+  if (
+    databaseUrl &&
+    !databaseUrl.startsWith('postgresql://') &&
+    !databaseUrl.startsWith('postgres://')
+  ) {
+    errors.push(
+      'DATABASE_URL must use a PostgreSQL connection string (postgresql:// or postgres://)',
+    );
+  }
+
+  if (databaseSchema.includes(' ')) {
+    errors.push('DATABASE_SCHEMA must not contain spaces');
   }
 
   const supabaseUrl = toNonEmptyString(config.SUPABASE_URL);
@@ -160,6 +178,8 @@ export function validateEnvironment(config: RawEnv): ValidatedEnvironment {
     NODE_ENV: nodeEnv,
     PORT: Number.isInteger(parsedPort) && parsedPort > 0 ? parsedPort : 3000,
     APP_VERSION: toNonEmptyString(config.APP_VERSION) ?? '0.1.0',
+    DATABASE_URL: databaseUrl,
+    DATABASE_SCHEMA: databaseSchema,
     SUPABASE_PRODUCTS_TABLE:
       toNonEmptyString(config.SUPABASE_PRODUCTS_TABLE) ?? 'products',
     SUPABASE_USERS_TABLE:

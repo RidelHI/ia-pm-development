@@ -4,6 +4,7 @@ Backend del proyecto de aprendizaje de gestión de productos de almacén.
 
 ## Stack
 - NestJS 11
+- Prisma ORM 7
 - Jest + ESLint
 - Deploy en Render (web service)
 - Integración preparada con Supabase
@@ -14,11 +15,14 @@ pnpm --filter api start:dev
 pnpm --filter api lint
 pnpm --filter api test
 pnpm --filter api build
+pnpm --filter api prisma:generate
 ```
 
 ## Variables de entorno
 Copiar `apps/api/.env.example` y completar:
 
+- `DATABASE_URL` (PostgreSQL connection string, recomendado para Prisma)
+- `DATABASE_SCHEMA` (default: `public`)
 - `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY` (recomendado para backend server-to-server)
 - `SUPABASE_PRODUCTS_TABLE` (default recomendado: `products`)

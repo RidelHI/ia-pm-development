@@ -9,3 +9,4 @@ dist
 *.log
 playwright-report
 test-results
+apps/api/prisma/generated

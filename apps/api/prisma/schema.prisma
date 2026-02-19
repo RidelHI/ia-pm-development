@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/client"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @db.Text
+  username     String   @unique @db.Text
+  passwordHash String   @map("passwordHash") @db.Text
+  role         String   @db.Text
+  createdAt    DateTime @default(now()) @map("createdAt") @db.Timestamptz(6)
+  updatedAt    DateTime @default(now()) @map("updatedAt") @db.Timestamptz(6)
+
+  @@index([role], map: "users_role_idx")
+  @@map("users")
+}
+
+model Product {
+  id             String   @id @db.Text
+  sku            String   @unique @db.Text
+  barcode        String?  @db.Text
+  name           String   @db.Text
+  category       String?  @db.Text
+  brand          String?  @db.Text
+  quantity       Int
+  minimumStock   Int?     @map("minimumStock")
+  unitPriceCents Int      @map("unitPriceCents")
+  imageUrl       String?  @map("imageUrl") @db.Text
+  status         String   @db.Text
+  location       String?  @db.Text
+  notes          String?  @db.Text
+  createdAt      DateTime @default(now()) @map("createdAt") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @map("updatedAt") @db.Timestamptz(6)
+
+  @@index([status], map: "products_status_idx")
+  @@index([name], map: "products_name_idx")
+  @@index([category], map: "products_category_idx")
+  @@index([brand], map: "products_brand_idx")
+  @@map("products")
+}
