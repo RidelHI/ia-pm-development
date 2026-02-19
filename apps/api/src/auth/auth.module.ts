@@ -4,18 +4,15 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, type ConfigType } from '@nestjs/config';
 import authConfig from '../config/auth.config';
 import { IntegrationsModule } from '../integrations/integrations.module';
-import { SupabaseService } from '../integrations/supabase/supabase.service';
+import { PrismaService } from '../integrations/prisma/prisma.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { InMemoryUsersRepository } from './repositories/in-memory-users.repository';
+import { PrismaUsersRepository } from './repositories/prisma-users.repository';
 import { resolveUsersRepository } from './repositories/users-repository.provider';
-import { SupabaseUsersRepository } from './repositories/supabase-users.repository';
-import {
-  USERS_REPOSITORY,
-  type UsersRepository,
-} from './repositories/users.repository';
+import { USERS_REPOSITORY } from './repositories/users.repository';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
@@ -43,22 +40,18 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     JwtAuthGuard,
     RolesGuard,
     InMemoryUsersRepository,
-    SupabaseUsersRepository,
+    PrismaUsersRepository,
     {
       provide: USERS_REPOSITORY,
-      inject: [
-        SupabaseService,
-        SupabaseUsersRepository,
-        InMemoryUsersRepository,
-      ],
-      useFactory: (
-        supabaseService: SupabaseService,
-        supabaseRepository: SupabaseUsersRepository,
+      inject: [PrismaService, PrismaUsersRepository, InMemoryUsersRepository],
+      useFactory: async (
+        prismaService: PrismaService,
+        prismaRepository: PrismaUsersRepository,
         inMemoryRepository: InMemoryUsersRepository,
-      ): UsersRepository =>
-        resolveUsersRepository(
-          supabaseService,
-          supabaseRepository,
+      ) =>
+        await resolveUsersRepository(
+          prismaService,
+          prismaRepository,
           inMemoryRepository,
         ),
     },
