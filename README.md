@@ -170,6 +170,42 @@ apps/api/src/<module>/
 | 17 | **Docs API** | Swagger/OpenAPI / GraphQL | @nestjs/swagger | Auto-generado desde decoradores | Mantener decoradores actualizados | Validar en review |
 | 18 | **Lint/Format** | ESLint 9 + Prettier | ESLint 9 flat + Prettier 3 | Estándar moderno, flat config | Migración de plugins legacy | Ya migrado |
 
+### MCP servers en uso (Codex)
+
+| Tipo | Servidor | Estado |
+|---|---|---|
+| Custom | `angular-cli` | Activo |
+| Custom | `context7` | Activo |
+| Custom | `github` | Activo |
+| Custom | `postman` | Activo |
+| Custom | `supabase` | Activo |
+| Custom | `testsprite` | Activo |
+| Recommended | `Linear` | Activo |
+| Recommended | `Notion` | Activo |
+| Recommended | `Figma` | Activo |
+| Recommended | `Playwright` | Activo |
+
+### Skills instalados (Codex)
+
+| Skill | Uso principal |
+|---|---|
+| `Backend NestJS` | Entrega backend NestJS con pruebas y evidencia |
+| `Figma` | Integración MCP de Figma para contexto de diseño |
+| `Figma Implement Design` | Implementación 1:1 de diseño a código |
+| `Frontend Angular` | Entrega frontend Angular con estado robusto |
+| `Linear` | Gestión de issues y flujo en Linear |
+| `Nestjs Best Practices` | Patrones y arquitectura recomendada de NestJS |
+| `Notion Spec to Implementation` | Convertir specs Notion a plan de implementación |
+| `OpenAI Docs` | Consulta oficial de documentación OpenAI |
+| `Playwright CLI Skill` | Automatización de navegador desde terminal |
+| `PM Orchestrator` | Orquestación de issue → branch → PR |
+| `Prisma Expert` | Diseño y operación de esquema/migraciones Prisma |
+| `QA Quality Gate` | Validación de calidad basada en riesgo |
+| `Release Operator` | Operación de CI/CD y despliegues |
+| `Render Deploy` | Despliegue en Render con blueprint |
+| `Skill Creator` | Creación y mantenimiento de skills |
+| `Skill Installer` | Instalación de skills curados o externos |
+
 ---
 
 ## 4) Estructura del repo
