@@ -401,7 +401,7 @@ model Product {
 
 | Capa | Mecanismo |
 |---|---|
-| **Autenticación** | JWT (RS256-compatible) via `@nestjs/passport` + `passport-jwt` |
+| **Autenticación** | JWT (HS256, shared-secret) via `@nestjs/passport` + `passport-jwt` |
 | **Hash de contraseñas** | `bcryptjs` |
 | **Token config** | Expire: 900s (15 min), Issuer: `warehouse-api`, Audience: `warehouse-clients` |
 | **Autorización** | Role-based guards (admin / user) |
