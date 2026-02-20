@@ -306,7 +306,8 @@ Install and run:
 
 ```bash
 pnpm install
-pnpm dev
+pnpm dev:api
+pnpm dev:web
 ```
 
 Validation:
