@@ -1,6 +1,6 @@
 # Project Blueprint — ia-pm-development
 
-> **Version:** 1.0 · **Date:** 2026-02-20 · **Author:** Staff/Principal Architect assessment
+> Version: 1.0 · Date: 2026-02-20 · Author: Ridel Hernández
 
 ---
 
@@ -171,6 +171,42 @@ apps/api/src/<module>/
 | 16 | **Charts** | Chart.js / D3 / ngx-charts | Chart.js 4 | Lightweight, simple API, canvas-based | Not signal reactive | Wrapper component |
 | 17 | **API Docs** | Swagger/OpenAPI / GraphQL | @nestjs/swagger | Auto-generated from decorators | Keeping decorators updated | Validate in review |
 | 18 | **Lint/Format** | ESLint 9 + Prettier | ESLint 9 flat + Prettier 3 | Modern standard, flat config | Legacy plugins migration | Already migrated |
+
+### MCP servers used
+
+| Type | Server | Status |
+|---|---|---|
+| Custom | `angular-cli` | Enabled |
+| Custom | `context7` | Enabled |
+| Custom | `github` | Enabled |
+| Custom | `postman` | Enabled |
+| Custom | `supabase` | Enabled |
+| Custom | `testsprite` | Enabled |
+| Recommended | `Linear` | Enabled |
+| Recommended | `Notion` | Enabled |
+| Recommended | `Figma` | Enabled |
+| Recommended | `Playwright` | Enabled |
+
+### Installed skills used
+
+| Skill | Purpose |
+|---|---|
+| `Backend NestJS` | Deliver NestJS backend issues with tests and API evidence |
+| `Figma` | Use Figma MCP context for design-to-code tasks |
+| `Figma Implement Design` | Translate Figma designs into production-ready implementation |
+| `Frontend Angular` | Deliver Angular issues with robust UI state and integration |
+| `Linear` | Manage Linear issue workflow in Codex |
+| `Nestjs Best Practices` | Apply NestJS architecture and implementation best practices |
+| `Notion Spec to Implementation` | Convert Notion specs into implementation plans |
+| `OpenAI Docs` | Reference official OpenAI developer documentation |
+| `Playwright CLI Skill` | Automate browser workflows from the terminal |
+| `PM Orchestrator` | Orchestrate issue-to-PR delivery flow |
+| `Prisma Expert` | Handle Prisma schema, migrations, and data modeling |
+| `QA Quality Gate` | Validate quality gates with risk-based checks |
+| `Release Operator` | Operate CI/CD and release hardening workflows |
+| `Render Deploy` | Deploy applications to Render with blueprints |
+| `Skill Creator` | Create and update skills |
+| `Skill Installer` | Install curated or external skills |
 
 ---
 
@@ -1070,5 +1106,3 @@ pnpm test:e2e:web
 | 20 | Document versioning strategy in new ADR | Docs | P2 |
 
 ---
-
-> **This Blueprint is your source of truth.** If you can follow each section without consulting anyone else, the Blueprint has achieved its objective.
