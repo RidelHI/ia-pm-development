@@ -2,6 +2,8 @@
 
 ## Requisitos
 - Node.js 22+
+- Java 21+ (para `apps/api-spring`)
+- Docker + Docker Compose (opcional, para correr APIs en paralelo)
 - Git 2.45+
 - Corepack habilitado (`corepack` viene con Node moderno)
 
@@ -39,8 +41,32 @@ pnpm dev:api
 ```
 
 - Web: `http://localhost:4200`
-- API: `http://localhost:3000`
+- API NestJS: `http://localhost:3000`
+- API Spring Boot: `http://localhost:8081/v1`
 - Entorno local API: usar `apps/api/.env.local` (ignorado por git).
+
+Para Spring Boot (`apps/api-spring`):
+
+Linux/macOS:
+```bash
+cd apps/api-spring
+./mvnw spring-boot:run
+```
+
+Windows PowerShell:
+```powershell
+cd apps/api-spring
+./mvnw.cmd spring-boot:run
+```
+
+## Ejecutar APIs en paralelo con Docker Compose
+```bash
+docker compose up --build api-nest api-spring
+```
+
+Verificacion rapida:
+- NestJS: `http://localhost:3000/v1/health/live`
+- Spring Boot: `http://localhost:8081/v1/health/live`
 
 ## Calidad local
 ```bash

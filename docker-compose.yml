@@ -1,0 +1,30 @@
+services:
+  api-nest:
+    image: node:22-alpine
+    container_name: ia-api-nest
+    working_dir: /workspace
+    command: >
+      sh -c "corepack enable &&
+      pnpm install --frozen-lockfile &&
+      pnpm --filter api start:dev"
+    environment:
+      CI: "true"
+      NODE_ENV: development
+      PORT: 3000
+      APP_DOCS_ENABLED: "true"
+      AUTH_JWT_SECRET: development-only-secret-change-in-production
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/workspace
+
+  api-spring:
+    container_name: ia-api-spring
+    build:
+      context: .
+      dockerfile: apps/api-spring/Dockerfile
+    environment:
+      PORT: 8081
+      APP_VERSION: 0.1.0
+    ports:
+      - "8081:8081"
